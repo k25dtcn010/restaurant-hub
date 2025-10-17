@@ -521,4 +521,221 @@ export const ordersRouter = router({
 				status: order.status,
 			};
 		}),
+
+	/**
+	 * T064: orders.getKitchenOrders - Get orders for kitchen dashboard
+	 * Auth: Required (Kitchen Staff, Manager)
+	 * Contract: orders-router.md Procedure 8
+	 * 
+	 * Business Logic:
+	 * - Query orders with kitchen workflow statuses
+	 * - Sort by createdAt ascending (oldest first)
+	 * - Calculate wait time for each order
+	 */
+	getKitchenOrders: publicProcedure
+		.input(
+			z.object({
+				status: z.array(z.enum(["Pending", "InKitchen", "ReadyToServe"])).optional(),
+			}).optional(),
+		)
+		.query(async ({ input, ctx }) => {
+			const { db } = ctx;
+			const statusFilter = input?.status || ["Pending", "InKitchen", "ReadyToServe"];
+
+			// Query orders with specified statuses
+			const ordersData = await db.query.orders.findMany({
+				where: (orders, { inArray }) => inArray(orders.status, statusFilter as any),
+				with: {
+					table: true,
+					orderItems: {
+						with: {
+							dish: true,
+						},
+					},
+				},
+				orderBy: (orders, { asc }) => [asc(orders.createdAt)],
+			});
+
+			// Transform to match contract output schema
+			const now = Date.now();
+			const transformedOrders = ordersData.map((order) => ({
+				id: order.id,
+				tableNumber: order.table.number,
+				status: order.status as "Pending" | "InKitchen" | "ReadyToServe",
+				items: order.orderItems.map((item) => ({
+					dishName: item.dish.name,
+					quantity: item.quantity,
+					specialInstructions: item.specialInstructions || null,
+				})),
+				createdAt: new Date(order.createdAt),
+				updatedAt: new Date(order.updatedAt),
+				waitTime: Math.floor((now - order.createdAt) / (1000 * 60)), // Minutes since created
+			}));
+
+			return {
+				orders: transformedOrders,
+			};
+		}),
+
+	/**
+	 * T065: orders.updateStatus - Update order status with history tracking
+	 * Auth: Required (role-based permissions)
+	 * Contract: orders-router.md Procedure 5
+	 * 
+	 * Business Logic:
+	 * - Validate order exists
+	 * - Validate status transition
+	 * - Update order status
+	 * - Create status history entry
+	 * - Broadcast WebSocket notifications
+	 */
+	updateStatus: publicProcedure
+		.input(
+			z.object({
+				orderId: z.number().int().positive(),
+				newStatus: z.enum(["Pending", "InKitchen", "ReadyToServe", "Served", "Completed", "Paid"]),
+			}),
+		)
+		.mutation(async ({ input, ctx }) => {
+			const { db } = ctx;
+			const { orderId, newStatus } = input;
+
+			// Get current order
+			const order = await db.query.orders.findFirst({
+				where: (orders, { eq }) => eq(orders.id, orderId),
+				with: {
+					table: true,
+					orderItems: {
+						with: {
+							dish: true,
+						},
+					},
+				},
+			});
+
+			if (!order) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: `Order ID ${orderId} does not exist`,
+				});
+			}
+
+			// Validate status transition (basic validation)
+			const currentStatus = order.status;
+			const validTransitions: Record<string, string[]> = {
+				Pending: ["InKitchen"],
+				InKitchen: ["ReadyToServe"],
+				ReadyToServe: ["Served"],
+				Served: ["Completed"],
+				Completed: ["Paid"],
+				Paid: [], // Terminal state
+			};
+
+			if (!validTransitions[currentStatus]?.includes(newStatus)) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: `Invalid status transition from ${currentStatus} to ${newStatus}`,
+				});
+			}
+
+			// Update order status
+			const updatedAt = Date.now();
+			await db.update(orders)
+				.set({ status: newStatus, updatedAt })
+				.where(eq(orders.id, orderId));
+
+			// Create status history entry
+			await db.insert(orderStatusHistory).values({
+				orderId,
+				status: newStatus,
+				changedBy: ctx.user?.id ?? null,
+			});
+
+			// T066: Broadcast WebSocket notifications based on new status
+			if (newStatus === "ReadyToServe") {
+				// Notify serving staff
+				wsNotifier.notifyOrderStatusChanged(orderId, "ORDER_READY");
+			} else if (newStatus === "Paid") {
+				// Notify managers
+				wsNotifier.notifyOrderStatusChanged(orderId, "ORDER_COMPLETED");
+			}
+
+			return {
+				orderId,
+				status: newStatus,
+				updatedAt: new Date(updatedAt),
+				changedBy: ctx.user?.id ?? null,
+			};
+		}),
+
+	/**
+	 * T067: orders.getById - Get complete order details
+	 * Auth: Optional (customers can view their table's order, staff can view all)
+	 * Contract: orders-router.md Procedure 6
+	 * 
+	 * Business Logic:
+	 * - Get order with all details
+	 * - Include status history
+	 * - Include items with dish details
+	 */
+	getById: publicProcedure
+		.input(
+			z.object({
+				orderId: z.number().int().positive(),
+			}),
+		)
+		.query(async ({ input, ctx }) => {
+			const { db } = ctx;
+			const { orderId } = input;
+
+			// Get order with all related data
+			const order = await db.query.orders.findFirst({
+				where: (orders, { eq }) => eq(orders.id, orderId),
+				with: {
+					table: true,
+					orderItems: {
+						with: {
+							dish: true,
+						},
+					},
+				},
+			});
+
+			if (!order) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: `Order ID ${orderId} does not exist`,
+				});
+			}
+
+			// Get status history
+			const statusHistoryData = await db.query.orderStatusHistory.findMany({
+				where: (history, { eq }) => eq(history.orderId, orderId),
+				orderBy: (history, { asc }) => [asc(history.changedAt)],
+			});
+
+			// Transform to match contract output schema
+			return {
+				id: order.id,
+				tableId: order.tableId,
+				tableNumber: order.table.number,
+				status: order.status as "Pending" | "InKitchen" | "ReadyToServe" | "Served" | "Completed" | "Paid",
+				totalAmount: order.totalAmount,
+				createdAt: new Date(order.createdAt),
+				updatedAt: new Date(order.updatedAt),
+				items: order.orderItems.map((item) => ({
+					id: item.id,
+					dishId: item.dishId,
+					dishName: item.dish.name,
+					quantity: item.quantity,
+					priceAtOrder: item.priceAtOrder,
+					specialInstructions: item.specialInstructions || null,
+				})),
+				statusHistory: statusHistoryData.map((entry) => ({
+					status: entry.status as "Pending" | "InKitchen" | "ReadyToServe" | "Served" | "Completed" | "Paid",
+					changedBy: entry.changedBy ? String(entry.changedBy) : "System",
+					changedAt: new Date(entry.changedAt),
+				})),
+			};
+		}),
 });
