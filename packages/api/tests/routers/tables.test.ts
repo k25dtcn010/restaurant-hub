@@ -21,13 +21,22 @@ describe("Tables Router - tables.getById", () => {
 	let testTableId: number;
 
 	beforeAll(async () => {
-		// Create a test table for validation
-		const [table] = await db.insert(tables).values({
-			number: 99,
-			qrCode: "https://app.restauranthub.com/?table=99",
-			capacity: 4,
-		}).returning();
-		testTableId = table.id;
+		// Check if table already exists from previous test run
+		const existing = await db.query.tables.findFirst({
+			where: (tables, { eq }) => eq(tables.number, 99),
+		});
+
+		if (existing) {
+			testTableId = existing.id;
+		} else {
+			// Create a test table for validation
+			const [table] = await db.insert(tables).values({
+				number: 99,
+				qrCode: "https://app.restauranthub.com/?table=99",
+				capacity: 4,
+			}).returning();
+			testTableId = table.id;
+		}
 	});
 
 	test("should return table when valid ID provided", async () => {

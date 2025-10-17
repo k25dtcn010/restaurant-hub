@@ -142,11 +142,17 @@ export const ordersRouter = router({
 				.set({ totalAmount })
 				.where(eq(orders.id, orderId));
 
+			// Get total item count from all order items
+			const allOrderItems = await db.query.orderItems.findMany({
+				where: (orderItems, { eq }) => eq(orderItems.orderId, orderId),
+			});
+			const totalItemCount = allOrderItems.reduce((sum, item) => sum + item.quantity, 0);
+
 			return {
 				orderId,
 				isNew,
 				totalAmount,
-				itemCount,
+				itemCount: totalItemCount,
 			};
 		}),
 

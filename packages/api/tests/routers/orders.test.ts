@@ -24,38 +24,55 @@ describe("Orders Router - orders.create", () => {
 	let testIngredientId: number;
 
 	beforeAll(async () => {
-		// Create test table
-		const [table] = await db.insert(tables).values({
-			number: 10,
-			qrCode: "https://app.restauranthub.com/?table=10",
-			capacity: 4,
-		}).returning();
-		testTableId = table.id;
-
-		// Create test ingredient
-		const [ingredient] = await db.insert(ingredients).values({
-			name: "Test Tomato",
-			quantity: 50,
-			unit: "kg",
-			threshold: 5,
-		}).returning();
-		testIngredientId = ingredient.id;
-
-		// Create test dish
-		const [dish] = await db.insert(dishes).values({
-			name: "Test Pasta",
-			description: "Delicious pasta",
-			price: 1500, // $15.00
-			isAvailable: true,
-		}).returning();
-		testDishId = dish.id;
-
-		// Create recipe
-		await db.insert(recipes).values({
-			dishId: testDishId,
-			ingredientId: testIngredientId,
-			quantityRequired: 2.0,
+		// Check if test data already exists from previous run
+		const existingTable = await db.query.tables.findFirst({
+			where: (tables, { eq }) => eq(tables.number, 100),
 		});
+		const existingIngredient = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.name, "Test Tomato"),
+		});
+		const existingDish = await db.query.dishes.findFirst({
+			where: (dishes, { eq }) => eq(dishes.name, "Test Pasta"),
+		});
+
+		if (existingTable && existingIngredient && existingDish) {
+			testTableId = existingTable.id;
+			testIngredientId = existingIngredient.id;
+			testDishId = existingDish.id;
+		} else {
+			// Create test table (use number > 30 to avoid conflicts with seed data)
+			const [table] = await db.insert(tables).values({
+				number: 100,
+				qrCode: "https://app.restauranthub.com/?table=100",
+				capacity: 4,
+			}).returning();
+			testTableId = table.id;
+
+			// Create test ingredient
+			const [ingredient] = await db.insert(ingredients).values({
+				name: "Test Tomato",
+				quantity: 50,
+				unit: "kg",
+				threshold: 5,
+			}).returning();
+			testIngredientId = ingredient.id;
+
+			// Create test dish
+			const [dish] = await db.insert(dishes).values({
+				name: "Test Pasta",
+				description: "Delicious pasta",
+				price: 1500, // $15.00
+				isAvailable: true,
+			}).returning();
+			testDishId = dish.id;
+
+			// Create recipe
+			await db.insert(recipes).values({
+				dishId: testDishId,
+				ingredientId: testIngredientId,
+				quantityRequired: 2.0,
+			});
+		}
 	});
 
 	beforeEach(async () => {
@@ -151,41 +168,66 @@ describe("Orders Router - orders.submit", () => {
 	let testOrderId: number;
 
 	beforeAll(async () => {
-		// Create test table
-		const [table] = await db.insert(tables).values({
-			number: 11,
-			qrCode: "https://app.restauranthub.com/?table=11",
-			capacity: 4,
-		}).returning();
-		testTableId = table.id;
-
-		// Create test ingredient
-		const [ingredient] = await db.insert(ingredients).values({
-			name: "Test Chicken",
-			quantity: 30,
-			unit: "kg",
-			threshold: 3,
-		}).returning();
-		testIngredientId = ingredient.id;
-
-		// Create test dish
-		const [dish] = await db.insert(dishes).values({
-			name: "Test Burger",
-			description: "Juicy burger",
-			price: 1800, // $18.00
-			isAvailable: true,
-		}).returning();
-		testDishId = dish.id;
-
-		// Create recipe
-		await db.insert(recipes).values({
-			dishId: testDishId,
-			ingredientId: testIngredientId,
-			quantityRequired: 0.3,
+		// Check if test data already exists from previous run
+		const existingTable = await db.query.tables.findFirst({
+			where: (tables, { eq }) => eq(tables.number, 101),
 		});
+		const existingIngredient = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.name, "Test Chicken"),
+		});
+		const existingDish = await db.query.dishes.findFirst({
+			where: (dishes, { eq }) => eq(dishes.name, "Test Burger"),
+		});
+
+		if (existingTable && existingIngredient && existingDish) {
+			testTableId = existingTable.id;
+			testIngredientId = existingIngredient.id;
+			testDishId = existingDish.id;
+		} else {
+			// Create test table (use number > 30 to avoid conflicts with seed data)
+			const [table] = await db.insert(tables).values({
+				number: 101,
+				qrCode: "https://app.restauranthub.com/?table=101",
+				capacity: 4,
+			}).returning();
+			testTableId = table.id;
+
+			// Create test ingredient
+			const [ingredient] = await db.insert(ingredients).values({
+				name: "Test Chicken",
+				quantity: 30,
+				unit: "kg",
+				threshold: 3,
+			}).returning();
+			testIngredientId = ingredient.id;
+
+			// Create test dish
+			const [dish] = await db.insert(dishes).values({
+				name: "Test Burger",
+				description: "Juicy burger",
+				price: 1800, // $18.00
+				isAvailable: true,
+			}).returning();
+			testDishId = dish.id;
+
+			// Create recipe
+			await db.insert(recipes).values({
+				dishId: testDishId,
+				ingredientId: testIngredientId,
+				quantityRequired: 0.3,
+			});
+		}
 	});
 
 	beforeEach(async () => {
+		// Clean up any previous test orders
+		const previousOrders = await db.query.orders.findMany({
+			where: (orders, { eq }) => eq(orders.tableId, testTableId),
+		});
+		for (const order of previousOrders) {
+			await db.delete(orders).where(eq(orders.id, order.id));
+		}
+
 		// Reset ingredient stock before each test
 		await db.update(ingredients)
 			.set({ quantity: 30 })

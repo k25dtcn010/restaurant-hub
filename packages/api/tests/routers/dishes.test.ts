@@ -22,33 +22,51 @@ describe("Dishes Router - dishes.getAll", () => {
 	let testIngredientId: number;
 
 	beforeAll(async () => {
-		// Create test ingredient
-		const [ingredient] = await db.insert(ingredients).values({
-			name: "Test Flour",
-			quantity: 100,
-			unit: "kg",
-			threshold: 10,
-		}).returning();
-		testIngredientId = ingredient.id;
-
-		// Create test dish
-		const [dish] = await db.insert(dishes).values({
-			name: "Test Pizza",
-			description: "Delicious test pizza",
-			price: 1200, // $12.00
-			isAvailable: true,
-		}).returning();
-		testDishId = dish.id;
-
-		// Create recipe linking dish to ingredient
-		await db.insert(recipes).values({
-			dishId: testDishId,
-			ingredientId: testIngredientId,
-			quantityRequired: 0.5,
+		// Check if test data already exists from previous run
+		const existingIngredient = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.name, "Test Flour"),
 		});
+		const existingDish = await db.query.dishes.findFirst({
+			where: (dishes, { eq }) => eq(dishes.name, "Test Pizza"),
+		});
+
+		if (existingIngredient && existingDish) {
+			testIngredientId = existingIngredient.id;
+			testDishId = existingDish.id;
+		} else {
+			// Create test ingredient
+			const [ingredient] = await db.insert(ingredients).values({
+				name: "Test Flour",
+				quantity: 100,
+				unit: "kg",
+				threshold: 10,
+			}).returning();
+			testIngredientId = ingredient.id;
+
+			// Create test dish
+			const [dish] = await db.insert(dishes).values({
+				name: "Test Pizza",
+				description: "Delicious test pizza",
+				price: 1200, // $12.00
+				isAvailable: true,
+			}).returning();
+			testDishId = dish.id;
+
+			// Create recipe linking dish to ingredient
+			await db.insert(recipes).values({
+				dishId: testDishId,
+				ingredientId: testIngredientId,
+				quantityRequired: 0.5,
+			});
+		}
 	});
 
 	test("should return all available dishes by default", async () => {
+		// Ensure ingredient has stock (reset from previous test)
+		await db.update(ingredients)
+			.set({ quantity: 100 })
+			.where(eq(ingredients.id, testIngredientId));
+
 		const caller = appRouter.createCaller(mockContext);
 		
 		const result = await caller.dishes.getAll({});
@@ -71,9 +89,11 @@ describe("Dishes Router - dishes.getAll", () => {
 			.where(eq(ingredients.id, testIngredientId));
 
 		const caller = appRouter.createCaller(mockContext);
-		const result = await caller.dishes.getAll({});
+		// Use includeDisabled: true to see unavailable dishes
+		const result = await caller.dishes.getAll({ includeDisabled: true });
 
 		const testDish = result.dishes.find(d => d.id === testDishId);
+		expect(testDish).toBeDefined();
 		expect(testDish?.isAvailable).toBe(false);
 
 		// Restore stock for other tests
