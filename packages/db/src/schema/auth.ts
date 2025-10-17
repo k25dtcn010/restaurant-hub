@@ -6,6 +6,9 @@ export const user = sqliteTable("user", {
 	email: text("email").notNull().unique(),
 	emailVerified: integer("email_verified", { mode: "boolean" }).notNull(),
 	image: text("image"),
+	role: text("role", { enum: ["Manager", "KitchenStaff", "Waiter"] })
+		.notNull()
+		.default("Waiter"),
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
@@ -53,3 +56,12 @@ export const verification = sqliteTable("verification", {
 	createdAt: integer("created_at", { mode: "timestamp" }),
 	updatedAt: integer("updated_at", { mode: "timestamp" }),
 });
+
+// TypeScript type exports per data-model.md Section 1
+export type User = typeof user.$inferSelect;
+export type UserInsert = typeof user.$inferInsert;
+export type UserPublic = Omit<User, "emailVerified">;
+
+export type Session = typeof session.$inferSelect;
+export type Account = typeof account.$inferSelect;
+export type Verification = typeof verification.$inferSelect;

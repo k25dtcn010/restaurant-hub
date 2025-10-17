@@ -38,19 +38,19 @@
 
 ### Database Schema & Migrations
 
-- [ ] T008 Create Drizzle config in packages/db/drizzle.config.ts with SQLite and Turso support | **Reference**: [research.md Section 10](./research.md#10-deployment-and-environment-configuration)
-- [ ] T009 [P] Define User schema in packages/db/src/schema/auth.ts (id, email, password, name, role, createdAt) | **Reference**: [data-model.md Section 1](./data-model.md#1-user) - includes validation rules and TypeScript types
-- [ ] T010 [P] Define Table schema in packages/db/src/schema/tables.ts (id, number, qrCode, capacity, createdAt) | **Reference**: [data-model.md Section 2](./data-model.md#2-table) - includes QR code format and validation
-- [ ] T011 [P] Define Dish schema in packages/db/src/schema/dishes.ts (id, name, description, price, photoUrl, isAvailable, createdAt, updatedAt) | **Reference**: [data-model.md Section 5](./data-model.md#5-dish) - includes availability logic
-- [ ] T012 [P] Define Ingredient schema in packages/db/src/schema/ingredients.ts (id, name, quantity, unit, threshold, updatedAt) | **Reference**: [data-model.md Section 6](./data-model.md#6-ingredient) - includes low-stock threshold logic
-- [ ] T013 [P] Define Recipe schema in packages/db/src/schema/recipes.ts (id, dishId FK, ingredientId FK, quantityRequired) | **Reference**: [data-model.md Section 7](./data-model.md#7-recipe) - includes composite uniqueness constraint
-- [ ] T014 Define Order schema in packages/db/src/schema/orders.ts (id, tableId FK, status enum, totalAmount, createdAt, updatedAt) | **Reference**: [data-model.md Section 3](./data-model.md#3-order) - includes status enum values and state transition rules
-- [ ] T015 [P] Define OrderItem schema in packages/db/src/schema/order-items.ts (id, orderId FK, dishId FK, quantity, priceAtOrder, specialInstructions, createdAt) | **Reference**: [data-model.md Section 4](./data-model.md#4-orderitem) - includes cascade delete and historical pricing
-- [ ] T016 [P] Define OrderStatusHistory schema in packages/db/src/schema/order-status-history.ts (id, orderId FK, status, changedBy userId FK, changedAt) | **Reference**: [data-model.md Section 8](./data-model.md#8-orderstatushistory) - audit trail pattern
-- [ ] T017 [P] Define Payment schema in packages/db/src/schema/payments.ts (id, orderId FK, amount, method, paidAt) | **Reference**: [data-model.md Section 9](./data-model.md#9-payment) - includes 1:1 relationship with Order
-- [ ] T018 Export all schemas and types from packages/db/src/index.ts | **Reference**: [data-model.md Type Exports Summary](./data-model.md#type-exports-summary)
-- [ ] T019 Generate initial Drizzle migration files with proper indexes | **Reference**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes critical index definitions
-- [ ] T020 Create database seed script in packages/db/src/seed.ts (30 tables, 3 test users, 15 dishes, 20 ingredients with recipes) | **Reference**: [data-model.md Seed Data Requirements](./data-model.md#seed-data-requirements) - includes complete seed data specification
+- [X] T008 Create Drizzle config in packages/db/drizzle.config.ts with SQLite and Turso support | **Reference**: [research.md Section 10](./research.md#10-deployment-and-environment-configuration)
+- [X] T009 [P] Define User schema in packages/db/src/schema/auth.ts (id, email, password, name, role, createdAt) | **Reference**: [data-model.md Section 1](./data-model.md#1-user) - includes validation rules and TypeScript types
+- [X] T010 [P] Define Table schema in packages/db/src/schema/tables.ts (id, number, qrCode, capacity, createdAt) | **Reference**: [data-model.md Section 2](./data-model.md#2-table) - includes QR code format and validation
+- [X] T011 [P] Define Dish schema in packages/db/src/schema/dishes.ts (id, name, description, price, photoUrl, isAvailable, createdAt, updatedAt) | **Reference**: [data-model.md Section 5](./data-model.md#5-dish) - includes availability logic
+- [X] T012 [P] Define Ingredient schema in packages/db/src/schema/ingredients.ts (id, name, quantity, unit, threshold, updatedAt) | **Reference**: [data-model.md Section 6](./data-model.md#6-ingredient) - includes low-stock threshold logic
+- [X] T013 [P] Define Recipe schema in packages/db/src/schema/recipes.ts (id, dishId FK, ingredientId FK, quantityRequired) | **Reference**: [data-model.md Section 7](./data-model.md#7-recipe) - includes composite uniqueness constraint
+- [X] T014 Define Order schema in packages/db/src/schema/orders.ts (id, tableId FK, status enum, totalAmount, createdAt, updatedAt) | **Reference**: [data-model.md Section 3](./data-model.md#3-order) - includes status enum values and state transition rules
+- [X] T015 [P] Define OrderItem schema in packages/db/src/schema/order-items.ts (id, orderId FK, dishId FK, quantity, priceAtOrder, specialInstructions, createdAt) | **Reference**: [data-model.md Section 4](./data-model.md#4-orderitem) - includes cascade delete and historical pricing
+- [X] T016 [P] Define OrderStatusHistory schema in packages/db/src/schema/order-status-history.ts (id, orderId FK, status, changedBy userId FK, changedAt) | **Reference**: [data-model.md Section 8](./data-model.md#8-orderstatushistory) - audit trail pattern
+- [X] T017 [P] Define Payment schema in packages/db/src/schema/payments.ts (id, orderId FK, amount, method, paidAt) | **Reference**: [data-model.md Section 9](./data-model.md#9-payment) - includes 1:1 relationship with Order
+- [X] T018 Export all schemas and types from packages/db/src/index.ts | **Reference**: [data-model.md Type Exports Summary](./data-model.md#type-exports-summary)
+- [X] T019 Generate initial Drizzle migration files with proper indexes | **Reference**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes critical index definitions
+- [X] T020 Create database seed script in packages/db/src/seed.ts (30 tables, 3 test users, 15 dishes, 20 ingredients with recipes) | **Reference**: [data-model.md Seed Data Requirements](./data-model.md#seed-data-requirements) - includes complete seed data specification
 
 ### Authentication Setup
 
