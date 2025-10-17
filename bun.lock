@@ -45,6 +45,7 @@
         "@hookform/resolvers": "^5.1.1",
         "@learn-bettert/api": "workspace:*",
         "@learn-bettert/auth": "workspace:*",
+        "@radix-ui/react-dialog": "^1.1.15",
         "@radix-ui/react-slot": "^1.2.3",
         "@tailwindcss/vite": "^4.0.15",
         "@tanstack/react-form": "^1.12.3",
