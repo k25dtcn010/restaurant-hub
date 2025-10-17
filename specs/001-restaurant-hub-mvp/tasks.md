@@ -128,12 +128,12 @@
 
 #### Customer Frontend (QR Ordering Flow)
 
-- [ ] T054 [P] [US1] Create landing page route in apps/web/src/routes/index.tsx with QR parameter handling | **QR Session Logic**: [research.md Section 4](./research.md#4-qr-code-generation-and-table-session-management) | **Acceptance**: [spec.md US1 Scenario 1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) | **Plan Reference**: [plan.md Task 2.2](./plan.md#task-22-build-customer-menu-ui)
-- [ ] T055 [P] [US1] Create MenuList component in apps/web/src/components/menu-list.tsx to display available dishes | **Acceptance**: [spec.md US1 Scenario 1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
-- [ ] T056 [P] [US1] Create OrderCart component in apps/web/src/components/order-cart.tsx to manage order items | **Acceptance**: [spec.md US1 Scenario 2](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
-- [ ] T057 [US1] Implement order submission flow in apps/web/src/routes/index.tsx with success/error handling | **Acceptance**: [spec.md US1 Scenario 3](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) | **Plan Reference**: [plan.md Task 2.5](./plan.md#task-25-build-order-cart--submission-ui)
-- [ ] T058 [US1] Add out-of-stock indicators and unavailable dish handling in MenuList component | **Acceptance**: [spec.md US1 Scenario 4](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
-- [ ] T059 [US1] Add loading states and optimistic updates for order submission | **State Management**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates)
+- [X] T054 [P] [US1] Create landing page route in apps/web/src/routes/index.tsx with QR parameter handling | **QR Session Logic**: [research.md Section 4](./research.md#4-qr-code-generation-and-table-session-management) | **Acceptance**: [spec.md US1 Scenario 1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) | **Plan Reference**: [plan.md Task 2.2](./plan.md#task-22-build-customer-menu-ui)
+- [X] T055 [P] [US1] Create MenuList component in apps/web/src/components/menu-list.tsx to display available dishes | **Acceptance**: [spec.md US1 Scenario 1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
+- [X] T056 [P] [US1] Create OrderCart component in apps/web/src/components/order-cart.tsx to manage order items | **Acceptance**: [spec.md US1 Scenario 2](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
+- [X] T057 [US1] Implement order submission flow in apps/web/src/routes/index.tsx with success/error handling | **Acceptance**: [spec.md US1 Scenario 3](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) | **Plan Reference**: [plan.md Task 2.5](./plan.md#task-25-build-order-cart--submission-ui)
+- [X] T058 [US1] Add out-of-stock indicators and unavailable dish handling in MenuList component | **Acceptance**: [spec.md US1 Scenario 4](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
+- [X] T059 [US1] Add loading states and optimistic updates for order submission | **State Management**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates)
 
 **Checkpoint**: User Story 1 complete - customers can order via QR, orders appear in kitchen, inventory updates automatically
 
