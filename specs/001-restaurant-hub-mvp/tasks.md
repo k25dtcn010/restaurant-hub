@@ -191,8 +191,8 @@
 
 ### Tests for User Story 3 (TDD-First)
 
-- [ ] T075 [P] [US3] Contract test for staff order creation with authentication in packages/api/tests/routers/orders.test.ts | **Contract**: Reuses [orders-router.md Procedure 1](./contracts/orders-router.md#1-orderscreate) with authenticated context | **Acceptance**: [spec.md US3 Scenario 3](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
-- [ ] T076 [P] [US3] Integration test for waiter-created orders matching QR order behavior in apps/server/tests/integration/staff-ordering.test.ts | **Acceptance**: [spec.md US3 Scenario 3](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [X] T075 [P] [US3] Contract test for staff order creation with authentication in packages/api/tests/routers/orders.test.ts | **Contract**: Reuses [orders-router.md Procedure 1](./contracts/orders-router.md#1-orderscreate) with authenticated context | **Acceptance**: [spec.md US3 Scenario 3](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [X] T076 [P] [US3] Integration test for waiter-created orders matching QR order behavior in apps/server/tests/integration/staff-ordering.test.ts | **Acceptance**: [spec.md US3 Scenario 3](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
 
 ### Implementation for User Story 3
 
