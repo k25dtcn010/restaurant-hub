@@ -738,4 +738,83 @@ export const ordersRouter = router({
 				})),
 			};
 		}),
+
+	/**
+	 * T085: orders.getServingOrders - Get orders for serving staff
+	 * Auth: Required (Waiter, Manager)
+	 * Contract: orders-router.md Procedure 9
+	 * 
+	 * Business Logic:
+	 * - Query orders with status in ['ReadyToServe', 'Served']
+	 * - Join with order_status_history to get readySince timestamp
+	 * - Calculate waitTime as difference between now and readySince
+	 * - Sort by waitTime descending (longest waiting first)
+	 */
+	getServingOrders: publicProcedure
+		.input(
+			z.object({
+				status: z.array(z.enum(["ReadyToServe", "Served"])).optional(),
+			}).optional().default({}),
+		)
+		.query(async ({ input, ctx }) => {
+			const { db } = ctx;
+			const statusFilter = input?.status || ["ReadyToServe", "Served"];
+
+			// Query orders with the specified statuses
+			const ordersData = await db.query.orders.findMany({
+				where: (orders, { inArray }) => inArray(orders.status, statusFilter),
+				with: {
+					table: true,
+					orderItems: {
+						with: {
+							dish: true,
+						},
+					},
+				},
+			});
+
+			// For each order, get the readySince timestamp from status history
+			const ordersWithMetadata = await Promise.all(
+				ordersData.map(async (order) => {
+					// Get status history to find when order was marked ReadyToServe
+					const readyStatusHistory = await db.query.orderStatusHistory.findFirst({
+						where: (history, { and, eq }) =>
+							and(
+								eq(history.orderId, order.id),
+								eq(history.status, "ReadyToServe")
+							),
+						orderBy: (history, { asc }) => [asc(history.changedAt)],
+					});
+
+					const readySince = readyStatusHistory
+						? new Date(readyStatusHistory.changedAt)
+						: null;
+
+					// Calculate wait time in minutes
+					const now = Date.now();
+					const readyTime = readySince ? readySince.getTime() : now;
+					const waitTime = Math.floor((now - readyTime) / (1000 * 60)); // Convert to minutes
+
+					return {
+						id: order.id,
+						tableNumber: order.table.number,
+						status: order.status as "ReadyToServe" | "Served",
+						items: order.orderItems.map((item) => ({
+							dishName: item.dish.name,
+							quantity: item.quantity,
+						})),
+						totalAmount: order.totalAmount,
+						readySince,
+						waitTime,
+					};
+				})
+			);
+
+			// Sort by waitTime descending (longest waiting first)
+			ordersWithMetadata.sort((a, b) => b.waitTime - a.waitTime);
+
+			return {
+				orders: ordersWithMetadata,
+			};
+		}),
 });
