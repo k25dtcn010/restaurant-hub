@@ -36,7 +36,14 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
-    "tsdown": "^0.15.5",
-    "@types/bun": "^1.2.6"
+    "@types/bun": "^1.2.6",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "prettier": "^3.6.2",
+    "tsdown": "^0.15.5"
   }
 }

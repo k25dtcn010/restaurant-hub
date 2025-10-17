@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# Generated files
+.turbo
+.cache
+*.tsbuildinfo
+
+# Environment
+.env*
+
+# IDE
+.vscode/
+.idea/

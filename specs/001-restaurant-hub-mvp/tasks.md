@@ -18,13 +18,13 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize monorepo structure per plan.md (apps/server, apps/web, packages/api, packages/auth, packages/db)
-- [ ] T002 Configure TypeScript 5.7+ strict mode in tsconfig.base.json and workspace tsconfig.json files
-- [ ] T003 [P] Setup Bun workspace configuration in bts.jsonc with proper package references
-- [ ] T004 [P] Install core dependencies: Hono 4.8+, tRPC 11.5+, Drizzle ORM, Better-Auth 1.3+
-- [ ] T005 [P] Configure Prettier, ESLint for code quality standards
-- [ ] T006 Create environment configuration templates (.env.example for apps/server and apps/web)
-- [ ] T007 [P] Setup Bun test runner configuration with 80% coverage threshold
+- [X] T001 Initialize monorepo structure per plan.md (apps/server, apps/web, packages/api, packages/auth, packages/db)
+- [X] T002 Configure TypeScript 5.7+ strict mode in tsconfig.base.json and workspace tsconfig.json files
+- [X] T003 [P] Setup Bun workspace configuration in bts.jsonc with proper package references
+- [X] T004 [P] Install core dependencies: Hono 4.8+, tRPC 11.5+, Drizzle ORM, Better-Auth 1.3+
+- [X] T005 [P] Configure Prettier, ESLint for code quality standards
+- [X] T006 Create environment configuration templates (.env.example for apps/server and apps/web)
+- [X] T007 [P] Setup Bun test runner configuration with 80% coverage threshold
 
 ---
 
