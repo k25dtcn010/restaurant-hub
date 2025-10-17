@@ -167,13 +167,13 @@
 
 #### Kitchen Dashboard Frontend
 
-- [ ] T068 [P] [US2] Create kitchen route in apps/web/src/routes/kitchen.tsx with authentication guard (KitchenStaff role) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) | **Acceptance**: [spec.md US2 Scenario 1-2](./spec.md#user-story-2---kitchen-order-management-priority-p1) | **Plan Reference**: [plan.md Task 3.2](./plan.md#task-32-build-kitchen-dashboard-ui)
-- [ ] T069 [P] [US2] Create OrdersBoard component in apps/web/src/components/orders-board.tsx with status columns (Pending, In Kitchen, Ready) | **Acceptance**: [spec.md US2 Scenario 5](./spec.md#user-story-2---kitchen-order-management-priority-p1)
-- [ ] T070 [P] [US2] Create OrderCard component in apps/web/src/components/order-card.tsx displaying table, dishes, quantities, timestamps | **Acceptance**: [spec.md US2 Scenario 1](./spec.md#user-story-2---kitchen-order-management-priority-p1)
-- [ ] T071 [US2] Implement WebSocket connection in kitchen.tsx for real-time order updates | **WebSocket Integration**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates) - includes query invalidation pattern | **Plan Reference**: [plan.md Task 3.3](./plan.md#task-33-implement-websocket-integration-for-new_order)
-- [ ] T072 [US2] Add status transition buttons to OrderCard for moving orders through workflow | **Acceptance**: [spec.md US2 Scenario 3-4](./spec.md#user-story-2---kitchen-order-management-priority-p1) | **Plan Reference**: [plan.md Task 3.5](./plan.md#task-35-add-status-update-buttons-to-kitchen-dashboard)
-- [ ] T073 [US2] Add visual distinction between different order statuses with color coding | **Acceptance**: [spec.md US2 Scenario 5](./spec.md#user-story-2---kitchen-order-management-priority-p1)
-- [ ] T074 [US2] Implement auto-refresh and real-time notification handling in kitchen dashboard | **State Management**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates)
+- [X] T068 [P] [US2] Create kitchen route in apps/web/src/routes/kitchen.tsx with authentication guard (KitchenStaff role) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) | **Acceptance**: [spec.md US2 Scenario 1-2](./spec.md#user-story-2---kitchen-order-management-priority-p1) | **Plan Reference**: [plan.md Task 3.2](./plan.md#task-32-build-kitchen-dashboard-ui)
+- [X] T069 [P] [US2] Create OrdersBoard component in apps/web/src/components/orders-board.tsx with status columns (Pending, In Kitchen, Ready) | **Acceptance**: [spec.md US2 Scenario 5](./spec.md#user-story-2---kitchen-order-management-priority-p1)
+- [X] T070 [P] [US2] Create OrderCard component in apps/web/src/components/order-card.tsx displaying table, dishes, quantities, timestamps | **Acceptance**: [spec.md US2 Scenario 1](./spec.md#user-story-2---kitchen-order-management-priority-p1)
+- [X] T071 [US2] Implement WebSocket connection in kitchen.tsx for real-time order updates | **WebSocket Integration**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates) - includes query invalidation pattern | **Plan Reference**: [plan.md Task 3.3](./plan.md#task-33-implement-websocket-integration-for-new_order)
+- [X] T072 [US2] Add status transition buttons to OrderCard for moving orders through workflow | **Acceptance**: [spec.md US2 Scenario 3-4](./spec.md#user-story-2---kitchen-order-management-priority-p1) | **Plan Reference**: [plan.md Task 3.5](./plan.md#task-35-add-status-update-buttons-to-kitchen-dashboard)
+- [X] T073 [US2] Add visual distinction between different order statuses with color coding | **Acceptance**: [spec.md US2 Scenario 5](./spec.md#user-story-2---kitchen-order-management-priority-p1)
+- [X] T074 [US2] Implement auto-refresh and real-time notification handling in kitchen dashboard | **State Management**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates)
 
 **Checkpoint**: User Story 2 complete - kitchen staff can view and manage orders in real-time
 
