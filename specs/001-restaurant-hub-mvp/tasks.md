@@ -54,29 +54,29 @@
 
 ### Authentication Setup
 
-- [ ] T021 Configure Better-Auth in packages/auth/src/index.ts with role-based permissions (Manager, KitchenStaff, Waiter) | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes complete implementation pattern with role enum and user fields
-- [ ] T022 Implement auth middleware for tRPC context in packages/api/src/context.ts | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes context creation pattern with session extraction
-- [ ] T023 Create auth client configuration in apps/web/src/lib/auth-client.ts | **Reference**: [plan.md Task 1.5](./plan.md#task-15-setup-better-auth)
+- [X] T021 Configure Better-Auth in packages/auth/src/index.ts with role-based permissions (Manager, KitchenStaff, Waiter) | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes complete implementation pattern with role enum and user fields
+- [X] T022 Implement auth middleware for tRPC context in packages/api/src/context.ts | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes context creation pattern with session extraction
+- [X] T023 Create auth client configuration in apps/web/src/lib/auth-client.ts | **Reference**: [plan.md Task 1.5](./plan.md#task-15-setup-better-auth)
 
 ### API Infrastructure
 
-- [ ] T024 Setup tRPC app router structure in packages/api/src/index.ts with router aggregation | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
-- [ ] T025 Create tRPC context with auth and DB client in packages/api/src/context.ts | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes protected procedure pattern
-- [ ] T026 Configure Hono server entry point in apps/server/src/index.ts with tRPC integration | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
-- [ ] T027 Setup WebSocket handler in apps/server/src/websocket.ts with role-based connection management (kitchen, serving, manager) | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) - includes complete WebSocket implementation pattern with connection pooling by role
-- [ ] T028 Configure CORS and middleware for Hono server | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
+- [X] T024 Setup tRPC app router structure in packages/api/src/index.ts with router aggregation | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
+- [X] T025 Create tRPC context with auth and DB client in packages/api/src/context.ts | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes protected procedure pattern
+- [X] T026 Configure Hono server entry point in apps/server/src/index.ts with tRPC integration | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
+- [X] T027 Setup WebSocket handler in apps/server/src/websocket.ts with role-based connection management (kitchen, serving, manager) | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) - includes complete WebSocket implementation pattern with connection pooling by role
+- [X] T028 Configure CORS and middleware for Hono server | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
 
 ### Frontend Foundation
 
-- [ ] T029 Configure Vite for React 18+ in apps/web/vite.config.ts with bundle size optimization | **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies) - includes code splitting and bundle optimization
-- [ ] T030 Setup TanStack Router in apps/web/src/main.tsx with file-based routing | **Reference**: [plan.md Task 1.8](./plan.md#task-18-frontend-trpc-client-setup)
-- [ ] T031 Create root layout in apps/web/src/routes/__root.tsx with Header and ThemeProvider | **Reference**: [plan.md Project Structure](./plan.md#source-code-repository-root)
-- [ ] T032 Setup tRPC client in apps/web/src/utils/trpc.ts with React Query integration | **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies) - includes tRPC batching configuration
-- [ ] T033 [P] Setup shadcn/ui configuration in apps/web/components.json
-- [ ] T034 [P] Install base shadcn/ui components (Button, Card, Input, Label, Dropdown, Skeleton, Sonner)
-- [ ] T035 Create theme provider in apps/web/src/components/theme-provider.tsx
-- [ ] T036 Create header component in apps/web/src/components/header.tsx with mode toggle and navigation
-- [ ] T037 Create loader component in apps/web/src/components/loader.tsx for async states
+- [X] T029 Configure Vite for React 18+ in apps/web/vite.config.ts with bundle size optimization | **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies) - includes code splitting and bundle optimization
+- [X] T030 Setup TanStack Router in apps/web/src/main.tsx with file-based routing | **Reference**: [plan.md Task 1.8](./plan.md#task-18-frontend-trpc-client-setup)
+- [X] T031 Create root layout in apps/web/src/routes/__root.tsx with Header and ThemeProvider | **Reference**: [plan.md Project Structure](./plan.md#source-code-repository-root)
+- [X] T032 Setup tRPC client in apps/web/src/utils/trpc.ts with React Query integration | **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies) - includes tRPC batching configuration
+- [X] T033 [P] Setup shadcn/ui configuration in apps/web/components.json
+- [X] T034 [P] Install base shadcn/ui components (Button, Card, Input, Label, Dropdown, Skeleton, Sonner)
+- [X] T035 Create theme provider in apps/web/src/components/theme-provider.tsx
+- [X] T036 Create header component in apps/web/src/components/header.tsx with mode toggle and navigation
+- [X] T037 Create loader component in apps/web/src/components/loader.tsx for async states
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
