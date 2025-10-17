@@ -2,10 +2,18 @@ import { Link } from "@tanstack/react-router";
 import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
 
+/**
+ * T083: Add authentication guards to protected routes
+ * Header component with navigation to all major routes
+ * Links are visible to all, but routes themselves have auth guards
+ */
+
 export default function Header() {
 	const links = [
 		{ to: "/", label: "Home" },
 		{ to: "/dashboard", label: "Dashboard" },
+		{ to: "/staff-order", label: "Staff Order" },
+		{ to: "/kitchen", label: "Kitchen" },
 	] as const;
 
 	return (
