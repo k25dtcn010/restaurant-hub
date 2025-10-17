@@ -223,8 +223,8 @@
 
 ### Tests for User Story 4 (TDD-First)
 
-- [ ] T085 [P] [US4] Contract test for orders.getAll with ReadyToServe filter in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 9](./contracts/orders-router.md#9-ordersgetservingorders)
-- [ ] T086 [P] [US4] Contract test for order status transitions (Served, Completed) in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **State Transitions**: [data-model.md Order Status](./data-model.md#3-order)
+- [X] T085 [P] [US4] Contract test for orders.getAll with ReadyToServe filter in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 9](./contracts/orders-router.md#9-ordersgetservingorders) | **Implementation**: orders.getServingOrders procedure implemented ✅
+- [X] T086 [P] [US4] Contract test for order status transitions (Served, Completed) in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **State Transitions**: [data-model.md Order Status](./data-model.md#3-order) | **Tests**: 4/4 passing ✅
 - [ ] T087 [P] [US4] WebSocket notification test for serving alerts in apps/server/tests/integration/websocket.test.ts | **WebSocket Event**: [orders-router.md ORDER_READY](./contracts/orders-router.md#5-ordersupdatestatus)
 - [ ] T088 [P] [US4] Integration test for complete serving workflow in apps/server/tests/integration/serving-workflow.test.ts | **Acceptance**: [spec.md US4 All Scenarios](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2)
 
