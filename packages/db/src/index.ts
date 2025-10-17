@@ -25,7 +25,7 @@ const client = createClient({
 	authToken: process.env.DATABASE_AUTH_TOKEN,
 });
 
-// Combine all schemas for Drizzle
+// Combine all schemas for Drizzle (including relations)
 const schema = {
 	...authSchema,
 	...tablesSchema,
@@ -40,6 +40,9 @@ const schema = {
 
 export const db = drizzle({ client, schema });
 
+// Export drizzle helpers for queries
+export { eq, and, ne, inArray, sql, or, gt, lt, gte, lte, like } from "drizzle-orm";
+
 // Export all schemas and types per data-model.md Type Exports Summary
 export * from "./schema/auth";
 export * from "./schema/tables";
@@ -50,3 +53,6 @@ export * from "./schema/orders";
 export * from "./schema/order-items";
 export * from "./schema/order-status-history";
 export * from "./schema/payments";
+
+// Type-safe schema access
+export const dbSchema = schema;

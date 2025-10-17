@@ -1,4 +1,5 @@
 import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
 import { orders } from "./orders";
 import { user } from "./auth";
 
@@ -21,6 +22,18 @@ export const orderStatusHistory = sqliteTable(
 		orderIdIdx: index("idx_order_status_history_order_id").on(table.orderId),
 	}),
 );
+
+// Relations
+export const orderStatusHistoryRelations = relations(orderStatusHistory, ({ one }) => ({
+	order: one(orders, {
+		fields: [orderStatusHistory.orderId],
+		references: [orders.id],
+	}),
+	user: one(user, {
+		fields: [orderStatusHistory.changedBy],
+		references: [user.id],
+	}),
+}));
 
 // TypeScript type exports
 export type OrderStatusHistoryEntry = typeof orderStatusHistory.$inferSelect;
