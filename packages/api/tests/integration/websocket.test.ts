@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
-import { db, eq, tables, ingredients, dishes, recipes, orders } from "@learn-bettert/db";
+import { db, eq, tables, ingredients, dishes, recipes, orders, orderItems, orderStatusHistory } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
 
 /**
@@ -16,7 +16,7 @@ import type { Context } from "../../src/context";
  * that the data structure matches the contract specifications.
  */
 
-// Mock context for different roles
+// Mock context for different roles (without actual users to avoid FK constraints)
 const customerContext: Context = {
 	session: null,
 	user: null,
@@ -25,15 +25,15 @@ const customerContext: Context = {
 };
 
 const kitchenContext: Context = {
-	session: { id: "test-session", userId: "1" } as any,
-	user: { id: 1, email: "kitchen@test.com", name: "Kitchen Staff", role: "KitchenStaff" } as any,
+	session: null,
+	user: null,
 	role: "KitchenStaff",
 	db,
 };
 
 const waiterContext: Context = {
-	session: { id: "test-session", userId: "2" } as any,
-	user: { id: 2, email: "waiter@test.com", name: "Waiter", role: "Waiter" } as any,
+	session: null,
+	user: null,
 	role: "Waiter",
 	db,
 };
@@ -93,11 +93,16 @@ describe("Integration: WebSocket Notifications for Kitchen Alerts", () => {
 	});
 
 	beforeEach(async () => {
-		// Clean up previous test orders
+		// Clean up previous test orders and related records
 		const previousOrders = await db.query.orders.findMany({
 			where: (orders, { eq }) => eq(orders.tableId, testTableId),
 		});
+		
 		for (const order of previousOrders) {
+			// Delete related records first (to avoid foreign key constraints)
+			await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, order.id));
+			await db.delete(orderItems).where(eq(orderItems.orderId, order.id));
+			// Now safe to delete the order
 			await db.delete(orders).where(eq(orders.id, order.id));
 		}
 
