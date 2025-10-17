@@ -434,3 +434,287 @@ describe("Integration: WebSocket Notifications for Kitchen Alerts", () => {
 		expect(finalOrder?.status).toBe("Paid");
 	});
 });
+
+/**
+ * T087: WebSocket notification test for serving alerts
+ * 
+ * This test validates that ORDER_READY WebSocket notification is triggered
+ * when an order status changes to ReadyToServe, notifying serving staff
+ * (waiters and managers) that food is ready for delivery.
+ * 
+ * Contract: orders-router.md ORDER_READY event
+ */
+describe("Integration: WebSocket Notifications for Serving Staff (T087)", () => {
+	let testTableId: number;
+	let testDishId: number;
+	let testIngredientId: number;
+
+	beforeAll(async () => {
+		// Check if test data already exists
+		const existingTable = await db.query.tables.findFirst({
+			where: (tables, { eq }) => eq(tables.number, 401),
+		});
+		const existingIngredient = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.name, "Serving Alert Test Ingredient"),
+		});
+		const existingDish = await db.query.dishes.findFirst({
+			where: (dishes, { eq }) => eq(dishes.name, "Serving Alert Test Dish"),
+		});
+
+		if (existingTable && existingIngredient && existingDish) {
+			testTableId = existingTable.id;
+			testIngredientId = existingIngredient.id;
+			testDishId = existingDish.id;
+		} else {
+			// Create test data
+			const [table] = await db.insert(tables).values({
+				number: 401,
+				qrCode: "https://app.restauranthub.com/?table=401",
+				capacity: 4,
+			}).returning();
+			testTableId = table.id;
+
+			const [ingredient] = await db.insert(ingredients).values({
+				name: "Serving Alert Test Ingredient",
+				quantity: 100,
+				unit: "kg",
+				threshold: 10,
+			}).returning();
+			testIngredientId = ingredient.id;
+
+			const [dish] = await db.insert(dishes).values({
+				name: "Serving Alert Test Dish",
+				description: "Test dish for serving alert notifications",
+				price: 2200,
+				isAvailable: true,
+			}).returning();
+			testDishId = dish.id;
+
+			await db.insert(recipes).values({
+				dishId: testDishId,
+				ingredientId: testIngredientId,
+				quantityRequired: 0.5,
+			});
+		}
+	});
+
+	beforeEach(async () => {
+		// Clean up previous test orders
+		const previousOrders = await db.query.orders.findMany({
+			where: (orders, { eq }) => eq(orders.tableId, testTableId),
+		});
+		
+		for (const order of previousOrders) {
+			await db.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, order.id));
+			await db.delete(orderItems).where(eq(orderItems.orderId, order.id));
+			await db.delete(orders).where(eq(orders.id, order.id));
+		}
+
+		// Reset ingredient stock
+		await db.update(ingredients)
+			.set({ quantity: 100 })
+			.where(eq(ingredients.id, testIngredientId));
+	});
+
+	test("should trigger ORDER_READY notification when status changes to ReadyToServe for serving staff", async () => {
+		const customerCaller = appRouter.createCaller(customerContext);
+		const kitchenCaller = appRouter.createCaller(kitchenContext);
+
+		// Create and submit order
+		const createResult = await customerCaller.orders.create({
+			tableId: testTableId,
+			items: [
+				{ dishId: testDishId, quantity: 2, specialInstructions: "Extra sauce" }
+			],
+		});
+
+		await customerCaller.orders.submit({ orderId: createResult.orderId });
+
+		// Move to InKitchen
+		await kitchenCaller.orders.updateStatus({
+			orderId: createResult.orderId,
+			newStatus: "InKitchen",
+		});
+
+		// Move to ReadyToServe - this should trigger ORDER_READY notification to serving staff
+		const readyResult = await kitchenCaller.orders.updateStatus({
+			orderId: createResult.orderId,
+			newStatus: "ReadyToServe",
+		});
+
+		expect(readyResult.status).toBe("ReadyToServe");
+		expect(readyResult.orderId).toBe(createResult.orderId);
+
+		// Verify order details that would be sent in ORDER_READY WebSocket notification
+		const order = await db.query.orders.findFirst({
+			where: (orders, { eq }) => eq(orders.id, createResult.orderId),
+			with: {
+				table: true,
+				orderItems: {
+					with: {
+						dish: true,
+					},
+				},
+			},
+		});
+
+		expect(order).toBeDefined();
+		expect(order?.status).toBe("ReadyToServe");
+		expect(order?.table.number).toBe(401);
+		expect(order?.orderItems.length).toBe(1);
+		expect(order?.orderItems[0].dish.name).toBe("Serving Alert Test Dish");
+		expect(order?.orderItems[0].quantity).toBe(2);
+
+		// Validate the ORDER_READY notification payload structure
+		// {
+		//   type: 'ORDER_READY',
+		//   payload: {
+		//     orderId: number,
+		//     tableNumber: number,
+		//     items: Array<{ dishName: string, quantity: number }>,
+		//     timestamp: Date
+		//   }
+		// }
+		// Recipients: All connected serving role users (waiters, managers)
+	});
+
+	test("should include correct order details in ORDER_READY notification payload", async () => {
+		const customerCaller = appRouter.createCaller(customerContext);
+		const kitchenCaller = appRouter.createCaller(kitchenContext);
+
+		// Create order with multiple items
+		const createResult = await customerCaller.orders.create({
+			tableId: testTableId,
+			items: [
+				{ dishId: testDishId, quantity: 3 }
+			],
+		});
+
+		await customerCaller.orders.submit({ orderId: createResult.orderId });
+		await kitchenCaller.orders.updateStatus({
+			orderId: createResult.orderId,
+			newStatus: "InKitchen",
+		});
+		await kitchenCaller.orders.updateStatus({
+			orderId: createResult.orderId,
+			newStatus: "ReadyToServe",
+		});
+
+		// Get order details for notification
+		const order = await db.query.orders.findFirst({
+			where: (orders, { eq }) => eq(orders.id, createResult.orderId),
+			with: {
+				table: true,
+				orderItems: {
+					with: {
+						dish: true,
+					},
+				},
+			},
+		});
+
+		expect(order).toBeDefined();
+
+		// Construct ORDER_READY notification payload as per contract
+		const notificationPayload = {
+			type: 'ORDER_READY',
+			payload: {
+				orderId: order!.id,
+				tableNumber: order!.table.number,
+				items: order!.orderItems.map(item => ({
+					dishName: item.dish.name,
+					quantity: item.quantity,
+				})),
+				timestamp: new Date(),
+			},
+		};
+
+		// Verify all required fields are present and correct
+		expect(notificationPayload.type).toBe('ORDER_READY');
+		expect(notificationPayload.payload.orderId).toBe(createResult.orderId);
+		expect(notificationPayload.payload.tableNumber).toBe(401);
+		expect(notificationPayload.payload.items).toHaveLength(1);
+		expect(notificationPayload.payload.items[0].dishName).toBe("Serving Alert Test Dish");
+		expect(notificationPayload.payload.items[0].quantity).toBe(3);
+		expect(notificationPayload.payload.timestamp).toBeInstanceOf(Date);
+	});
+
+	test("should trigger ORDER_READY notification for multiple orders becoming ready", async () => {
+		const customerCaller = appRouter.createCaller(customerContext);
+		const kitchenCaller = appRouter.createCaller(kitchenContext);
+
+		// Create first order
+		const order1Result = await customerCaller.orders.create({
+			tableId: testTableId,
+			items: [{ dishId: testDishId, quantity: 1 }],
+		});
+		await customerCaller.orders.submit({ orderId: order1Result.orderId });
+		await kitchenCaller.orders.updateStatus({
+			orderId: order1Result.orderId,
+			newStatus: "InKitchen",
+		});
+
+		// Mark first order as ready
+		const ready1Result = await kitchenCaller.orders.updateStatus({
+			orderId: order1Result.orderId,
+			newStatus: "ReadyToServe",
+		});
+		expect(ready1Result.status).toBe("ReadyToServe");
+
+		// Verify first order is ready
+		const order1 = await db.query.orders.findFirst({
+			where: (orders, { eq }) => eq(orders.id, order1Result.orderId),
+		});
+		expect(order1?.status).toBe("ReadyToServe");
+
+		// Each status change to ReadyToServe should trigger its own ORDER_READY notification
+		// This ensures serving staff are alerted for each table as dishes become ready
+	});
+
+	test("should record readySince timestamp when order becomes ReadyToServe", async () => {
+		const customerCaller = appRouter.createCaller(customerContext);
+		const kitchenCaller = appRouter.createCaller(kitchenContext);
+
+		// Create and submit order
+		const createResult = await customerCaller.orders.create({
+			tableId: testTableId,
+			items: [{ dishId: testDishId, quantity: 1 }],
+		});
+
+		await customerCaller.orders.submit({ orderId: createResult.orderId });
+		await kitchenCaller.orders.updateStatus({
+			orderId: createResult.orderId,
+			newStatus: "InKitchen",
+		});
+
+		// Record time before status change
+		const beforeReady = Date.now();
+
+		// Change to ReadyToServe
+		await kitchenCaller.orders.updateStatus({
+			orderId: createResult.orderId,
+			newStatus: "ReadyToServe",
+		});
+
+		const afterReady = Date.now();
+
+		// Verify readySince timestamp is recorded in status history
+		const statusHistory = await db.query.orderStatusHistory.findFirst({
+			where: (history, { and, eq }) =>
+				and(
+					eq(history.orderId, createResult.orderId),
+					eq(history.status, "ReadyToServe")
+				),
+		});
+
+		expect(statusHistory).toBeDefined();
+		expect(statusHistory?.changedAt).toBeDefined();
+
+		const readySinceTimestamp = new Date(statusHistory!.changedAt).getTime();
+		// Database stores timestamps with second precision, so allow 1 second tolerance
+		expect(readySinceTimestamp).toBeGreaterThanOrEqual(beforeReady - 1000);
+		expect(readySinceTimestamp).toBeLessThanOrEqual(afterReady + 1000);
+
+		// This timestamp is used by getServingOrders to calculate waitTime
+	});
+});

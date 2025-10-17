@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
-import { db, eq, tables, ingredients, dishes, recipes, orders } from "@learn-bettert/db";
+import { db, eq, tables, ingredients, dishes, recipes, orders, orderItems, orderStatusHistory } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
 
 /**
@@ -780,6 +780,363 @@ describe("Orders Router - orders.getById (T067)", () => {
 		
 		await expect(
 			caller.orders.getById({ orderId: 99999 })
+		).rejects.toThrow();
+	});
+});
+
+/**
+ * T085: Contract test for orders.getServingOrders with ReadyToServe filter
+ * T086: Contract test for order status transitions (Served, Completed)
+ * Contract: orders-router.md Procedure 9
+ * TDD Red Phase: These tests should FAIL before implementation
+ */
+describe("Orders Router - orders.getServingOrders (T085)", () => {
+	let testTableId: number;
+	let testDishId: number;
+	let testIngredientId: number;
+	let readyOrderId: number;
+	let servedOrderId: number;
+
+	beforeAll(async () => {
+		// Check if test data already exists
+		const existingTable = await db.query.tables.findFirst({
+			where: (tables, { eq }) => eq(tables.number, 105),
+		});
+		const existingIngredient = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.name, "Test Serving Ingredient"),
+		});
+		const existingDish = await db.query.dishes.findFirst({
+			where: (dishes, { eq }) => eq(dishes.name, "Test Serving Dish"),
+		});
+
+		if (existingTable && existingIngredient && existingDish) {
+			testTableId = existingTable.id;
+			testIngredientId = existingIngredient.id;
+			testDishId = existingDish.id;
+		} else {
+			// Create test table
+			const [table] = await db.insert(tables).values({
+				number: 105,
+				qrCode: "https://app.restauranthub.com/?table=105",
+				capacity: 4,
+			}).returning();
+			testTableId = table.id;
+
+			// Create test ingredient
+			const [ingredient] = await db.insert(ingredients).values({
+				name: "Test Serving Ingredient",
+				quantity: 30,
+				unit: "kg",
+				threshold: 3,
+			}).returning();
+			testIngredientId = ingredient.id;
+
+			// Create test dish
+			const [dish] = await db.insert(dishes).values({
+				name: "Test Serving Dish",
+				description: "Dish for serving tests",
+				price: 1800,
+				isAvailable: true,
+			}).returning();
+			testDishId = dish.id;
+
+			// Create recipe
+			await db.insert(recipes).values({
+				dishId: testDishId,
+				ingredientId: testIngredientId,
+				quantityRequired: 0.3,
+			});
+		}
+	});
+
+	beforeEach(async () => {
+		// Clean up previous test orders (cascade will delete related records)
+		const previousOrders = await db.query.orders.findMany({
+			where: (orders, { eq }) => eq(orders.tableId, testTableId),
+		});
+		for (const order of previousOrders) {
+			await db.delete(orders).where(eq(orders.id, order.id));
+		}
+
+		// Reset ingredient stock
+		await db.update(ingredients)
+			.set({ quantity: 30 })
+			.where(eq(ingredients.id, testIngredientId));
+
+		// Create test orders in ReadyToServe and Served states
+		const caller = appRouter.createCaller(mockContext);
+		
+		// Create and submit order 1, then mark as ReadyToServe
+		const result1 = await caller.orders.create({
+			tableId: testTableId,
+			items: [{ dishId: testDishId, quantity: 2 }],
+		});
+		await caller.orders.submit({ orderId: result1.orderId });
+		// Move to InKitchen then ReadyToServe
+		await caller.orders.updateStatus({
+			orderId: result1.orderId,
+			newStatus: "InKitchen",
+		});
+		await caller.orders.updateStatus({
+			orderId: result1.orderId,
+			newStatus: "ReadyToServe",
+		});
+		readyOrderId = result1.orderId;
+
+		// Create and submit order 2, then mark as Served
+		const result2 = await caller.orders.create({
+			tableId: testTableId,
+			items: [{ dishId: testDishId, quantity: 1 }],
+		});
+		await caller.orders.submit({ orderId: result2.orderId });
+		await caller.orders.updateStatus({
+			orderId: result2.orderId,
+			newStatus: "InKitchen",
+		});
+		await caller.orders.updateStatus({
+			orderId: result2.orderId,
+			newStatus: "ReadyToServe",
+		});
+		await caller.orders.updateStatus({
+			orderId: result2.orderId,
+			newStatus: "Served",
+		});
+		servedOrderId = result2.orderId;
+	});
+
+	test("should return orders with ReadyToServe and Served statuses", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		const result = await caller.orders.getServingOrders({});
+
+		expect(result.orders).toBeDefined();
+		expect(result.orders.length).toBeGreaterThanOrEqual(2);
+		
+		// Should include our test orders
+		const orderIds = result.orders.map((o) => o.id);
+		expect(orderIds).toContain(readyOrderId);
+		expect(orderIds).toContain(servedOrderId);
+
+		// Verify orders have correct statuses
+		const readyOrder = result.orders.find((o) => o.id === readyOrderId);
+		const servedOrder = result.orders.find((o) => o.id === servedOrderId);
+		
+		expect(readyOrder?.status).toBe("ReadyToServe");
+		expect(servedOrder?.status).toBe("Served");
+	});
+
+	test("should filter orders by status (ReadyToServe only)", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		const result = await caller.orders.getServingOrders({
+			status: ["ReadyToServe"],
+		});
+
+		expect(result.orders).toBeDefined();
+		
+		// Should only include ReadyToServe orders
+		const hasReady = result.orders.some((o) => o.id === readyOrderId);
+		const hasServed = result.orders.some((o) => o.id === servedOrderId);
+		
+		expect(hasReady).toBe(true);
+		expect(hasServed).toBe(false);
+
+		// All orders should have ReadyToServe status
+		result.orders.forEach((order) => {
+			expect(order.status).toBe("ReadyToServe");
+		});
+	});
+
+	test("should include table number and items in response", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		const result = await caller.orders.getServingOrders({});
+
+		const testOrder = result.orders.find((o) => o.id === readyOrderId);
+		expect(testOrder).toBeDefined();
+		expect(testOrder?.tableNumber).toBe(105);
+		expect(testOrder?.items).toBeDefined();
+		expect(testOrder?.items.length).toBeGreaterThan(0);
+		
+		// Check item structure
+		const firstItem = testOrder?.items[0];
+		expect(firstItem?.dishName).toBeDefined();
+		expect(firstItem?.quantity).toBeDefined();
+	});
+
+	test("should include readySince timestamp and calculate waitTime", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		const result = await caller.orders.getServingOrders({});
+
+		const testOrder = result.orders.find((o) => o.id === readyOrderId);
+		expect(testOrder).toBeDefined();
+		
+		// Should have readySince timestamp
+		expect(testOrder?.readySince).toBeDefined();
+		expect(testOrder?.readySince).toBeInstanceOf(Date);
+		
+		// Should have waitTime in minutes (should be very small for just-created orders)
+		expect(testOrder?.waitTime).toBeDefined();
+		expect(typeof testOrder?.waitTime).toBe("number");
+		expect(testOrder?.waitTime).toBeGreaterThanOrEqual(0);
+	});
+
+	test("should include totalAmount in response", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		const result = await caller.orders.getServingOrders({});
+
+		const testOrder = result.orders.find((o) => o.id === readyOrderId);
+		expect(testOrder).toBeDefined();
+		expect(testOrder?.totalAmount).toBeDefined();
+		expect(typeof testOrder?.totalAmount).toBe("number");
+		expect(testOrder?.totalAmount).toBeGreaterThan(0);
+	});
+
+	test("should sort by waitTime descending (longest waiting first)", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		const result = await caller.orders.getServingOrders({});
+
+		expect(result.orders.length).toBeGreaterThan(0);
+		
+		// Check that orders are sorted by waitTime descending
+		for (let i = 0; i < result.orders.length - 1; i++) {
+			const current = result.orders[i];
+			const next = result.orders[i + 1];
+			expect(current.waitTime).toBeGreaterThanOrEqual(next.waitTime);
+		}
+	});
+});
+
+/**
+ * T086: Contract test for order status transitions (Served, Completed)
+ * Contract: orders-router.md Procedure 5
+ * Testing Served and Completed status transitions
+ */
+describe("Orders Router - status transitions to Served/Completed (T086)", () => {
+	let testTableId: number;
+	let testDishId: number;
+	let testIngredientId: number;
+	let testOrderId: number;
+
+	beforeAll(async () => {
+		// Reuse test data from table 105 (created in T085 tests)
+		const existingTable = await db.query.tables.findFirst({
+			where: (tables, { eq }) => eq(tables.number, 105),
+		});
+		const existingIngredient = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.name, "Test Serving Ingredient"),
+		});
+		const existingDish = await db.query.dishes.findFirst({
+			where: (dishes, { eq }) => eq(dishes.name, "Test Serving Dish"),
+		});
+
+		// These should exist from the previous test suite, but handle case where they don't
+		if (!existingTable || !existingIngredient || !existingDish) {
+			throw new Error("Test data from T085 suite not found. Run T085 tests first.");
+		}
+
+		testTableId = existingTable.id;
+		testIngredientId = existingIngredient.id;
+		testDishId = existingDish.id;
+	});
+
+	beforeEach(async () => {
+		// Clean up previous test orders (cascade will delete related records)
+		const previousOrders = await db.query.orders.findMany({
+			where: (orders, { eq }) => eq(orders.tableId, testTableId),
+		});
+		for (const order of previousOrders) {
+			await db.delete(orders).where(eq(orders.id, order.id));
+		}
+
+		// Reset ingredient stock
+		await db.update(ingredients)
+			.set({ quantity: 30 })
+			.where(eq(ingredients.id, testIngredientId));
+
+		// Create a test order and move it to ReadyToServe
+		const caller = appRouter.createCaller(mockContext);
+		const result = await caller.orders.create({
+			tableId: testTableId,
+			items: [{ dishId: testDishId, quantity: 1 }],
+		});
+		await caller.orders.submit({ orderId: result.orderId });
+		await caller.orders.updateStatus({
+			orderId: result.orderId,
+			newStatus: "InKitchen",
+		});
+		await caller.orders.updateStatus({
+			orderId: result.orderId,
+			newStatus: "ReadyToServe",
+		});
+		testOrderId = result.orderId;
+	});
+
+	test("should transition from ReadyToServe to Served", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		const result = await caller.orders.updateStatus({
+			orderId: testOrderId,
+			newStatus: "Served",
+		});
+
+		expect(result.status).toBe("Served");
+		expect(result.orderId).toBe(testOrderId);
+		expect(result.updatedAt).toBeDefined();
+	});
+
+	test("should transition from Served to Completed", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		// First move to Served
+		await caller.orders.updateStatus({
+			orderId: testOrderId,
+			newStatus: "Served",
+		});
+
+		// Then move to Completed
+		const result = await caller.orders.updateStatus({
+			orderId: testOrderId,
+			newStatus: "Completed",
+		});
+
+		expect(result.status).toBe("Completed");
+		expect(result.orderId).toBe(testOrderId);
+	});
+
+	test("should create status history for Served transition", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		await caller.orders.updateStatus({
+			orderId: testOrderId,
+			newStatus: "Served",
+		});
+
+		// Get order details to check status history
+		const orderDetails = await caller.orders.getById({
+			orderId: testOrderId,
+		});
+
+		expect(orderDetails.statusHistory).toBeDefined();
+		const servedHistory = orderDetails.statusHistory.find(
+			(h) => h.status === "Served"
+		);
+		expect(servedHistory).toBeDefined();
+		expect(servedHistory?.changedAt).toBeDefined();
+	});
+
+	test("should not allow invalid status transitions", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		// Try to go from ReadyToServe directly to Paid (should fail)
+		await expect(
+			caller.orders.updateStatus({
+				orderId: testOrderId,
+				newStatus: "Paid",
+			})
 		).rejects.toThrow();
 	});
 });
