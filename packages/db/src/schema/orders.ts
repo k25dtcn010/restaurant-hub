@@ -1,5 +1,8 @@
 import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
 import { tables } from "./tables";
+import { orderItems } from "./order-items";
+import { orderStatusHistory } from "./order-status-history";
 
 // Order status enum per data-model.md Section 3
 export const orderStatuses = [
@@ -40,6 +43,16 @@ export const orders = sqliteTable(
 		createdAtIdx: index("idx_orders_created_at").on(table.createdAt),
 	}),
 );
+
+// Relations
+export const ordersRelations = relations(orders, ({ one, many }) => ({
+	table: one(tables, {
+		fields: [orders.tableId],
+		references: [tables.id],
+	}),
+	orderItems: many(orderItems),
+	statusHistory: many(orderStatusHistory),
+}));
 
 // TypeScript type exports
 export type Order = typeof orders.$inferSelect;

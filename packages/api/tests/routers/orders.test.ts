@@ -1,0 +1,303 @@
+import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
+import { appRouter } from "../../src/routers/index";
+import { db, eq, tables, ingredients, dishes, recipes, orders } from "@learn-bettert/db";
+import type { Context } from "../../src/context";
+
+/**
+ * T040: Contract test for orders.create
+ * T041: Contract test for orders.submit with inventory reduction
+ * Contract: orders-router.md Procedures 1 & 2
+ * TDD Red Phase: These tests should FAIL before implementation
+ */
+
+// Mock context for testing
+const mockContext: Context = {
+	session: null,
+	user: null,
+	role: null,
+	db,
+};
+
+describe("Orders Router - orders.create", () => {
+	let testTableId: number;
+	let testDishId: number;
+	let testIngredientId: number;
+
+	beforeAll(async () => {
+		// Check if test data already exists from previous run
+		const existingTable = await db.query.tables.findFirst({
+			where: (tables, { eq }) => eq(tables.number, 100),
+		});
+		const existingIngredient = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.name, "Test Tomato"),
+		});
+		const existingDish = await db.query.dishes.findFirst({
+			where: (dishes, { eq }) => eq(dishes.name, "Test Pasta"),
+		});
+
+		if (existingTable && existingIngredient && existingDish) {
+			testTableId = existingTable.id;
+			testIngredientId = existingIngredient.id;
+			testDishId = existingDish.id;
+		} else {
+			// Create test table (use number > 30 to avoid conflicts with seed data)
+			const [table] = await db.insert(tables).values({
+				number: 100,
+				qrCode: "https://app.restauranthub.com/?table=100",
+				capacity: 4,
+			}).returning();
+			testTableId = table.id;
+
+			// Create test ingredient
+			const [ingredient] = await db.insert(ingredients).values({
+				name: "Test Tomato",
+				quantity: 50,
+				unit: "kg",
+				threshold: 5,
+			}).returning();
+			testIngredientId = ingredient.id;
+
+			// Create test dish
+			const [dish] = await db.insert(dishes).values({
+				name: "Test Pasta",
+				description: "Delicious pasta",
+				price: 1500, // $15.00
+				isAvailable: true,
+			}).returning();
+			testDishId = dish.id;
+
+			// Create recipe
+			await db.insert(recipes).values({
+				dishId: testDishId,
+				ingredientId: testIngredientId,
+				quantityRequired: 2.0,
+			});
+		}
+	});
+
+	beforeEach(async () => {
+		// Clean up any test orders before each test
+		const testOrders = await db.query.orders.findMany({
+			where: (orders, { eq }) => eq(orders.tableId, testTableId),
+		});
+		for (const order of testOrders) {
+			await db.delete(orders).where(eq(orders.id, order.id));
+		}
+	});
+
+	test("should create new order for table without active order", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		const result = await caller.orders.create({
+			tableId: testTableId,
+			items: [
+				{
+					dishId: testDishId,
+					quantity: 2,
+					specialInstructions: "Extra sauce",
+				},
+			],
+		});
+
+		expect(result).toBeDefined();
+		expect(result.orderId).toBeDefined();
+		expect(result.isNew).toBe(true);
+		expect(result.totalAmount).toBe(3000); // 2 * $15.00
+		expect(result.itemCount).toBe(2);
+	});
+
+	test("should add items to existing unpaid order", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		// Create first order
+		const firstResult = await caller.orders.create({
+			tableId: testTableId,
+			items: [{ dishId: testDishId, quantity: 1 }],
+		});
+
+		// Add more items to same table
+		const secondResult = await caller.orders.create({
+			tableId: testTableId,
+			items: [{ dishId: testDishId, quantity: 1 }],
+		});
+
+		expect(secondResult.orderId).toBe(firstResult.orderId);
+		expect(secondResult.isNew).toBe(false);
+		expect(secondResult.totalAmount).toBe(3000); // 2 * $15.00
+		expect(secondResult.itemCount).toBe(2);
+	});
+
+	test("should return error when table does not exist", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		await expect(
+			caller.orders.create({
+				tableId: 99999,
+				items: [{ dishId: testDishId, quantity: 1 }],
+			})
+		).rejects.toThrow();
+	});
+
+	test("should return error when dish does not exist", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		await expect(
+			caller.orders.create({
+				tableId: testTableId,
+				items: [{ dishId: 99999, quantity: 1 }],
+			})
+		).rejects.toThrow();
+	});
+
+	test("should validate quantity is positive", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		await expect(
+			caller.orders.create({
+				tableId: testTableId,
+				items: [{ dishId: testDishId, quantity: 0 }],
+			})
+		).rejects.toThrow();
+	});
+});
+
+describe("Orders Router - orders.submit", () => {
+	let testTableId: number;
+	let testDishId: number;
+	let testIngredientId: number;
+	let testOrderId: number;
+
+	beforeAll(async () => {
+		// Check if test data already exists from previous run
+		const existingTable = await db.query.tables.findFirst({
+			where: (tables, { eq }) => eq(tables.number, 101),
+		});
+		const existingIngredient = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.name, "Test Chicken"),
+		});
+		const existingDish = await db.query.dishes.findFirst({
+			where: (dishes, { eq }) => eq(dishes.name, "Test Burger"),
+		});
+
+		if (existingTable && existingIngredient && existingDish) {
+			testTableId = existingTable.id;
+			testIngredientId = existingIngredient.id;
+			testDishId = existingDish.id;
+		} else {
+			// Create test table (use number > 30 to avoid conflicts with seed data)
+			const [table] = await db.insert(tables).values({
+				number: 101,
+				qrCode: "https://app.restauranthub.com/?table=101",
+				capacity: 4,
+			}).returning();
+			testTableId = table.id;
+
+			// Create test ingredient
+			const [ingredient] = await db.insert(ingredients).values({
+				name: "Test Chicken",
+				quantity: 30,
+				unit: "kg",
+				threshold: 3,
+			}).returning();
+			testIngredientId = ingredient.id;
+
+			// Create test dish
+			const [dish] = await db.insert(dishes).values({
+				name: "Test Burger",
+				description: "Juicy burger",
+				price: 1800, // $18.00
+				isAvailable: true,
+			}).returning();
+			testDishId = dish.id;
+
+			// Create recipe
+			await db.insert(recipes).values({
+				dishId: testDishId,
+				ingredientId: testIngredientId,
+				quantityRequired: 0.3,
+			});
+		}
+	});
+
+	beforeEach(async () => {
+		// Clean up any previous test orders
+		const previousOrders = await db.query.orders.findMany({
+			where: (orders, { eq }) => eq(orders.tableId, testTableId),
+		});
+		for (const order of previousOrders) {
+			await db.delete(orders).where(eq(orders.id, order.id));
+		}
+
+		// Reset ingredient stock before each test
+		await db.update(ingredients)
+			.set({ quantity: 30 })
+			.where(eq(ingredients.id, testIngredientId));
+
+		// Create a fresh order for submission tests
+		const caller = appRouter.createCaller(mockContext);
+		const result = await caller.orders.create({
+			tableId: testTableId,
+			items: [{ dishId: testDishId, quantity: 2 }],
+		});
+		testOrderId = result.orderId;
+	});
+
+	test("should submit order and reduce inventory", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		// Get initial stock
+		const beforeStock = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.id, testIngredientId),
+		});
+
+		// Submit order
+		const result = await caller.orders.submit({ orderId: testOrderId });
+
+		expect(result).toBeDefined();
+		expect(result.orderId).toBe(testOrderId);
+		expect(result.status).toBe("Pending");
+		expect(result.submittedAt).toBeDefined();
+
+		// Verify inventory reduced
+		const afterStock = await db.query.ingredients.findFirst({
+			where: (ingredients, { eq }) => eq(ingredients.id, testIngredientId),
+		});
+
+		// 2 burgers * 0.3 kg = 0.6 kg reduced
+		expect(afterStock!.quantity).toBe(beforeStock!.quantity - 0.6);
+	});
+
+	test("should return error when order does not exist", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		await expect(
+			caller.orders.submit({ orderId: 99999 })
+		).rejects.toThrow();
+	});
+
+	test("should return error when insufficient stock", async () => {
+		// Set stock too low
+		await db.update(ingredients)
+			.set({ quantity: 0.1 })
+			.where(eq(ingredients.id, testIngredientId));
+
+		const caller = appRouter.createCaller(mockContext);
+		
+		await expect(
+			caller.orders.submit({ orderId: testOrderId })
+		).rejects.toThrow();
+	});
+
+	test("should create order status history entry", async () => {
+		const caller = appRouter.createCaller(mockContext);
+		
+		await caller.orders.submit({ orderId: testOrderId });
+
+		const history = await db.query.orderStatusHistory.findMany({
+			where: (history, { eq }) => eq(history.orderId, testOrderId),
+		});
+
+		expect(history.length).toBeGreaterThan(0);
+		expect(history[0].status).toBe("Pending");
+	});
+});
