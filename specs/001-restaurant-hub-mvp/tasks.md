@@ -153,8 +153,8 @@
 
 - [X] T060 [P] [US2] Contract test for orders.getAll with status filtering in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 8](./contracts/orders-router.md#8-ordersgetkitchenorders)
 - [X] T061 [P] [US2] Contract test for orders.updateStatus in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **State Transitions**: [data-model.md Order Section](./data-model.md#3-order)
-- [ ] T062 [P] [US2] Integration test for kitchen workflow (Pending → In Kitchen → Ready) in apps/server/tests/integration/kitchen-workflow.test.ts | **Plan Reference**: [plan.md Task 3.4](./plan.md#task-34-implement-ordersupdatestatus-mutation)
-- [ ] T063 [P] [US2] WebSocket notification test for kitchen alerts in apps/server/tests/integration/websocket.test.ts | **WebSocket Events**: [orders-router.md WebSocket Notifications](./contracts/orders-router.md#2-orderssubmit)
+- [X] T062 [P] [US2] Integration test for kitchen workflow (Pending → In Kitchen → Ready) in apps/server/tests/integration/kitchen-workflow.test.ts | **Plan Reference**: [plan.md Task 3.4](./plan.md#task-34-implement-ordersupdatestatus-mutation)
+- [X] T063 [P] [US2] WebSocket notification test for kitchen alerts in apps/server/tests/integration/websocket.test.ts | **WebSocket Events**: [orders-router.md WebSocket Notifications](./contracts/orders-router.md#2-orderssubmit)
 
 ### Implementation for User Story 2
 
