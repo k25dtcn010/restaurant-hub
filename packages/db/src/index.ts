@@ -14,14 +14,16 @@ import * as paymentsSchema from "./schema/payments";
 
 // Create database client
 // Note: DATABASE_URL must be set in environment before importing this module
+// Default to in-memory database for testing if not set
+const databaseUrl = process.env.DATABASE_URL || "file::memory:?cache=shared";
 if (!process.env.DATABASE_URL) {
-	throw new Error(
-		"DATABASE_URL environment variable is required. Load .env before importing @repo/db",
+	console.warn(
+		"⚠️  DATABASE_URL not set, using in-memory database. Load .env for persistent storage.",
 	);
 }
 
 const client = createClient({
-	url: process.env.DATABASE_URL,
+	url: databaseUrl,
 	authToken: process.env.DATABASE_AUTH_TOKEN,
 });
 

@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll } from "bun:test";
 import { appRouter } from "../../src/routers/index";
-import { db } from "@learn-bettert/db";
+import { db, eq, ingredients, dishes, recipes } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
 
 /**
@@ -23,7 +23,7 @@ describe("Dishes Router - dishes.getAll", () => {
 
 	beforeAll(async () => {
 		// Create test ingredient
-		const [ingredient] = await db.insert(db.schema.ingredients).values({
+		const [ingredient] = await db.insert(ingredients).values({
 			name: "Test Flour",
 			quantity: 100,
 			unit: "kg",
@@ -32,7 +32,7 @@ describe("Dishes Router - dishes.getAll", () => {
 		testIngredientId = ingredient.id;
 
 		// Create test dish
-		const [dish] = await db.insert(db.schema.dishes).values({
+		const [dish] = await db.insert(dishes).values({
 			name: "Test Pizza",
 			description: "Delicious test pizza",
 			price: 1200, // $12.00
@@ -41,7 +41,7 @@ describe("Dishes Router - dishes.getAll", () => {
 		testDishId = dish.id;
 
 		// Create recipe linking dish to ingredient
-		await db.insert(db.schema.recipes).values({
+		await db.insert(recipes).values({
 			dishId: testDishId,
 			ingredientId: testIngredientId,
 			quantityRequired: 0.5,
@@ -66,9 +66,9 @@ describe("Dishes Router - dishes.getAll", () => {
 
 	test("should mark dish unavailable when ingredient is out of stock", async () => {
 		// Reduce ingredient stock to 0
-		await db.update(db.schema.ingredients)
+		await db.update(ingredients)
 			.set({ quantity: 0 })
-			.where(db.eq(db.schema.ingredients.id, testIngredientId));
+			.where(eq(ingredients.id, testIngredientId));
 
 		const caller = appRouter.createCaller(mockContext);
 		const result = await caller.dishes.getAll({});
@@ -77,14 +77,14 @@ describe("Dishes Router - dishes.getAll", () => {
 		expect(testDish?.isAvailable).toBe(false);
 
 		// Restore stock for other tests
-		await db.update(db.schema.ingredients)
+		await db.update(ingredients)
 			.set({ quantity: 100 })
-			.where(db.eq(db.schema.ingredients.id, testIngredientId));
+			.where(eq(ingredients.id, testIngredientId));
 	});
 
 	test("should include disabled dishes when includeDisabled=true", async () => {
 		// Create a disabled dish
-		const [disabledDish] = await db.insert(db.schema.dishes).values({
+		const [disabledDish] = await db.insert(dishes).values({
 			name: "Disabled Dish",
 			description: "Not available",
 			price: 1000,

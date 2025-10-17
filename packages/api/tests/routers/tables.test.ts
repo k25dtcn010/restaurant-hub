@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll } from "bun:test";
 import { appRouter } from "../../src/routers/index";
-import { db } from "@learn-bettert/db";
+import { db, tables } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
 
 /**
@@ -22,7 +22,7 @@ describe("Tables Router - tables.getById", () => {
 
 	beforeAll(async () => {
 		// Create a test table for validation
-		const [table] = await db.insert(db.schema.tables).values({
+		const [table] = await db.insert(tables).values({
 			number: 99,
 			qrCode: "https://app.restauranthub.com/?table=99",
 			capacity: 4,

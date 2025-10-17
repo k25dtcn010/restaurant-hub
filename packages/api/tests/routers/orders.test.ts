@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
-import { db } from "@learn-bettert/db";
+import { db, eq, tables, ingredients, dishes, recipes, orders } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
 
 /**
@@ -25,7 +25,7 @@ describe("Orders Router - orders.create", () => {
 
 	beforeAll(async () => {
 		// Create test table
-		const [table] = await db.insert(db.schema.tables).values({
+		const [table] = await db.insert(tables).values({
 			number: 10,
 			qrCode: "https://app.restauranthub.com/?table=10",
 			capacity: 4,
@@ -33,7 +33,7 @@ describe("Orders Router - orders.create", () => {
 		testTableId = table.id;
 
 		// Create test ingredient
-		const [ingredient] = await db.insert(db.schema.ingredients).values({
+		const [ingredient] = await db.insert(ingredients).values({
 			name: "Test Tomato",
 			quantity: 50,
 			unit: "kg",
@@ -42,7 +42,7 @@ describe("Orders Router - orders.create", () => {
 		testIngredientId = ingredient.id;
 
 		// Create test dish
-		const [dish] = await db.insert(db.schema.dishes).values({
+		const [dish] = await db.insert(dishes).values({
 			name: "Test Pasta",
 			description: "Delicious pasta",
 			price: 1500, // $15.00
@@ -51,7 +51,7 @@ describe("Orders Router - orders.create", () => {
 		testDishId = dish.id;
 
 		// Create recipe
-		await db.insert(db.schema.recipes).values({
+		await db.insert(recipes).values({
 			dishId: testDishId,
 			ingredientId: testIngredientId,
 			quantityRequired: 2.0,
@@ -64,7 +64,7 @@ describe("Orders Router - orders.create", () => {
 			where: (orders, { eq }) => eq(orders.tableId, testTableId),
 		});
 		for (const order of testOrders) {
-			await db.delete(db.schema.orders).where(db.eq(db.schema.orders.id, order.id));
+			await db.delete(orders).where(eq(orders.id, order.id));
 		}
 	});
 
@@ -152,7 +152,7 @@ describe("Orders Router - orders.submit", () => {
 
 	beforeAll(async () => {
 		// Create test table
-		const [table] = await db.insert(db.schema.tables).values({
+		const [table] = await db.insert(tables).values({
 			number: 11,
 			qrCode: "https://app.restauranthub.com/?table=11",
 			capacity: 4,
@@ -160,7 +160,7 @@ describe("Orders Router - orders.submit", () => {
 		testTableId = table.id;
 
 		// Create test ingredient
-		const [ingredient] = await db.insert(db.schema.ingredients).values({
+		const [ingredient] = await db.insert(ingredients).values({
 			name: "Test Chicken",
 			quantity: 30,
 			unit: "kg",
@@ -169,7 +169,7 @@ describe("Orders Router - orders.submit", () => {
 		testIngredientId = ingredient.id;
 
 		// Create test dish
-		const [dish] = await db.insert(db.schema.dishes).values({
+		const [dish] = await db.insert(dishes).values({
 			name: "Test Burger",
 			description: "Juicy burger",
 			price: 1800, // $18.00
@@ -178,7 +178,7 @@ describe("Orders Router - orders.submit", () => {
 		testDishId = dish.id;
 
 		// Create recipe
-		await db.insert(db.schema.recipes).values({
+		await db.insert(recipes).values({
 			dishId: testDishId,
 			ingredientId: testIngredientId,
 			quantityRequired: 0.3,
@@ -187,9 +187,9 @@ describe("Orders Router - orders.submit", () => {
 
 	beforeEach(async () => {
 		// Reset ingredient stock before each test
-		await db.update(db.schema.ingredients)
+		await db.update(ingredients)
 			.set({ quantity: 30 })
-			.where(db.eq(db.schema.ingredients.id, testIngredientId));
+			.where(eq(ingredients.id, testIngredientId));
 
 		// Create a fresh order for submission tests
 		const caller = appRouter.createCaller(mockContext);
@@ -235,9 +235,9 @@ describe("Orders Router - orders.submit", () => {
 
 	test("should return error when insufficient stock", async () => {
 		// Set stock too low
-		await db.update(db.schema.ingredients)
+		await db.update(ingredients)
 			.set({ quantity: 0.1 })
-			.where(db.eq(db.schema.ingredients.id, testIngredientId));
+			.where(eq(ingredients.id, testIngredientId));
 
 		const caller = appRouter.createCaller(mockContext);
 		
