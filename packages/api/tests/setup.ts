@@ -1,6 +1,8 @@
 // Test setup file - loads environment before any other modules
 // IMPORTANT: Set DATABASE_URL BEFORE importing any database modules
-const dbPath = "/home/runner/work/restaurant-hub/restaurant-hub/packages/db/local.db";
+import { resolve } from "path";
+
+const dbPath = resolve(__dirname, "../../db/local.db");
 
 // Set environment variables BEFORE any imports
 process.env.DATABASE_URL = `file:${dbPath}`;
