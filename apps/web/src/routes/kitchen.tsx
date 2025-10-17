@@ -47,12 +47,11 @@ function RouteComponent() {
 	const session = routeContext.session;
 	
 	// Query kitchen orders (Pending, InKitchen, ReadyToServe)
+	// Note: No polling interval since we now use WebSocket for real-time updates
 	const { data, isLoading, error, refetch } = useQuery({
 		...trpc.orders.getKitchenOrders.queryOptions({
 			status: ["Pending", "InKitchen", "ReadyToServe"],
 		}),
-		// Refetch every 30 seconds as fallback to WebSocket
-		refetchInterval: 30000,
 	});
 
 	// Convert date strings to Date objects

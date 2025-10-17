@@ -1,9 +1,12 @@
 import { OrderCard } from "./order-card";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { RefreshCw } from "lucide-react";
-import { useEffect, useCallback } from "react";
+import { Badge } from "./ui/badge";
+import { RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { useCallback, useState } from "react";
 import { queryClient } from "@/utils/trpc";
+import { useWebSocket } from "@/hooks/use-websocket";
+import { toast } from "sonner";
 
 /**
  * T069: OrdersBoard Component
@@ -46,42 +49,61 @@ interface OrdersBoardProps {
 }
 
 export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
+	const [isConnected, setIsConnected] = useState(false);
+
 	/**
 	 * T071 & T074: WebSocket integration for real-time updates
 	 * 
-	 * Note: In a production setup, we would connect to WebSocket here:
-	 * - Listen for 'NEW_ORDER' events
-	 * - Listen for 'ORDER_STATUS_CHANGED' events
-	 * - Invalidate queries when events are received
-	 * 
-	 * For now, we rely on polling (30s interval set in kitchen.tsx)
-	 * 
-	 * Example WebSocket pattern (from research.md Section 6):
-	 * ```typescript
-	 * useEffect(() => {
-	 *   const ws = new WebSocket('ws://localhost:3000/ws');
-	 *   
-	 *   ws.onmessage = (event) => {
-	 *     const message = JSON.parse(event.data);
-	 *     
-	 *     if (message.type === 'NEW_ORDER') {
-	 *       queryClient.invalidateQueries({
-	 *         predicate: (query) => query.queryKey[0] === "orders.getKitchenOrders",
-	 *       });
-	 *       toast.success(`New order from Table ${message.payload.tableNumber}`);
-	 *     }
-	 *     
-	 *     if (message.type === 'ORDER_STATUS_CHANGED') {
-	 *       queryClient.invalidateQueries({
-	 *         predicate: (query) => query.queryKey[0] === "orders.getKitchenOrders",
-	 *       });
-	 *     }
-	 *   };
-	 *   
-	 *   return () => ws.close();
-	 * }, []);
-	 * ```
+	 * Connects to WebSocket server with 'kitchen' role
+	 * Listens for NEW_ORDER and ORDER_STATUS_CHANGED events
+	 * Automatically invalidates queries and shows notifications
 	 */
+	const handleWebSocketMessage = useCallback((message: { type: string; [key: string]: unknown }) => {
+		console.log("[OrdersBoard] WebSocket message:", message);
+
+		switch (message.type) {
+			case "NEW_ORDER":
+				// Invalidate queries to refetch kitchen orders
+				queryClient.invalidateQueries({
+					predicate: (query) => query.queryKey[0] === "orders.getKitchenOrders",
+				});
+				
+				// Show notification
+				const order = message.order as { id?: number; tableNumber?: number };
+				if (order?.tableNumber) {
+					toast.success(`New order from Table ${order.tableNumber}`, {
+						description: `Order #${order.id}`,
+					});
+				}
+				break;
+
+			case "ORDER_STATUS_CHANGED":
+				// Invalidate queries to refetch kitchen orders
+				queryClient.invalidateQueries({
+					predicate: (query) => query.queryKey[0] === "orders.getKitchenOrders",
+				});
+				break;
+
+			default:
+				// Ignore other message types
+				break;
+		}
+	}, []);
+
+	// Connect to WebSocket with 'kitchen' role
+	const { getStatus } = useWebSocket({
+		role: "kitchen",
+		onMessage: handleWebSocketMessage,
+		onConnect: () => {
+			console.log("[OrdersBoard] WebSocket connected");
+			setIsConnected(true);
+		},
+		onDisconnect: () => {
+			console.log("[OrdersBoard] WebSocket disconnected");
+			setIsConnected(false);
+		},
+	});
+
 	const handleWebSocketUpdate = useCallback(() => {
 		// Invalidate kitchen orders query to trigger refetch
 		queryClient.invalidateQueries({
@@ -121,12 +143,25 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
 
 	return (
 		<div className="space-y-4">
-			{/* Header with refresh button */}
+			{/* Header with WebSocket status and refresh button */}
 			<div className="flex items-center justify-between">
-				<div>
+				<div className="flex items-center gap-3">
 					<p className="text-sm text-muted-foreground">
 						{orders.length} active {orders.length === 1 ? "order" : "orders"}
 					</p>
+					<Badge variant={isConnected ? "default" : "secondary"} className="gap-1">
+						{isConnected ? (
+							<>
+								<Wifi className="h-3 w-3" />
+								Live
+							</>
+						) : (
+							<>
+								<WifiOff className="h-3 w-3" />
+								Offline
+							</>
+						)}
+					</Badge>
 				</div>
 				<Button
 					onClick={onRefresh}
