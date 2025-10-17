@@ -4,7 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
-import { ChefHat, ClipboardList, UtensilsCrossed } from "lucide-react";
+import { ChefHat, ClipboardList, UtensilsCrossed, TruckIcon } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
@@ -89,6 +89,26 @@ function RouteComponent() {
 						<Button asChild className="w-full">
 							<Link to="/kitchen">
 								Go to Kitchen
+							</Link>
+						</Button>
+					</CardContent>
+				</Card>
+
+				{/* Serving Dashboard */}
+				<Card className="hover:shadow-lg transition-shadow">
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<TruckIcon className="h-5 w-5" />
+							Serving
+						</CardTitle>
+						<CardDescription>
+							Manage orders ready to serve
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Button asChild className="w-full">
+							<Link to="/serving">
+								Go to Serving
 							</Link>
 						</Button>
 					</CardContent>
