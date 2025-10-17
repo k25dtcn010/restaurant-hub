@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, router, managerOnlyProcedure } from "../index";
-import { eq, and, sql } from "drizzle-orm";
+import { eq } from "@learn-bettert/db";
+import { dishes, recipes } from "@learn-bettert/db";
 
 /**
  * Dishes Router
@@ -174,7 +175,7 @@ export const dishesRouter = router({
 			}
 
 			// Create dish
-			const [dish] = await db.insert(db.schema.dishes).values({
+			const [dish] = await db.insert(dishes).values({
 				name,
 				description,
 				price,
@@ -184,7 +185,7 @@ export const dishesRouter = router({
 
 			// Create recipe entries
 			for (const item of recipe) {
-				await db.insert(db.schema.recipes).values({
+				await db.insert(recipes).values({
 					dishId: dish.id,
 					ingredientId: item.ingredientId,
 					quantityRequired: item.quantityRequired,
@@ -252,9 +253,9 @@ export const dishesRouter = router({
 			}
 
 			if (Object.keys(updates).length > 0) {
-				await db.update(db.schema.dishes)
+				await db.update(dishes)
 					.set(updates)
-					.where(eq(db.schema.dishes.id, dishId));
+					.where(eq(dishes.id, dishId));
 			}
 
 			// Update recipe if provided
@@ -270,12 +271,12 @@ export const dishesRouter = router({
 				}
 
 				// Delete existing recipes
-				await db.delete(db.schema.recipes)
-					.where(eq(db.schema.recipes.dishId, dishId));
+				await db.delete(recipes)
+					.where(eq(recipes.dishId, dishId));
 
 				// Create new recipe entries
 				for (const item of recipe) {
-					await db.insert(db.schema.recipes).values({
+					await db.insert(recipes).values({
 						dishId,
 						ingredientId: item.ingredientId,
 						quantityRequired: item.quantityRequired,
@@ -315,9 +316,9 @@ export const dishesRouter = router({
 				throw new Error(`Dish ID ${dishId} does not exist`);
 			}
 
-			await db.update(db.schema.dishes)
+			await db.update(dishes)
 				.set({ isAvailable })
-				.where(eq(db.schema.dishes.id, dishId));
+				.where(eq(dishes.id, dishId));
 
 			return {
 				dishId,
@@ -357,13 +358,13 @@ export const dishesRouter = router({
 
 			if (orderItems.length > 0) {
 				// Soft delete: set isAvailable = false
-				await db.update(db.schema.dishes)
+				await db.update(dishes)
 					.set({ isAvailable: false })
-					.where(eq(db.schema.dishes.id, dishId));
+					.where(eq(dishes.id, dishId));
 			} else {
 				// Hard delete: remove from database
-				await db.delete(db.schema.dishes)
-					.where(eq(db.schema.dishes.id, dishId));
+				await db.delete(dishes)
+					.where(eq(dishes.id, dishId));
 			}
 
 			return {

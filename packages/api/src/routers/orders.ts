@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { publicProcedure, router, protectedProcedure } from "../index";
-import { eq, and, ne, inArray, sql } from "drizzle-orm";
+import { publicProcedure, router } from "../index";
+import { eq, sql } from "@learn-bettert/db";
+import { orders, orderItems, ingredients, orderStatusHistory } from "@learn-bettert/db";
 import { TRPCError } from "@trpc/server";
 
 /**
@@ -66,7 +67,7 @@ export const ordersRouter = router({
 				orderId = activeOrder.id;
 			} else {
 				// Create new order
-				const [newOrder] = await db.insert(db.schema.orders).values({
+				const [newOrder] = await db.insert(orders).values({
 					tableId,
 					status: "Pending",
 					totalAmount: 0,
@@ -120,7 +121,7 @@ export const ordersRouter = router({
 				}
 
 				// Add order item
-				await db.insert(db.schema.orderItems).values({
+				await db.insert(orderItems).values({
 					orderId,
 					dishId: item.dishId,
 					quantity: item.quantity,
@@ -137,9 +138,9 @@ export const ordersRouter = router({
 				totalAmount += activeOrder.totalAmount;
 			}
 
-			await db.update(db.schema.orders)
+			await db.update(orders)
 				.set({ totalAmount })
-				.where(eq(db.schema.orders.id, orderId));
+				.where(eq(orders.id, orderId));
 
 			return {
 				orderId,
@@ -264,21 +265,21 @@ export const ordersRouter = router({
 				// Reduce inventory
 				for (const [ingredientId, required] of ingredientRequirements.entries()) {
 					await tx
-						.update(tx.schema.ingredients)
+						.update(ingredients)
 						.set({
-							quantity: sql`${tx.schema.ingredients.quantity} - ${required}`,
+							quantity: sql`${ingredients.quantity} - ${required}`,
 						})
-						.where(eq(tx.schema.ingredients.id, ingredientId));
+						.where(eq(ingredients.id, ingredientId));
 				}
 
 				// Update order status
 				await tx
-					.update(tx.schema.orders)
+					.update(orders)
 					.set({ status: "Pending" })
-					.where(eq(tx.schema.orders.id, orderId));
+					.where(eq(orders.id, orderId));
 
 				// Create status history entry
-				await tx.insert(tx.schema.orderStatusHistory).values({
+				await tx.insert(orderStatusHistory).values({
 					orderId,
 					status: "Pending",
 					changedBy: ctx.user?.id ?? null,
@@ -381,7 +382,7 @@ export const ordersRouter = router({
 				}
 
 				// Add order item
-				await db.insert(db.schema.orderItems).values({
+				await db.insert(orderItems).values({
 					orderId,
 					dishId: item.dishId,
 					quantity: item.quantity,
@@ -398,11 +399,11 @@ export const ordersRouter = router({
 						for (const recipe of dish.recipes) {
 							const required = recipe.quantityRequired * item.quantity;
 							await db
-								.update(db.schema.ingredients)
+								.update(ingredients)
 								.set({
-									quantity: sql`${db.schema.ingredients.quantity} - ${required}`,
+									quantity: sql`${ingredients.quantity} - ${required}`,
 								})
-								.where(eq(db.schema.ingredients.id, recipe.ingredientId));
+								.where(eq(ingredients.id, recipe.ingredientId));
 						}
 					}
 				}
@@ -411,9 +412,9 @@ export const ordersRouter = router({
 			// Update order total
 			const newTotal = order.totalAmount + totalAdded;
 			await db
-				.update(db.schema.orders)
+				.update(orders)
 				.set({ totalAmount: newTotal })
-				.where(eq(db.schema.orders.id, orderId));
+				.where(eq(orders.id, orderId));
 
 			// TODO T052: Broadcast WebSocket if order already in kitchen
 			// if (order.status in ['Pending', 'InKitchen', 'ReadyToServe']) {

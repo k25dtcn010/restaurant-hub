@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, router, waiterProcedure, managerOnlyProcedure } from "../index";
-import { eq } from "drizzle-orm";
+import { eq } from "@learn-bettert/db";
+import { tables } from "@learn-bettert/db";
 
 /**
  * Tables Router
@@ -34,7 +35,7 @@ export const tablesRouter = router({
 		});
 
 		// Map tables with active order information
-		const tables = allTables.map((table) => {
+		const tablesWithOrders = allTables.map((table) => {
 			const activeOrder = activeOrders.find((order) => order.tableId === table.id);
 			return {
 				id: table.id,
@@ -47,7 +48,7 @@ export const tablesRouter = router({
 			};
 		});
 
-		return { tables };
+		return { tables: tablesWithOrders };
 	}),
 
 	/**
@@ -116,7 +117,7 @@ export const tablesRouter = router({
 			// Generate QR code URL
 			const qrCode = `https://app.restauranthub.com/?table=${number}`;
 
-			const [table] = await db.insert(db.schema.tables).values({
+			const [table] = await db.insert(tables).values({
 				number,
 				qrCode,
 				capacity,
@@ -144,7 +145,7 @@ export const tablesRouter = router({
 		)
 		.mutation(async ({ input, ctx }) => {
 			const { db } = ctx;
-			const { tableId, capacity } = input;
+			const { tableId, capacity: newCapacity } = input;
 
 			const table = await db.query.tables.findFirst({
 				where: (tables, { eq }) => eq(tables.id, tableId),
@@ -155,17 +156,19 @@ export const tablesRouter = router({
 			}
 
 			const updates: any = {};
-			if (capacity !== undefined) {
-				updates.capacity = capacity;
+			if (newCapacity !== undefined) {
+				updates.capacity = newCapacity;
 			}
 
-			await db.update(db.schema.tables)
-				.set(updates)
-				.where(eq(db.schema.tables.id, tableId));
+			if (Object.keys(updates).length > 0) {
+				await db.update(tables)
+					.set(updates)
+					.where(eq(tables.id, tableId));
+			}
 
 			return {
 				tableId,
-				capacity: capacity ?? table.capacity,
+				capacity: newCapacity ?? table!.capacity,
 				updatedAt: new Date(),
 			};
 		}),
@@ -194,17 +197,17 @@ export const tablesRouter = router({
 			}
 
 			// Check if table has any orders
-			const orders = await db.query.orders.findMany({
+			const tableOrders = await db.query.orders.findMany({
 				where: (orders, { eq }) => eq(orders.tableId, tableId),
 				limit: 1,
 			});
 
-			if (orders.length > 0) {
+			if (tableOrders.length > 0) {
 				throw new Error(`Cannot delete table ${tableId}: has order history`);
 			}
 
 			// Hard delete table
-			await db.delete(db.schema.tables).where(eq(db.schema.tables.id, tableId));
+			await db.delete(tables).where(eq(tables.id, tableId));
 
 			return {
 				tableId,
