@@ -198,14 +198,14 @@
 
 #### Staff Order Creation Frontend
 
-- [ ] T077 [P] [US3] Create login route in apps/web/src/routes/login.tsx with Better-Auth integration | **Auth Pattern**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) | **Plan Reference**: [plan.md Task 4.1](./plan.md#task-41-build-staff-order-creation-ui)
-- [ ] T078 [P] [US3] Create sign-in form component in apps/web/src/components/sign-in-form.tsx | **Seed Users**: [data-model.md Seed Data](./data-model.md#seed-data-requirements) - use waiter@restauranthub.com / password123
-- [ ] T079 [P] [US3] Create dashboard route in apps/web/src/routes/dashboard.tsx with role-based redirection | **Access Control**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth)
-- [ ] T080 [US3] Create staff-ordering route in apps/web/src/routes/staff-order.tsx (Waiter/Manager access) | **Acceptance**: [spec.md US3 Scenario 1-2](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
-- [ ] T081 [US3] Create TableSelector component in apps/web/src/components/table-selector.tsx for choosing table | **Acceptance**: [spec.md US3 Scenario 1](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
-- [ ] T082 [US3] Reuse MenuList and OrderCart components for staff order creation | **Acceptance**: [spec.md US3 Scenario 2](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
-- [ ] T083 [US3] Add authentication guards to protected routes using Better-Auth session checks | **Auth Middleware**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth)
-- [ ] T084 [US3] Create user menu component in apps/web/src/components/user-menu.tsx with logout functionality
+- [X] T077 [P] [US3] Create login route in apps/web/src/routes/login.tsx with Better-Auth integration | **Auth Pattern**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) | **Plan Reference**: [plan.md Task 4.1](./plan.md#task-41-build-staff-order-creation-ui)
+- [X] T078 [P] [US3] Create sign-in form component in apps/web/src/components/sign-in-form.tsx | **Seed Users**: [data-model.md Seed Data](./data-model.md#seed-data-requirements) - use waiter@restauranthub.com / password123
+- [X] T079 [P] [US3] Create dashboard route in apps/web/src/routes/dashboard.tsx with role-based redirection | **Access Control**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth)
+- [X] T080 [US3] Create staff-ordering route in apps/web/src/routes/staff-order.tsx (Waiter/Manager access) | **Acceptance**: [spec.md US3 Scenario 1-2](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [X] T081 [US3] Create TableSelector component in apps/web/src/components/table-selector.tsx for choosing table | **Acceptance**: [spec.md US3 Scenario 1](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [X] T082 [US3] Reuse MenuList and OrderCart components for staff order creation | **Acceptance**: [spec.md US3 Scenario 2](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [X] T083 [US3] Add authentication guards to protected routes using Better-Auth session checks | **Auth Middleware**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth)
+- [X] T084 [US3] Create user menu component in apps/web/src/components/user-menu.tsx with logout functionality
 
 **Checkpoint**: User Story 3 complete - staff can create orders on behalf of customers
 
