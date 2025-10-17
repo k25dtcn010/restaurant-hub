@@ -151,8 +151,8 @@
 
 ### Tests for User Story 2 (TDD-First)
 
-- [ ] T060 [P] [US2] Contract test for orders.getAll with status filtering in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 8](./contracts/orders-router.md#8-ordersgetkitchenorders)
-- [ ] T061 [P] [US2] Contract test for orders.updateStatus in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **State Transitions**: [data-model.md Order Section](./data-model.md#3-order)
+- [X] T060 [P] [US2] Contract test for orders.getAll with status filtering in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 8](./contracts/orders-router.md#8-ordersgetkitchenorders)
+- [X] T061 [P] [US2] Contract test for orders.updateStatus in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **State Transitions**: [data-model.md Order Section](./data-model.md#3-order)
 - [ ] T062 [P] [US2] Integration test for kitchen workflow (Pending → In Kitchen → Ready) in apps/server/tests/integration/kitchen-workflow.test.ts | **Plan Reference**: [plan.md Task 3.4](./plan.md#task-34-implement-ordersupdatestatus-mutation)
 - [ ] T063 [P] [US2] WebSocket notification test for kitchen alerts in apps/server/tests/integration/websocket.test.ts | **WebSocket Events**: [orders-router.md WebSocket Notifications](./contracts/orders-router.md#2-orderssubmit)
 
@@ -160,10 +160,10 @@
 
 #### Orders Router Extensions (Status Management)
 
-- [ ] T064 [P] [US2] Implement orders.getAll query in packages/api/src/routers/orders.ts with filtering by status and table | **Contract**: [orders-router.md Procedure 8](./contracts/orders-router.md#8-ordersgetkitchenorders) | **Business Logic**: Group by table, sort by createdAt ASC | **Plan Reference**: [plan.md Task 3.1](./plan.md#task-31-implement-ordersgetkitchenorders-query)
-- [ ] T065 [US2] Implement orders.updateStatus mutation in packages/api/src/routers/orders.ts with status history tracking | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **Data Model**: [data-model.md OrderStatusHistory](./data-model.md#8-orderstatushistory) | **Plan Reference**: [plan.md Task 3.4](./plan.md#task-34-implement-ordersupdatestatus-mutation)
-- [ ] T066 [US2] Add WebSocket notification broadcasting to orders.updateStatus for serving staff alerts (Ready to Serve) | **WebSocket Pattern**: [research.md Section 1](./research.md#1-real-time-notification-architecture) | **Contract**: [orders-router.md ORDER_READY Event](./contracts/orders-router.md#5-ordersupdatestatus)
-- [ ] T067 [US2] Implement orders.getById query in packages/api/src/routers/orders.ts with full order details | **Contract**: [orders-router.md Procedure 6](./contracts/orders-router.md#6-ordersgetbyid)
+- [X] T064 [P] [US2] Implement orders.getAll query in packages/api/src/routers/orders.ts with filtering by status and table | **Contract**: [orders-router.md Procedure 8](./contracts/orders-router.md#8-ordersgetkitchenorders) | **Business Logic**: Group by table, sort by createdAt ASC | **Plan Reference**: [plan.md Task 3.1](./plan.md#task-31-implement-ordersgetkitchenorders-query)
+- [X] T065 [US2] Implement orders.updateStatus mutation in packages/api/src/routers/orders.ts with status history tracking | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **Data Model**: [data-model.md OrderStatusHistory](./data-model.md#8-orderstatushistory) | **Plan Reference**: [plan.md Task 3.4](./plan.md#task-34-implement-ordersupdatestatus-mutation)
+- [X] T066 [US2] Add WebSocket notification broadcasting to orders.updateStatus for serving staff alerts (Ready to Serve) | **WebSocket Pattern**: [research.md Section 1](./research.md#1-real-time-notification-architecture) | **Contract**: [orders-router.md ORDER_READY Event](./contracts/orders-router.md#5-ordersupdatestatus)
+- [X] T067 [US2] Implement orders.getById query in packages/api/src/routers/orders.ts with full order details | **Contract**: [orders-router.md Procedure 6](./contracts/orders-router.md#6-ordersgetbyid)
 
 #### Kitchen Dashboard Frontend
 

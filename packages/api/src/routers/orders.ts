@@ -212,7 +212,7 @@ export const ordersRouter = router({
 			const { orderId } = input;
 
 			// Use transaction for atomic inventory reduction
-			return await db.transaction(async (tx) => {
+			const result = await db.transaction(async (tx) => {
 				// Get order with items and recipes
 				const order = await tx.query.orders.findFirst({
 					where: (orders, { eq }) => eq(orders.id, orderId),
@@ -569,7 +569,7 @@ export const ordersRouter = router({
 				})),
 				createdAt: new Date(order.createdAt),
 				updatedAt: new Date(order.updatedAt),
-				waitTime: Math.floor((now - order.createdAt) / (1000 * 60)), // Minutes since created
+				waitTime: Math.floor((now - Number(order.createdAt)) / (1000 * 60)), // Minutes since created
 			}));
 
 			return {
@@ -641,7 +641,7 @@ export const ordersRouter = router({
 			// Update order status
 			const updatedAt = Date.now();
 			await db.update(orders)
-				.set({ status: newStatus, updatedAt })
+				.set({ status: newStatus, updatedAt: sql`${updatedAt}` })
 				.where(eq(orders.id, orderId));
 
 			// Create status history entry
