@@ -1,4 +1,6 @@
 import { sqliteTable, integer, text, real } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
+import { recipes } from "./recipes";
 
 // Ingredient entity per data-model.md Section 6
 export const ingredients = sqliteTable("ingredients", {
@@ -12,6 +14,11 @@ export const ingredients = sqliteTable("ingredients", {
 		.$defaultFn(() => new Date())
 		.$onUpdateFn(() => new Date()),
 });
+
+// Relations
+export const ingredientsRelations = relations(ingredients, ({ many }) => ({
+	recipes: many(recipes),
+}));
 
 // TypeScript type exports
 export type Ingredient = typeof ingredients.$inferSelect;

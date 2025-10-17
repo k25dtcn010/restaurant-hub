@@ -2,6 +2,7 @@ import { publicProcedure, router } from "../index";
 import { tablesRouter } from "./tables";
 import { dishesRouter } from "./dishes";
 import { ordersRouter } from "./orders";
+import { inventoryRouter } from "./inventory";
 
 /**
  * Main tRPC application router - aggregates all sub-routers
@@ -12,8 +13,10 @@ import { ordersRouter } from "./orders";
  * ✅ dishes: Menu display, dish availability
  * ✅ orders: Order creation, submission, status management
  * 
+ * Phase 7: User Story 5 (T103):
+ * ✅ inventory: Ingredient stock management, low-stock alerts
+ * 
  * Future sub-routers:
- * - inventory: Ingredient stock management, low-stock alerts
  * - payments: Cash payment processing
  */
 export const appRouter = router({
@@ -24,8 +27,9 @@ export const appRouter = router({
 	tables: tablesRouter,
 	dishes: dishesRouter,
 	orders: ordersRouter,
+	// Phase 7: User Story 5 router (T103)
+	inventory: inventoryRouter,
 	// Future routers will be added here:
-	// inventory: inventoryRouter,
 	// payments: paymentsRouter,
 });
 

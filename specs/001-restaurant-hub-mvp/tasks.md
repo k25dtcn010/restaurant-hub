@@ -255,20 +255,20 @@
 
 ### Tests for User Story 5 (TDD-First)
 
-- [ ] T095 [P] [US5] Contract test for inventory.getAll in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 1](./contracts/inventory-router.md#1-inventorygetall) | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [ ] T096 [P] [US5] Contract test for inventory.adjustStock in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 3](./contracts/inventory-router.md#3-inventoryadjuststock) | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [ ] T097 [P] [US5] Contract test for inventory.updateThreshold in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 4](./contracts/inventory-router.md#4-inventoryupdatethreshold) | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [ ] T098 [P] [US5] Integration test for low-stock alerts in apps/server/tests/integration/inventory-alerts.test.ts | **Acceptance**: [spec.md US5 Scenario 2, 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T095 [P] [US5] Contract test for inventory.getAll in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 1](./contracts/inventory-router.md#1-inventorygetall) | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T096 [P] [US5] Contract test for inventory.adjustStock in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 3](./contracts/inventory-router.md#3-inventoryadjuststock) | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T097 [P] [US5] Contract test for inventory.updateThreshold in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 4](./contracts/inventory-router.md#4-inventoryupdatethreshold) | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T098 [P] [US5] Integration test for low-stock alerts in apps/server/tests/integration/inventory-alerts.test.ts | **Acceptance**: [spec.md US5 Scenario 2, 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
 
 ### Implementation for User Story 5
 
 #### Inventory Router
 
-- [ ] T099 [P] [US5] Implement inventory.getAll query in packages/api/src/routers/inventory.ts with low-stock calculation | **Contract**: [inventory-router.md Procedure 1](./contracts/inventory-router.md#1-inventorygetall) | **Data Model**: [data-model.md Ingredient](./data-model.md#6-ingredient) | **Business Logic**: Compute isLowStock = quantity < threshold | **Plan Reference**: [plan.md Task 5.1](./plan.md#task-51-implement-inventory-router-procedures)
-- [ ] T100 [P] [US5] Implement inventory.getById query in packages/api/src/routers/inventory.ts with dish usage details | **Contract**: [inventory-router.md Procedure 2](./contracts/inventory-router.md#2-inventorygetbyid) | **Data Model**: Join with Recipe and Dish tables
-- [ ] T101 [P] [US5] Implement inventory.adjustStock mutation in packages/api/src/routers/inventory.ts with validation | **Contract**: [inventory-router.md Procedure 3](./contracts/inventory-router.md#3-inventoryadjuststock) | **Business Logic**: Prevent negative quantities | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [ ] T102 [P] [US5] Implement inventory.updateThreshold mutation in packages/api/src/routers/inventory.ts | **Contract**: [inventory-router.md Procedure 4](./contracts/inventory-router.md#4-inventoryupdatethreshold) | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [ ] T103 [US5] Add inventory router to main app router in packages/api/src/routers/index.ts
+- [X] T099 [P] [US5] Implement inventory.getAll query in packages/api/src/routers/inventory.ts with low-stock calculation | **Contract**: [inventory-router.md Procedure 1](./contracts/inventory-router.md#1-inventorygetall) | **Data Model**: [data-model.md Ingredient](./data-model.md#6-ingredient) | **Business Logic**: Compute isLowStock = quantity < threshold | **Plan Reference**: [plan.md Task 5.1](./plan.md#task-51-implement-inventory-router-procedures)
+- [X] T100 [P] [US5] Implement inventory.getById query in packages/api/src/routers/inventory.ts with dish usage details | **Contract**: [inventory-router.md Procedure 2](./contracts/inventory-router.md#2-inventorygetbyid) | **Data Model**: Join with Recipe and Dish tables
+- [X] T101 [P] [US5] Implement inventory.adjustStock mutation in packages/api/src/routers/inventory.ts with validation | **Contract**: [inventory-router.md Procedure 3](./contracts/inventory-router.md#3-inventoryadjuststock) | **Business Logic**: Prevent negative quantities | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T102 [P] [US5] Implement inventory.updateThreshold mutation in packages/api/src/routers/inventory.ts | **Contract**: [inventory-router.md Procedure 4](./contracts/inventory-router.md#4-inventoryupdatethreshold) | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T103 [US5] Add inventory router to main app router in packages/api/src/routers/index.ts
 
 #### Inventory Dashboard Frontend
 
