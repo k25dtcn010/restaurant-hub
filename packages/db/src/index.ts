@@ -11,6 +11,12 @@ import * as ordersSchema from "./schema/orders"
 import * as paymentsSchema from "./schema/payments"
 import * as recipesSchema from "./schema/recipes"
 import * as tablesSchema from "./schema/tables"
+// New schemas per spec 002-advanced-ops-management
+import * as modifiersSchema from "./schema/modifiers"
+import * as categoriesSchema from "./schema/categories"
+import * as variantsSchema from "./schema/variants"
+import * as reservationsSchema from "./schema/reservations"
+import * as shiftsSchema from "./schema/shifts"
 
 // Create database client
 // Note: DATABASE_URL must be set in environment before importing this module
@@ -38,6 +44,11 @@ const schema = {
   ...orderItemsSchema,
   ...orderStatusHistorySchema,
   ...paymentsSchema,
+  ...modifiersSchema,
+  ...categoriesSchema,
+  ...variantsSchema,
+  ...reservationsSchema,
+  ...shiftsSchema,
 }
 
 export const db = drizzle({ client, schema })
@@ -55,6 +66,11 @@ export * from "./schema/orders"
 export * from "./schema/order-items"
 export * from "./schema/order-status-history"
 export * from "./schema/payments"
+export * from "./schema/modifiers"
+export * from "./schema/categories"
+export * from "./schema/variants"
+export * from "./schema/reservations"
+export * from "./schema/shifts"
 
 // Type-safe schema access
 export const dbSchema = schema
