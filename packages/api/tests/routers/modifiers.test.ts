@@ -663,3 +663,174 @@ describe("Modifiers Router - T025-T028: Modifier Groups CRUD", () => {
     })
   })
 })
+
+describe("Modifiers Router - T029-T030: Dish-Modifier Assignment", () => {
+  let testDishId: number
+  let testModifierId: number
+  let testModifierGroupId: number
+
+  beforeAll(async () => {
+    // Get or create a test dish
+    const existingDish = await db.query.dishes.findFirst()
+    if (existingDish) {
+      testDishId = existingDish.id
+    } else {
+      const { dishes } = await import("@learn-bettert/db")
+      const [newDish] = await db
+        .insert(dishes)
+        .values({
+          name: "Test Dish for Assignment",
+          description: "Test dish",
+          price: 1200,
+          isAvailable: true,
+        })
+        .returning()
+      testDishId = newDish.id
+    }
+
+    // Create a test modifier
+    const [modifier] = await db
+      .insert(modifiers)
+      .values({
+        name: "Test Modifier for Assignment",
+        priceAdjustment: 200,
+        isAvailable: true,
+      })
+      .returning()
+    testModifierId = modifier.id
+
+    // Create a test modifier group
+    const [group] = await db
+      .insert(modifierGroups)
+      .values({
+        name: "Test Group for Assignment",
+        minSelections: 0,
+        maxSelections: 3,
+        displayOrder: 0,
+      })
+      .returning()
+    testModifierGroupId = group.id
+  })
+
+  afterAll(async () => {
+    // Clean up - delete assignments first
+    await db
+      .delete(dishModifiers)
+      .where(eq(dishModifiers.modifierId, testModifierId))
+    
+    // Then delete modifier and group
+    await db.delete(modifiers).where(eq(modifiers.id, testModifierId))
+    await db.delete(modifierGroups).where(eq(modifierGroups.id, testModifierGroupId))
+  })
+
+  describe("T029: modifiers.assignToDish", () => {
+    test("T029-1: Manager can assign modifier to dish with group", async () => {
+      const caller = appRouter.createCaller(managerContext)
+
+      const result = await caller.modifiers.assignToDish({
+        dishId: testDishId,
+        modifierId: testModifierId,
+        modifierGroupId: testModifierGroupId,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.success).toBe(true)
+
+      // Verify assignment exists in database
+      const assignment = await db.query.dishModifiers.findFirst({
+        where: (dishModifiers, { and, eq }) =>
+          and(
+            eq(dishModifiers.dishId, testDishId),
+            eq(dishModifiers.modifierId, testModifierId)
+          ),
+      })
+      expect(assignment).toBeDefined()
+      expect(assignment?.modifierGroupId).toBe(testModifierGroupId)
+    })
+
+    test("T029-2: Duplicate assignment is idempotent (no error)", async () => {
+      const caller = appRouter.createCaller(managerContext)
+
+      // Assign again (should not error)
+      const result = await caller.modifiers.assignToDish({
+        dishId: testDishId,
+        modifierId: testModifierId,
+        modifierGroupId: testModifierGroupId,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe("T030: modifiers.getByDish", () => {
+    beforeAll(async () => {
+      // Ensure assignment exists
+      const existingAssignment = await db.query.dishModifiers.findFirst({
+        where: (dishModifiers, { and, eq }) =>
+          and(
+            eq(dishModifiers.dishId, testDishId),
+            eq(dishModifiers.modifierId, testModifierId)
+          ),
+      })
+
+      if (!existingAssignment) {
+        await db.insert(dishModifiers).values({
+          dishId: testDishId,
+          modifierId: testModifierId,
+          modifierGroupId: testModifierGroupId,
+        })
+      }
+    })
+
+    test("T030-1: Returns modifiers grouped by modifierGroup for a specific dish", async () => {
+      const caller = appRouter.createCaller(mockContext)
+
+      const result = await caller.modifiers.getByDish({
+        dishId: testDishId,
+      })
+
+      expect(result).toBeDefined()
+      expect(result).toBeArray()
+      
+      // Find our test group
+      const testGroup = result.find((g) => g.group.id === testModifierGroupId)
+      expect(testGroup).toBeDefined()
+      expect(testGroup?.group.name).toBe("Test Group for Assignment")
+      
+      // Verify modifiers in the group
+      expect(testGroup?.modifiers).toBeArray()
+      const testModifier = testGroup?.modifiers.find((m) => m.id === testModifierId)
+      expect(testModifier).toBeDefined()
+      expect(testModifier?.name).toBe("Test Modifier for Assignment")
+      expect(testModifier?.priceAdjustment).toBe(200)
+    })
+
+    test("T030-2: Returns empty array for dish with no modifiers", async () => {
+      // Create a new dish with no modifiers
+      const { dishes } = await import("@learn-bettert/db")
+      const [newDish] = await db
+        .insert(dishes)
+        .values({
+          name: "Dish with No Modifiers",
+          description: "Test",
+          price: 1000,
+          isAvailable: true,
+        })
+        .returning()
+
+      const caller = appRouter.createCaller(mockContext)
+
+      const result = await caller.modifiers.getByDish({
+        dishId: newDish.id,
+      })
+
+      expect(result).toBeDefined()
+      expect(result).toBeArray()
+      expect(result.length).toBe(0)
+
+      // Clean up
+      await db.delete((await import("@learn-bettert/db")).dishes).where(eq((await import("@learn-bettert/db")).dishes.id, newDish.id))
+    })
+  })
+})

@@ -327,6 +327,7 @@ export const modifiersRouter = router({
    * modifiers.assignToDish - Assign a modifier to a dish with a group
    * Auth: Manager only
    * Contract: modifiers-router.md § modifiers.assignToDish
+   * T029-GREEN: Implementation
    */
   assignToDish: managerOnlyProcedure
     .input(
@@ -336,17 +337,38 @@ export const modifiersRouter = router({
         modifierGroupId: z.number(),
       })
     )
-    .mutation(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "TODO: Implement modifiers.assignToDish in Phase 3",
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+
+      // Check if assignment already exists
+      const existing = await db.query.dishModifiers.findFirst({
+        where: (dishModifiers, { and, eq }) =>
+          and(
+            eq(dishModifiers.dishId, input.dishId),
+            eq(dishModifiers.modifierId, input.modifierId)
+          ),
       })
+
+      // If already exists, it's idempotent - just return success
+      if (existing) {
+        return { success: true }
+      }
+
+      // Insert new assignment
+      await db.insert(dishModifiers).values({
+        dishId: input.dishId,
+        modifierId: input.modifierId,
+        modifierGroupId: input.modifierGroupId,
+      })
+
+      return { success: true }
     }),
 
   /**
    * modifiers.getByDish - Get all modifiers for a specific dish, grouped by modifier group
    * Auth: Public
    * Contract: modifiers-router.md § modifiers.getByDish
+   * T030-GREEN: Implementation
    */
   getByDish: publicProcedure
     .input(
@@ -354,10 +376,68 @@ export const modifiersRouter = router({
         dishId: z.number(),
       })
     )
-    .query(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "TODO: Implement modifiers.getByDish in Phase 3",
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx
+
+      // Get all dish modifiers for this dish with full details
+      const assignments = await db.query.dishModifiers.findMany({
+        where: eq(dishModifiers.dishId, input.dishId),
+        with: {
+          modifier: true,
+          modifierGroup: true,
+        },
       })
+
+      // Group by modifier group
+      const groupedMap = new Map<
+        number,
+        {
+          group: {
+            id: number
+            name: string
+            minSelections: number | null
+            maxSelections: number | null
+            displayOrder: number
+          }
+          modifiers: Array<{
+            id: number
+            name: string
+            priceAdjustment: number
+            isAvailable: boolean
+          }>
+        }
+      >()
+
+      for (const assignment of assignments) {
+        const groupId = assignment.modifierGroup.id
+
+        if (!groupedMap.has(groupId)) {
+          groupedMap.set(groupId, {
+            group: {
+              id: assignment.modifierGroup.id,
+              name: assignment.modifierGroup.name,
+              minSelections: assignment.modifierGroup.minSelections,
+              maxSelections: assignment.modifierGroup.maxSelections,
+              displayOrder: assignment.modifierGroup.displayOrder,
+            },
+            modifiers: [],
+          })
+        }
+
+        const group = groupedMap.get(groupId)!
+        group.modifiers.push({
+          id: assignment.modifier.id,
+          name: assignment.modifier.name,
+          priceAdjustment: assignment.modifier.priceAdjustment,
+          isAvailable: assignment.modifier.isAvailable,
+        })
+      }
+
+      // Convert map to array and sort by displayOrder
+      const result = Array.from(groupedMap.values()).sort(
+        (a, b) => a.group.displayOrder - b.group.displayOrder
+      )
+
+      return result
     }),
 })

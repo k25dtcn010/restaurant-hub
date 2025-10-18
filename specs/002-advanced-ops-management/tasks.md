@@ -393,7 +393,7 @@
 
 #### T029-T030: Dish-Modifier Assignment
 
-- [ ] T029-RED [US1] Write FAILING test for modifiers.assignToDish
+- [X] T029-RED [US1] Write FAILING test for modifiers.assignToDish
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.assignToDish"
   - **Data Model**: Inserts into `dishModifiers` join table (see `data-model.md` § 1.3)
   - **Test Cases**:
@@ -402,19 +402,19 @@
   - **BLOCKS**: T038 (dish editor needs this to assign modifiers)
   - **Expected**: Tests FAIL
 
-- [ ] T029-GREEN [US1] Implement modifiers.assignToDish
+- [X] T029-GREEN [US1] Implement modifiers.assignToDish
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Implementation**: Insert into `dishModifiers (dishId, modifierId, modifierGroupId)`
   - **Handle Duplicates**: Use `ON CONFLICT DO NOTHING` or check before inserting
   - **Expected**: Tests PASS
 
-- [ ] T030-RED [US1] Write FAILING test for modifiers.getByDish
+- [X] T030-RED [US1] Write FAILING test for modifiers.getByDish
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.getByDish"
   - **Test**: Returns modifiers grouped by modifierGroup for a specific dish
   - **BLOCKS**: T039 (modifier selector needs this data)
   - **Expected**: Tests FAIL
 
-- [ ] T030-GREEN [US1] Implement modifiers.getByDish with grouping
+- [X] T030-GREEN [US1] Implement modifiers.getByDish with grouping
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Implementation**:
     1. Join `dishModifiers → modifiers → modifierGroups`
