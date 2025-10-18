@@ -3,6 +3,7 @@ import { appRouter } from "../../src/routers/index";
 import { db, eq, tables, ingredients, dishes, recipes, orders, user } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
 import { auth } from "@learn-bettert/auth";
+import { mockWsNotifier } from "../setup";
 
 /**
  * T075: Contract test for staff order creation with authentication
@@ -215,6 +216,7 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
 			user: null,
 			role: null,
 			db,
+	wsNotifier: mockWsNotifier,
 		};
 
 		const customerCaller = appRouter.createCaller(mockContext);
@@ -315,6 +317,7 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
 			user: null,
 			role: null,
 			db,
+	wsNotifier: mockWsNotifier,
 		};
 
 		const beforeCustomerQuantity = afterWaiterIngredient!.quantity;

@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
 import { db, eq, tables, ingredients, dishes, recipes, orders, orderItems, payments } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
+import { mockWsNotifier } from "../setup";
 
 /**
  * T113: Integration test for payment flow and table session clearing
@@ -23,6 +24,7 @@ const customerContext: Context = {
 	user: null,
 	role: null,
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 const waiterContext: Context = {

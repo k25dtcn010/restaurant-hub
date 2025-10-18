@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
 import { db, eq, tables, ingredients, dishes, recipes, orders, orderItems, orderStatusHistory } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
+import { mockWsNotifier } from "../setup";
 
 /**
  * T062: Integration test for kitchen workflow
@@ -22,6 +23,7 @@ const kitchenContext: Context = {
 	user: null,
 	role: "KitchenStaff",
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 describe("Integration: Kitchen Workflow (Pending → InKitchen → Ready)", () => {

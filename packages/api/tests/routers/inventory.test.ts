@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
 import { db, eq, ingredients, dishes, recipes } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
+import { mockWsNotifier } from "../setup";
 
 /**
  * Phase 7 - User Story 5: Inventory Management Tests (TDD Red Phase)
