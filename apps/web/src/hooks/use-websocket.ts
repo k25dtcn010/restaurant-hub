@@ -168,7 +168,7 @@ export function useWebSocket({
 				wsRef.current = null;
 			}
 		};
-	}, [connect]);
+	}, []);
 
 	// Keep-alive ping every 30 seconds
 	useEffect(() => {
