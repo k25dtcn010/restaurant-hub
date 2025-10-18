@@ -32,6 +32,9 @@ export const ordersRouter = router({
    * - Add to existing order if yes, create new if no
    * - Validate dishes exist and are available
    * - Do NOT reduce inventory yet (happens on submit)
+   * 
+   * T020: Extended to accept variantId, specialRequest, and modifiers
+   * Note: Modifier price calculation will be implemented in Phase 3
    */
   create: publicProcedure
     .input(
@@ -43,6 +46,17 @@ export const ordersRouter = router({
               dishId: z.number().int().positive(),
               quantity: z.number().int().min(1),
               specialInstructions: z.string().max(255).optional(),
+              // T020: NEW fields for advanced operations
+              variantId: z.number().optional(), // Selected dish variant (if dish has variants)
+              specialRequest: z.string().max(200).optional(), // Customer special request
+              modifiers: z
+                .array(
+                  z.object({
+                    modifierId: z.number(),
+                    modifierGroupId: z.number(),
+                  })
+                )
+                .optional(), // Selected modifiers
             })
           )
           .min(1),

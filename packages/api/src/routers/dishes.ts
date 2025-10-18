@@ -21,16 +21,20 @@ export const dishesRouter = router({
    * - Join with Recipe and Ingredient to compute isAvailable flag
    * - Dish is unavailable if any required ingredient has quantity = 0
    * - Filter by isAvailable if includeDisabled = false (default)
+   * 
+   * T019: Extended with flag fields (isRecommended, isChefSpecial, isHidden, orderPriority)
+   * and includeHidden filter
    */
   getAll: publicProcedure
     .input(
       z.object({
         includeDisabled: z.boolean().optional().default(false),
+        includeHidden: z.boolean().optional().default(false),
       })
     )
     .query(async ({ input, ctx }) => {
       const { db } = ctx
-      const { includeDisabled } = input
+      const { includeDisabled, includeHidden } = input
 
       // Get all dishes
       const allDishes = await db.query.dishes.findMany({
@@ -65,12 +69,22 @@ export const dishesRouter = router({
           price: dish.price,
           photoUrl: dish.photoUrl,
           isAvailable,
+          // T019: Add flag fields
+          isHidden: dish.isHidden,
+          isRecommended: dish.isRecommended,
+          isChefSpecial: dish.isChefSpecial,
+          orderPriority: dish.orderPriority,
           createdAt: dish.createdAt,
         }
       })
 
       // Filter out disabled dishes if requested
-      const filteredDishes = includeDisabled ? dishes : dishes.filter((dish) => dish.isAvailable)
+      let filteredDishes = includeDisabled ? dishes : dishes.filter((dish) => dish.isAvailable)
+      
+      // T019: Filter out hidden dishes unless includeHidden is true
+      if (!includeHidden) {
+        filteredDishes = filteredDishes.filter((dish) => !dish.isHidden)
+      }
 
       return { dishes: filteredDishes }
     }),
@@ -79,6 +93,8 @@ export const dishesRouter = router({
    * T047: dishes.getById - Get dish details with recipe
    * Auth: Public
    * Contract: dishes-router.md Procedure 2
+   * 
+   * T019: Extended with variants array and flag fields
    */
   getById: publicProcedure
     .input(
@@ -97,6 +113,10 @@ export const dishesRouter = router({
             with: {
               ingredient: true,
             },
+          },
+          // T019: Include variants
+          dishVariants: {
+            orderBy: (dishVariants, { asc }) => [asc(dishVariants.displayOrder)],
           },
         },
       })
@@ -125,6 +145,14 @@ export const dishesRouter = router({
         currentStock: r.ingredient.quantity,
       }))
 
+      // T019: Map variants
+      const variants = dish.dishVariants.map((v) => ({
+        id: v.id,
+        name: v.name,
+        price: v.price,
+        displayOrder: v.displayOrder,
+      }))
+
       return {
         id: dish.id,
         name: dish.name,
@@ -132,7 +160,14 @@ export const dishesRouter = router({
         price: dish.price,
         photoUrl: dish.photoUrl,
         isAvailable,
+        // T019: Add flag fields
+        isHidden: dish.isHidden,
+        isRecommended: dish.isRecommended,
+        isChefSpecial: dish.isChefSpecial,
+        orderPriority: dish.orderPriority,
         recipe,
+        // T019: Add variants array
+        variants,
         createdAt: dish.createdAt,
         updatedAt: dish.updatedAt,
       }

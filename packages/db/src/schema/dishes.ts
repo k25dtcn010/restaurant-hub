@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm"
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 
+import { dishVariants } from "./variants"
 import { recipes } from "./recipes"
 
 // Dish entity per data-model.md Section 5
@@ -28,6 +29,7 @@ export const dishes = sqliteTable("dishes", {
 // Relations
 export const dishesRelations = relations(dishes, ({ many }) => ({
   recipes: many(recipes),
+  dishVariants: many(dishVariants),
 }))
 
 // TypeScript type exports
