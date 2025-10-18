@@ -63,6 +63,7 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
 			} as any,
 			role: waiterUser.role,
 			db,
+			wsNotifier: mockWsNotifier,
 		};
 
 		// Get test data from seed
@@ -161,6 +162,7 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
 			} as any,
 			role: managerUser.role,
 			db,
+			wsNotifier: mockWsNotifier,
 		};
 
 		const caller = appRouter.createCaller(managerContext);
@@ -418,6 +420,7 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
 			} as any,
 			role: kitchenUser.role,
 			db,
+			wsNotifier: mockWsNotifier,
 		};
 
 		const caller = appRouter.createCaller(kitchenContext);

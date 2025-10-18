@@ -21,6 +21,7 @@ const managerContext: Context = {
 	},
 	role: "Manager",
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 // Mock context for non-Manager role (should fail)
@@ -34,6 +35,7 @@ const waiterContext: Context = {
 	},
 	role: "Waiter",
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 describe("Dishes Router - dishes.create (T126)", () => {

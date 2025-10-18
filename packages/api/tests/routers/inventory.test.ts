@@ -34,6 +34,7 @@ const mockManagerContext: Context = {
 	},
 	role: "Manager",
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 const mockKitchenContext: Context = {
@@ -46,6 +47,7 @@ const mockKitchenContext: Context = {
 	},
 	role: "KitchenStaff",
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 describe("Inventory Router - inventory.getAll (T095)", () => {
