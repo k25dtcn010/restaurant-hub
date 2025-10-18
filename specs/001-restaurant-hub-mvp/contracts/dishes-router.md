@@ -19,6 +19,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 **Description**: Retrieves all active dishes for customer menu display.
 
 **Input Schema**:
+
 ```typescript
 {
   includeDisabled?: boolean  // Default: false (only show isAvailable=true)
@@ -26,21 +27,23 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   dishes: Array<{
-    id: number,
-    name: string,
-    description: string,
-    price: number,           // In cents
-    photoUrl: string | null,
-    isAvailable: boolean,    // Computed: dish enabled AND all ingredients in stock
+    id: number
+    name: string
+    description: string
+    price: number // In cents
+    photoUrl: string | null
+    isAvailable: boolean // Computed: dish enabled AND all ingredients in stock
     createdAt: Date
   }>
 }
 ```
 
 **Business Logic**:
+
 - If `includeDisabled = false`: Filter `isAvailable = true` only
 - Join with `recipe` and `ingredients` to check stock availability
 - Dish is unavailable if any required ingredient has `quantity = 0`
@@ -54,6 +57,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 **Description**: Retrieves detailed information for a specific dish including recipe.
 
 **Input Schema**:
+
 ```typescript
 {
   dishId: number
@@ -61,6 +65,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   id: number,
@@ -90,6 +95,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 **Description**: Creates a new dish with recipe (FR-001a).
 
 **Input Schema**:
+
 ```typescript
 {
   name: string,              // Max 100 chars
@@ -104,6 +110,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   dishId: number,
@@ -113,12 +120,14 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Business Logic**:
+
 - Validate all ingredient IDs exist in database
 - Create dish entry in `dishes` table
 - Create recipe entries in `recipe` table
 - Initial `isAvailable = true`
 
 **Errors**:
+
 - `BAD_REQUEST`: Invalid input (empty name, negative price, invalid ingredient IDs)
 - `FORBIDDEN`: User is not Manager
 
@@ -131,6 +140,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 **Description**: Updates existing dish details (FR-001b).
 
 **Input Schema**:
+
 ```typescript
 {
   dishId: number,
@@ -146,6 +156,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   dishId: number,
@@ -155,12 +166,14 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Business Logic**:
+
 - Update only provided fields (partial update)
 - If `recipe` provided, delete existing recipe entries and create new ones
 - Update `updatedAt` timestamp
 - Validate recipe ingredient IDs exist
 
 **Errors**:
+
 - `NOT_FOUND`: Dish ID does not exist
 - `BAD_REQUEST`: Invalid input
 - `FORBIDDEN`: User is not Manager
@@ -174,6 +187,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 **Description**: Enables or disables a dish (FR-001c).
 
 **Input Schema**:
+
 ```typescript
 {
   dishId: number,
@@ -182,6 +196,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   dishId: number,
@@ -191,11 +206,13 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Business Logic**:
+
 - Set `isAvailable` field in database
 - Disabled dishes (`isAvailable = false`) are hidden from customer menu
 - Dishes remain in database for historical order references
 
 **Errors**:
+
 - `NOT_FOUND`: Dish ID does not exist
 - `FORBIDDEN`: User is not Manager
 
@@ -208,6 +225,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 **Description**: Soft-deletes a dish (sets `isAvailable = false`). Hard delete prevented if dish exists in order history.
 
 **Input Schema**:
+
 ```typescript
 {
   dishId: number
@@ -215,6 +233,7 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   dishId: number,
@@ -223,11 +242,13 @@ Manages menu items (dishes) that customers can order, including CRUD operations 
 ```
 
 **Business Logic**:
+
 - Check if dish exists in `order_items` table
 - If exists: Set `isAvailable = false` (soft delete)
 - If not exists: Hard delete from `dishes` and `recipe` tables (cascade)
 
 **Errors**:
+
 - `NOT_FOUND`: Dish ID does not exist
 - `FORBIDDEN`: User is not Manager
 
@@ -240,7 +261,7 @@ export type Dish = {
   id: number
   name: string
   description: string
-  price: number  // cents
+  price: number // cents
   photoUrl: string | null
   isAvailable: boolean
   createdAt: Date

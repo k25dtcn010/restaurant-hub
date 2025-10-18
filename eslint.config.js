@@ -1,9 +1,9 @@
-import js from "@eslint/js";
-import tseslint from "@typescript-eslint/eslint-plugin";
-import tsparser from "@typescript-eslint/parser";
-import react from "eslint-plugin-react";
-import reactHooks from "eslint-plugin-react-hooks";
-import prettier from "eslint-config-prettier";
+import js from "@eslint/js"
+import tseslint from "@typescript-eslint/eslint-plugin"
+import tsparser from "@typescript-eslint/parser"
+import prettier from "eslint-config-prettier"
+import react from "eslint-plugin-react"
+import reactHooks from "eslint-plugin-react-hooks"
 
 export default [
   js.configs.recommended,
@@ -11,7 +11,7 @@ export default [
     files: ["**/*.{ts,tsx}"],
     plugins: {
       "@typescript-eslint": tseslint,
-      "react": react,
+      react: react,
       "react-hooks": reactHooks,
     },
     languageOptions: {
@@ -40,4 +40,4 @@ export default [
     },
   },
   prettier,
-];
+]

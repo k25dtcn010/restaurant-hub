@@ -33,6 +33,7 @@ Follow-up TODOs:
 ### I. Test-Driven Development (TDD-First) — NON-NEGOTIABLE
 
 **Red-Green-Refactor Cycle MUST be strictly enforced:**
+
 - Tests MUST be written BEFORE implementation code
 - Tests MUST fail initially (Red phase)
 - Implementation MUST make tests pass (Green phase)
@@ -45,6 +46,7 @@ Follow-up TODOs:
 ### II. Code Quality Standards
 
 **Quality gates that MUST be satisfied:**
+
 - TypeScript strict mode MUST be enabled (`"strict": true` in tsconfig.json)
 - Zero TypeScript compilation errors tolerated in production code
 - Linting (ESLint) and formatting (Prettier) MUST pass without warnings
@@ -58,6 +60,7 @@ Follow-up TODOs:
 ### III. User Experience Consistency
 
 **UX principles that MUST guide all interface development:**
+
 - UI components MUST use shadcn/ui library for consistency
 - Theme switching (light/dark mode) MUST be supported across all interfaces
 - Loading states MUST provide visual feedback (skeletons, spinners) within 200ms
@@ -72,6 +75,7 @@ Follow-up TODOs:
 ### IV. Performance Requirements
 
 **Performance thresholds that MUST be met:**
+
 - API endpoint response time p95 MUST be under 200ms for standard operations
 - Database queries MUST use indexed fields; full table scans require justification
 - Bundle size for web app MUST remain under 500KB (initial gzip)
@@ -85,6 +89,7 @@ Follow-up TODOs:
 ### V. Type Safety & Reliability
 
 **Type safety requirements that MUST be enforced:**
+
 - All API endpoints MUST define tRPC procedures with Zod schemas
 - Database schema MUST be defined in Drizzle with exported TypeScript types
 - No `any` types permitted without explicit `@ts-expect-error` with justification
@@ -98,6 +103,7 @@ Follow-up TODOs:
 ## Technical Standards
 
 **Technology Stack Requirements:**
+
 - **Runtime**: Bun 1.3.0+ MUST be used for all workspaces
 - **Framework**: Hono 4.8+ for server, React 18+ with TanStack Router for web client
 - **Database**: SQLite/Turso with Drizzle ORM MUST manage all persistence
@@ -107,6 +113,7 @@ Follow-up TODOs:
 - **Monorepo**: Bun workspaces MUST organize code into apps/ and packages/
 
 **Workspace Organization:**
+
 - `apps/web` - Frontend React application (port 3001)
 - `apps/server` - Backend Hono + tRPC server (port 3000)
 - `packages/api` - Shared tRPC router definitions and business logic
@@ -114,6 +121,7 @@ Follow-up TODOs:
 - `packages/db` - Database schema, migrations, and query functions
 
 **Security Standards:**
+
 - Authentication tokens MUST use httpOnly cookies
 - API endpoints MUST validate user permissions through Better-Auth context
 - User input MUST be sanitized and validated server-side via Zod
@@ -123,12 +131,14 @@ Follow-up TODOs:
 ## Development Workflow
 
 **Pre-Implementation Phase:**
+
 1. Feature specification MUST be created using `.specify/templates/spec-template.md`
 2. Implementation plan MUST be generated using `.specify/templates/plan-template.md`
 3. Constitution Check gate MUST pass before any code is written
 4. User stories MUST be prioritized (P1, P2, P3...) and independently testable
 
 **Implementation Phase:**
+
 1. Feature branch MUST be created following pattern: `###-feature-name`
 2. Tests MUST be written first and confirmed failing (Red phase)
 3. Implementation MUST make tests pass (Green phase)
@@ -137,6 +147,7 @@ Follow-up TODOs:
 6. Lint and format checks MUST pass before pushing
 
 **Review & Merge Phase:**
+
 1. Pull requests MUST include test coverage report
 2. All CI checks MUST pass (types, tests, lints)
 3. Code reviewer MUST verify TDD cycle was followed
@@ -144,6 +155,7 @@ Follow-up TODOs:
 5. Database migrations MUST be reviewed for destructive operations
 
 **Quality Gates (enforced in CI):**
+
 - `bun check-types` - No TypeScript errors
 - `bun test` - All tests passing
 - `bun lint` - No linting errors
@@ -153,11 +165,13 @@ Follow-up TODOs:
 ## Governance
 
 **Constitution Authority:**
+
 - This constitution supersedes all other development practices and conventions
 - All code changes MUST comply with core principles
 - Complexity that violates principles MUST be justified in implementation plan under "Complexity Tracking" section
 
 **Amendment Process:**
+
 - Amendments require documented proposal with rationale
 - Version MUST be incremented per semantic versioning:
   - **MAJOR**: Removing/redefining core principles
@@ -167,12 +181,14 @@ Follow-up TODOs:
 - Active feature work MUST complete migration plan before amendments take effect
 
 **Compliance & Enforcement:**
+
 - All pull requests MUST pass Constitution Check as defined in implementation plans
 - Code reviews MUST verify adherence to TDD workflow
 - Performance benchmarks MUST be validated for features affecting API or rendering
 - Tooling MUST enforce quality gates (TypeScript strict mode, linting rules, test coverage)
 
 **Development Guidance:**
+
 - For runtime development assistance, refer to project README.md and docs/
 - For specification workflow, use `.specify/templates/` and `.github/prompts/speckit.*.prompt.md`
 - For architectural decisions, consult this constitution and feature specs in `/specs/`

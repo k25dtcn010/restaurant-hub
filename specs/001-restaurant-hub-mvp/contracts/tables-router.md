@@ -21,21 +21,23 @@ Manages table configuration and QR code generation for customer ordering.
 **Input Schema**: None
 
 **Output Schema**:
+
 ```typescript
 {
   tables: Array<{
-    id: number,
-    number: number,          // 1-30
-    qrCode: string,
-    capacity: number,
-    hasActiveOrder: boolean, // Whether unpaid order exists
-    activeOrderId: number | null,
+    id: number
+    number: number // 1-30
+    qrCode: string
+    capacity: number
+    hasActiveOrder: boolean // Whether unpaid order exists
+    activeOrderId: number | null
     createdAt: Date
   }>
 }
 ```
 
 **Business Logic**:
+
 - Join with `orders` to compute `hasActiveOrder` (status != 'Paid')
 - Sort by table number ascending
 
@@ -48,6 +50,7 @@ Manages table configuration and QR code generation for customer ordering.
 **Description**: Validates a table ID exists (used when scanning QR code).
 
 **Input Schema**:
+
 ```typescript
 {
   tableId: number
@@ -55,6 +58,7 @@ Manages table configuration and QR code generation for customer ordering.
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   id: number,
@@ -66,6 +70,7 @@ Manages table configuration and QR code generation for customer ordering.
 ```
 
 **Errors**:
+
 - `NOT_FOUND`: Table ID does not exist (returns `isValid: false`)
 
 ---
@@ -77,6 +82,7 @@ Manages table configuration and QR code generation for customer ordering.
 **Description**: Creates a new table with QR code (setup phase).
 
 **Input Schema**:
+
 ```typescript
 {
   number: number,            // 1-30, unique
@@ -85,6 +91,7 @@ Manages table configuration and QR code generation for customer ordering.
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   tableId: number,
@@ -95,10 +102,12 @@ Manages table configuration and QR code generation for customer ordering.
 ```
 
 **Business Logic**:
+
 - Generate QR code URL: `https://app.restauranthub.com/?table={number}`
 - Validate table number is unique and within 1-30 range
 
 **Errors**:
+
 - `BAD_REQUEST`: Table number already exists or out of range
 - `FORBIDDEN`: User is not Manager
 
@@ -111,6 +120,7 @@ Manages table configuration and QR code generation for customer ordering.
 **Description**: Updates table metadata (capacity).
 
 **Input Schema**:
+
 ```typescript
 {
   tableId: number,
@@ -119,6 +129,7 @@ Manages table configuration and QR code generation for customer ordering.
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   tableId: number,
@@ -128,6 +139,7 @@ Manages table configuration and QR code generation for customer ordering.
 ```
 
 **Errors**:
+
 - `NOT_FOUND`: Table ID does not exist
 - `FORBIDDEN`: User is not Manager
 
@@ -140,6 +152,7 @@ Manages table configuration and QR code generation for customer ordering.
 **Description**: Deletes a table (only if no order history exists).
 
 **Input Schema**:
+
 ```typescript
 {
   tableId: number
@@ -147,6 +160,7 @@ Manages table configuration and QR code generation for customer ordering.
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   tableId: number,
@@ -155,11 +169,13 @@ Manages table configuration and QR code generation for customer ordering.
 ```
 
 **Business Logic**:
+
 - Check if table has any orders in `orders` table
 - If orders exist: Return error (cannot delete)
 - If no orders: Hard delete table
 
 **Errors**:
+
 - `NOT_FOUND`: Table ID does not exist
 - `BAD_REQUEST`: Table has order history (cannot delete)
 - `FORBIDDEN`: User is not Manager
@@ -171,7 +187,7 @@ Manages table configuration and QR code generation for customer ordering.
 ```typescript
 export type Table = {
   id: number
-  number: number  // 1-30
+  number: number // 1-30
   qrCode: string
   capacity: number
   createdAt: Date

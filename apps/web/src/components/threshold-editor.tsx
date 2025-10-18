@@ -1,3 +1,12 @@
+import { useMutation } from "@tanstack/react-query"
+import { AlertTriangle } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+
+import { queryClient, trpcClient } from "@/utils/trpc"
+
+import type { IngredientData } from "./inventory-table"
+import { Button } from "./ui/button"
 import {
   Dialog,
   DialogContent,
@@ -5,16 +14,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import type { IngredientData } from "./inventory-table";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { queryClient, trpcClient } from "@/utils/trpc";
-import { toast } from "sonner";
-import { AlertTriangle } from "lucide-react";
+} from "./ui/dialog"
+import { Input } from "./ui/input"
+import { Label } from "./ui/label"
 
 /**
  * T108: ThresholdEditor Component
@@ -28,13 +30,13 @@ import { AlertTriangle } from "lucide-react";
  */
 
 interface ThresholdEditorProps {
-  ingredient: IngredientData;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  ingredient: IngredientData
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export function ThresholdEditor({ ingredient, open, onOpenChange }: ThresholdEditorProps) {
-  const [threshold, setThreshold] = useState<string>(ingredient.threshold.toString());
+  const [threshold, setThreshold] = useState<string>(ingredient.threshold.toString())
 
   // Mutation for updating threshold
   const updateThresholdMutation = useMutation({
@@ -45,46 +47,46 @@ export function ThresholdEditor({ ingredient, open, onOpenChange }: ThresholdEdi
       queryClient.invalidateQueries({
         predicate: (query) => {
           // tRPC query keys are arrays like [["inventory", "getAll"], {...input}]
-          const queryKey = query.queryKey[0];
-          return Array.isArray(queryKey) && queryKey[0] === "inventory" && queryKey[1] === "getAll";
+          const queryKey = query.queryKey[0]
+          return Array.isArray(queryKey) && queryKey[0] === "inventory" && queryKey[1] === "getAll"
         },
-      });
+      })
       toast.success("Threshold updated successfully", {
         description: `${ingredient.name}: New threshold is ${data.threshold} ${ingredient.unit}`,
-      });
-      handleClose();
+      })
+      handleClose()
     },
     onError: (error: Error) => {
       toast.error("Failed to update threshold", {
         description: error.message,
-      });
+      })
     },
-  });
+  })
 
   const handleClose = () => {
-    setThreshold(ingredient.threshold.toString());
-    onOpenChange(false);
-  };
+    setThreshold(ingredient.threshold.toString())
+    onOpenChange(false)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    const thresholdValue = parseFloat(threshold);
+    const thresholdValue = parseFloat(threshold)
     if (isNaN(thresholdValue) || thresholdValue < 0) {
       toast.error("Invalid threshold", {
         description: "Threshold must be a non-negative number",
-      });
-      return;
+      })
+      return
     }
 
     updateThresholdMutation.mutate({
       ingredientId: ingredient.id,
       threshold: thresholdValue,
-    });
-  };
+    })
+  }
 
-  const thresholdValue = parseFloat(threshold);
-  const willBeLowStock = !isNaN(thresholdValue) && ingredient.quantity < thresholdValue;
+  const thresholdValue = parseFloat(threshold)
+  const willBeLowStock = !isNaN(thresholdValue) && ingredient.quantity < thresholdValue
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -154,5 +156,5 @@ export function ThresholdEditor({ ingredient, open, onOpenChange }: ThresholdEdi
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

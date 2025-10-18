@@ -19,30 +19,29 @@ The integration tests for payment processing were experiencing data conflicts wh
 Added proper cleanup hooks to ensure test isolation:
 
 **auth-integration.test.ts**:
+
 ```typescript
-let createdOrderIds: number[] = [];
+let createdOrderIds: number[] = []
 
 beforeEach(async () => {
   // Replenish ingredient stock before each test
-  await db.update(ingredients)
-    .set({ quantity: 100 })
-    .where(eq(ingredients.id, testIngredientId));
-  
+  await db.update(ingredients).set({ quantity: 100 }).where(eq(ingredients.id, testIngredientId))
+
   // Reset order tracking
-  createdOrderIds = [];
-});
+  createdOrderIds = []
+})
 
 afterEach(async () => {
   // Clean up all orders and payments created during the test
   for (const orderId of createdOrderIds) {
     // Delete payments first (foreign key constraint)
-    await db.delete(payments).where(eq(payments.orderId, orderId));
+    await db.delete(payments).where(eq(payments.orderId, orderId))
     // Delete order items
-    await db.delete(orderItems).where(eq(orderItems.orderId, orderId));
+    await db.delete(orderItems).where(eq(orderItems.orderId, orderId))
     // Delete order
-    await db.delete(orders).where(eq(orders.id, orderId));
+    await db.delete(orders).where(eq(orders.id, orderId))
   }
-});
+})
 ```
 
 ### 2. Order ID Tracking
@@ -54,8 +53,8 @@ Each test now tracks created orders for cleanup:
 const createResult = await customerCaller.orders.create({
   tableId: testTableId,
   items: [{ dishId: testDishId, quantity: 1 }],
-});
-createdOrderIds.push(createResult.orderId); // Track for cleanup
+})
+createdOrderIds.push(createResult.orderId) // Track for cleanup
 ```
 
 ### 3. Unique Table Numbers
@@ -98,6 +97,7 @@ Ensured correct cleanup order to respect foreign key constraints:
 - **Total**: 18/21 passing (85.7%)
 
 Common errors:
+
 - "Order has already been submitted"
 - "UNIQUE constraint failed: tables.number"
 - "UNIQUE constraint failed: tables.qr_code"
@@ -133,27 +133,27 @@ Common errors:
 
 ```typescript
 describe("Test Suite", () => {
-  let createdIds: number[] = [];
-  
+  let createdIds: number[] = []
+
   beforeEach(async () => {
     // Reset tracking
-    createdIds = [];
+    createdIds = []
     // Replenish shared resources
-  });
-  
+  })
+
   afterEach(async () => {
     // Clean up in reverse dependency order
     for (const id of createdIds) {
       // Delete children first, then parents
     }
-  });
-  
+  })
+
   test("should do something", async () => {
-    const result = await createEntity();
-    createdIds.push(result.id); // Track for cleanup
+    const result = await createEntity()
+    createdIds.push(result.id) // Track for cleanup
     // ... test assertions
-  });
-});
+  })
+})
 ```
 
 ## Implementation Details
@@ -175,6 +175,7 @@ describe("Test Suite", () => {
 ### Test Execution
 
 Run all payment-related tests:
+
 ```bash
 bun test packages/api/tests/routers/payments.test.ts \
   packages/api/tests/integration/payment-flow.test.ts \

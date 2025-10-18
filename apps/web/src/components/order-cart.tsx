@@ -1,31 +1,32 @@
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Trash2 } from "lucide-react";
+import { ShoppingCart, Trash2 } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * T056: OrderCart Component
  * Manages order items in the customer's cart
- * 
+ *
  * Acceptance: spec.md US1 Scenario 2
  * - Shows items added to order with quantities and prices
  * - Allows customers to remove items or change quantities
  */
 
 interface CartItem {
-  dishId: number;
-  dishName: string;
-  quantity: number;
-  priceAtOrder: number; // In cents
+  dishId: number
+  dishName: string
+  quantity: number
+  priceAtOrder: number // In cents
 }
 
 interface OrderCartProps {
-  items: CartItem[];
-  tableNumber?: number;
-  isLoading?: boolean;
-  onRemoveItem: (dishId: number) => void;
-  onSubmit: () => void;
-  isSubmitting?: boolean;
+  items: CartItem[]
+  tableNumber?: number
+  isLoading?: boolean
+  onRemoveItem: (dishId: number) => void
+  onSubmit: () => void
+  isSubmitting?: boolean
 }
 
 export function OrderCart({
@@ -36,11 +37,8 @@ export function OrderCart({
   onSubmit,
   isSubmitting,
 }: OrderCartProps) {
-  const totalAmount = items.reduce(
-    (sum, item) => sum + item.priceAtOrder * item.quantity,
-    0
-  );
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalAmount = items.reduce((sum, item) => sum + item.priceAtOrder * item.quantity, 0)
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
 
   if (isLoading) {
     return (
@@ -52,7 +50,7 @@ export function OrderCart({
           <Skeleton className="h-20 w-full" />
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
@@ -62,13 +60,11 @@ export function OrderCart({
           <ShoppingCart className="h-5 w-5" />
           Your Order
           {tableNumber && (
-            <span className="text-sm font-normal text-muted-foreground">
-              (Table {tableNumber})
-            </span>
+            <span className="text-sm font-normal text-muted-foreground">(Table {tableNumber})</span>
           )}
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent>
         {items.length === 0 ? (
           <div className="py-8 text-center text-muted-foreground">
@@ -116,16 +112,11 @@ export function OrderCart({
               <p className="text-2xl font-bold">${(totalAmount / 100).toFixed(2)}</p>
             </div>
           </div>
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={onSubmit}
-            disabled={isSubmitting}
-          >
+          <Button className="w-full" size="lg" onClick={onSubmit} disabled={isSubmitting}>
             {isSubmitting ? "Submitting..." : "Submit Order"}
           </Button>
         </CardFooter>
       )}
     </Card>
-  );
+  )
 }

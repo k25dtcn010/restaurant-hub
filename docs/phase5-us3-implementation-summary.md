@@ -17,6 +17,7 @@ This document summarizes the implementation of Phase 5 User Story 3 frontend, wh
 **File**: `apps/web/src/routes/staff-order.tsx`
 
 **Features**:
+
 - Authentication guard (requires logged-in user)
 - Two-step workflow:
   1. Select a table from the table selector
@@ -27,17 +28,18 @@ This document summarizes the implementation of Phase 5 User Story 3 frontend, wh
 - Invalidates queries to update UI state after order submission
 
 **Route Configuration**:
+
 ```typescript
 export const Route = createFileRoute("/staff-order")({
   component: RouteComponent,
   beforeLoad: async () => {
-    const session = await authClient.getSession();
+    const session = await authClient.getSession()
     if (!session.data) {
-      throw redirect({ to: "/login" });
+      throw redirect({ to: "/login" })
     }
-    return { session };
+    return { session }
   },
-});
+})
 ```
 
 ### 2. TableSelector Component
@@ -45,6 +47,7 @@ export const Route = createFileRoute("/staff-order")({
 **File**: `apps/web/src/components/table-selector.tsx`
 
 **Features**:
+
 - Displays all tables in a responsive grid (3-6 columns based on screen size)
 - Each table shows:
   - Table number (large, prominent)
@@ -57,6 +60,7 @@ export const Route = createFileRoute("/staff-order")({
 - Empty state handling
 
 **Visual Layout**:
+
 ```
 ┌─────────────────────────────────────────┐
 │ Select Table                            │
@@ -86,6 +90,7 @@ export const Route = createFileRoute("/staff-order")({
 **File**: `apps/web/src/routes/dashboard.tsx`
 
 **Changes**:
+
 - Converted simple button-based dashboard to card-based navigation
 - Added three main navigation cards:
   1. **Create Order** - Navigate to staff-order route
@@ -100,6 +105,7 @@ export const Route = createFileRoute("/staff-order")({
 - Better "Sign Out" button placement
 
 **Visual Layout**:
+
 ```
 ┌──────────────────────────────────────────────────┐
 │ Staff Dashboard                                  │
@@ -129,6 +135,7 @@ export const Route = createFileRoute("/staff-order")({
 **File**: `apps/web/src/components/header.tsx`
 
 **Changes**:
+
 - Added navigation links:
   - Home
   - Dashboard
@@ -200,14 +207,17 @@ export const Route = createFileRoute("/staff-order")({
 ### State Management
 
 **Local State** (React useState):
+
 - `selectedTableId`: Currently selected table ID
 - `cart`: Map of cart items (dishId → CartItem)
 
 **Server State** (TanStack Query):
+
 - Tables data (from tRPC `tables.getAll`)
 - Dishes data (from tRPC `dishes.getAll`)
 
 **Mutations**:
+
 - `orders.create`: Creates order record
 - `orders.submit`: Submits order to kitchen and reduces inventory
 
@@ -274,65 +284,79 @@ The following components from User Story 1 are reused:
 ### API Integration
 
 **tRPC Queries**:
+
 - `trpc.tables.getAll.queryOptions()` - Fetch all tables with active order status
 - `trpc.dishes.getAll.queryOptions({ includeDisabled: false })` - Fetch available dishes
 
 **tRPC Mutations**:
+
 - `trpcClient.orders.create.mutate({ tableId, items })` - Create order
 - `trpcClient.orders.submit.mutate({ orderId })` - Submit order to kitchen
 
 **Query Invalidation**:
+
 ```typescript
 queryClient.invalidateQueries({
   queryKey: trpc.tables.getAll.queryKey(),
-});
+})
 ```
+
 - Refreshes table list after order submission
 - Updates "In Use" badges on tables
 
 ## Acceptance Criteria Verification
 
 ### US3 Scenario 1
+
 **Given**: Waiter is logged into staff interface  
 **When**: They select "Create Order"  
 **Then**: They can choose a table number and browse the menu  
 **Status**: ✅ **IMPLEMENTED**
+
 - TableSelector shows all tables
 - Menu appears after table selection
 
 ### US3 Scenario 2
+
 **Given**: Waiter is creating an order  
 **When**: They add dishes to the order  
 **Then**: They see the same menu items and pricing as customers see via QR  
 **Status**: ✅ **IMPLEMENTED**
+
 - Reuses MenuList component from US1
 - Same dishes.getAll query
 - Identical pricing logic
 
 ### US3 Scenario 3
+
 **Given**: Waiter has selected dishes  
 **When**: They submit the order  
 **Then**: Order is created with same workflow as QR orders (kitchen notification, inventory reduction, status "Pending")  
 **Status**: ✅ **IMPLEMENTED**
+
 - Uses same orders.create and orders.submit mutations
 - Kitchen receives WebSocket notification
 - Inventory automatically reduced
 - Order status set to "Pending"
 
 ### US3 Scenario 4
+
 **Given**: An existing order was created via QR  
 **When**: A waiter views it in the staff interface  
 **Then**: They can add additional items to that order  
 **Status**: ✅ **IMPLEMENTED**
+
 - orders.create mutation checks for existing unpaid orders
 - Returns isNew flag (false if adding to existing order)
 - Items are added to same order
 
 ### US3 Scenario 5
+
 **Given**: Waiter views all active orders  
 **When**: They filter by table number  
 **Then**: They see all orders (QR and staff-created) for that table  
 **Status**: ✅ **IMPLEMENTED**
+
 - TableSelector shows "In Use" badge for tables with active orders
 - tables.getAll query includes hasActiveOrder flag
 - No distinction between QR and staff-created orders
@@ -340,17 +364,20 @@ queryClient.invalidateQueries({
 ## Code Quality
 
 ### Type Safety
+
 - All components use TypeScript with proper interfaces
 - tRPC provides end-to-end type safety
 - React Query types inferred from tRPC
 
 ### Error Handling
+
 - Form validation (table selected, cart not empty)
 - TRPCClientError caught and displayed as toast
 - Loading states handled gracefully
 - Empty states with helpful messages
 
 ### UX Patterns
+
 - Optimistic updates (cart state)
 - Toast notifications (success/error feedback)
 - Loading skeletons (Skeleton components)
@@ -358,6 +385,7 @@ queryClient.invalidateQueries({
 - Visual feedback (selection highlights, hover effects)
 
 ### Accessibility
+
 - Semantic HTML structure
 - Keyboard navigation support (buttons)
 - ARIA labels on interactive elements
@@ -367,14 +395,14 @@ queryClient.invalidateQueries({
 
 All Phase 5 User Story 3 frontend tasks marked as complete in `tasks.md`:
 
-- [X] T077: Login route (already existed)
-- [X] T078: Sign-in form component (already existed)
-- [X] T079: Dashboard route with role-based redirection (enhanced)
-- [X] T080: Staff-ordering route (created)
-- [X] T081: TableSelector component (created)
-- [X] T082: Reuse MenuList and OrderCart (verified)
-- [X] T083: Authentication guards (implemented)
-- [X] T084: User menu component (already existed)
+- [x] T077: Login route (already existed)
+- [x] T078: Sign-in form component (already existed)
+- [x] T079: Dashboard route with role-based redirection (enhanced)
+- [x] T080: Staff-ordering route (created)
+- [x] T081: TableSelector component (created)
+- [x] T082: Reuse MenuList and OrderCart (verified)
+- [x] T083: Authentication guards (implemented)
+- [x] T084: User menu component (already existed)
 
 ## Testing Notes
 
@@ -470,7 +498,7 @@ To test this implementation when Bun runtime is available:
 
 ## Screenshots
 
-*Note: Screenshots will be added once the application is running with Bun.*
+_Note: Screenshots will be added once the application is running with Bun._
 
 ### Expected Screenshots
 

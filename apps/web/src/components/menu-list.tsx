@@ -1,33 +1,34 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Minus } from "lucide-react";
+import { Minus, Plus } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * T055: MenuList Component
  * Displays available dishes for customer ordering
- * 
+ *
  * Acceptance: spec.md US1 Scenario 1
  * - Shows all available dishes with names, descriptions, prices, and photos
  * - Allows customers to add dishes to their order
  */
 
 interface Dish {
-  id: number;
-  name: string;
-  description: string;
-  price: number; // In cents
-  photoUrl: string | null;
-  isAvailable: boolean;
-  createdAt: Date;
+  id: number
+  name: string
+  description: string
+  price: number // In cents
+  photoUrl: string | null
+  isAvailable: boolean
+  createdAt: Date
 }
 
 interface MenuListProps {
-  dishes: Dish[];
-  isLoading: boolean;
-  onAddToCart: (dishId: number, quantity: number) => void;
-  cartItems: Map<number, number>; // dishId -> quantity
+  dishes: Dish[]
+  isLoading: boolean
+  onAddToCart: (dishId: number, quantity: number) => void
+  cartItems: Map<number, number> // dishId -> quantity
 }
 
 export function MenuList({ dishes, isLoading, onAddToCart, cartItems }: MenuListProps) {
@@ -47,7 +48,7 @@ export function MenuList({ dishes, isLoading, onAddToCart, cartItems }: MenuList
           </Card>
         ))}
       </div>
-    );
+    )
   }
 
   if (dishes.length === 0) {
@@ -57,14 +58,14 @@ export function MenuList({ dishes, isLoading, onAddToCart, cartItems }: MenuList
           <p className="text-muted-foreground">No dishes available at the moment.</p>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {dishes.map((dish) => {
-        const quantity = cartItems.get(dish.id) || 0;
-        const isUnavailable = !dish.isAvailable;
+        const quantity = cartItems.get(dish.id) || 0
+        const isUnavailable = !dish.isAvailable
 
         return (
           <Card key={dish.id} className={isUnavailable ? "opacity-60" : ""}>
@@ -82,26 +83,17 @@ export function MenuList({ dishes, isLoading, onAddToCart, cartItems }: MenuList
             <CardContent className="space-y-4">
               {dish.photoUrl && (
                 <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                  <img
-                    src={dish.photoUrl}
-                    alt={dish.name}
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={dish.photoUrl} alt={dish.name} className="h-full w-full object-cover" />
                 </div>
               )}
-              
+
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">
-                  ${(dish.price / 100).toFixed(2)}
-                </div>
+                <div className="text-2xl font-bold">${(dish.price / 100).toFixed(2)}</div>
 
                 {!isUnavailable && (
                   <div className="flex items-center gap-2">
                     {quantity === 0 ? (
-                      <Button
-                        size="sm"
-                        onClick={() => onAddToCart(dish.id, 1)}
-                      >
+                      <Button size="sm" onClick={() => onAddToCart(dish.id, 1)}>
                         <Plus className="mr-1 h-4 w-4" />
                         Add
                       </Button>
@@ -114,13 +106,8 @@ export function MenuList({ dishes, isLoading, onAddToCart, cartItems }: MenuList
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
-                        <span className="min-w-[2rem] text-center font-semibold">
-                          {quantity}
-                        </span>
-                        <Button
-                          size="sm"
-                          onClick={() => onAddToCart(dish.id, quantity + 1)}
-                        >
+                        <span className="min-w-[2rem] text-center font-semibold">{quantity}</span>
+                        <Button size="sm" onClick={() => onAddToCart(dish.id, quantity + 1)}>
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
@@ -130,10 +117,10 @@ export function MenuList({ dishes, isLoading, onAddToCart, cartItems }: MenuList
               </div>
             </CardContent>
           </Card>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
 
 /**

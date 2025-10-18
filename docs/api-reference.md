@@ -27,12 +27,12 @@ RestaurantHub uses Better-Auth for role-based access control.
 
 ### User Roles
 
-| Role | Permissions |
-|------|-------------|
-| **Manager** | Full CRUD on dishes, ingredients, users; View all operations |
-| **KitchenStaff** | Update order status (Pending → InKitchen → Ready) |
-| **Waiter** | Create orders, mark served/paid, view tables |
-| **Customer** | View menu, create orders via QR code (unauthenticated) |
+| Role             | Permissions                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| **Manager**      | Full CRUD on dishes, ingredients, users; View all operations |
+| **KitchenStaff** | Update order status (Pending → InKitchen → Ready)            |
+| **Waiter**       | Create orders, mark served/paid, view tables                 |
+| **Customer**     | View menu, create orders via QR code (unauthenticated)       |
 
 ### Authentication Endpoints
 
@@ -41,6 +41,7 @@ RestaurantHub uses Better-Auth for role-based access control.
 - **GET** `/api/auth/session` - Get current session
 
 **Test Credentials** (Development):
+
 ```
 Manager: admin@restauranthub.com / password123
 Chef: chef@restauranthub.com / password123
@@ -61,6 +62,7 @@ Manage restaurant tables and QR code scanning.
 **Input**: None
 
 **Output**:
+
 ```typescript
 {
   tables: Array<{
@@ -74,8 +76,9 @@ Manage restaurant tables and QR code scanning.
 ```
 
 **Example**:
+
 ```typescript
-const { data } = trpc.tables.getAll.useQuery();
+const { data } = trpc.tables.getAll.useQuery()
 ```
 
 ---
@@ -86,6 +89,7 @@ const { data } = trpc.tables.getAll.useQuery();
 **Description**: Get specific table by ID
 
 **Input**:
+
 ```typescript
 {
   tableId: number
@@ -93,6 +97,7 @@ const { data } = trpc.tables.getAll.useQuery();
 ```
 
 **Output**:
+
 ```typescript
 {
   id: number
@@ -104,6 +109,7 @@ const { data } = trpc.tables.getAll.useQuery();
 ```
 
 **Errors**:
+
 - `NOT_FOUND`: Table ID does not exist
 
 ---
@@ -118,6 +124,7 @@ Manage menu items and recipes.
 **Description**: Get all dishes with availability status
 
 **Input**:
+
 ```typescript
 {
   includeDisabled?: boolean  // Default: false
@@ -125,21 +132,23 @@ Manage menu items and recipes.
 ```
 
 **Output**:
+
 ```typescript
 {
   dishes: Array<{
     id: number
     name: string
     description: string
-    price: number           // In cents (e.g., 1500 = $15.00)
+    price: number // In cents (e.g., 1500 = $15.00)
     photoUrl: string | null
-    isAvailable: boolean    // Based on ingredient stock
+    isAvailable: boolean // Based on ingredient stock
     createdAt: Date
   }>
 }
 ```
 
 **Business Logic**:
+
 - Dish is unavailable if any required ingredient has `quantity = 0`
 - Dish is unavailable if manually disabled (`isAvailable = false`)
 
@@ -151,6 +160,7 @@ Manage menu items and recipes.
 **Description**: Get dish details with recipe
 
 **Input**:
+
 ```typescript
 {
   dishId: number
@@ -158,6 +168,7 @@ Manage menu items and recipes.
 ```
 
 **Output**:
+
 ```typescript
 {
   id: number
@@ -186,6 +197,7 @@ Manage menu items and recipes.
 **Description**: Create new dish with recipe
 
 **Input**:
+
 ```typescript
 {
   name: string              // Max 100 chars
@@ -200,6 +212,7 @@ Manage menu items and recipes.
 ```
 
 **Output**:
+
 ```typescript
 {
   dishId: number
@@ -209,6 +222,7 @@ Manage menu items and recipes.
 ```
 
 **Errors**:
+
 - `BAD_REQUEST`: Invalid input (negative price, invalid ingredient IDs)
 - `FORBIDDEN`: User is not Manager
 
@@ -220,6 +234,7 @@ Manage menu items and recipes.
 **Description**: Update existing dish
 
 **Input**:
+
 ```typescript
 {
   dishId: number
@@ -235,6 +250,7 @@ Manage menu items and recipes.
 ```
 
 **Output**:
+
 ```typescript
 {
   dishId: number
@@ -244,6 +260,7 @@ Manage menu items and recipes.
 ```
 
 **Errors**:
+
 - `NOT_FOUND`: Dish ID does not exist
 - `FORBIDDEN`: User is not Manager
 
@@ -255,6 +272,7 @@ Manage menu items and recipes.
 **Description**: Enable or disable dish
 
 **Input**:
+
 ```typescript
 {
   dishId: number
@@ -263,6 +281,7 @@ Manage menu items and recipes.
 ```
 
 **Output**:
+
 ```typescript
 {
   dishId: number
@@ -272,6 +291,7 @@ Manage menu items and recipes.
 ```
 
 **Errors**:
+
 - `NOT_FOUND`: Dish ID does not exist
 - `FORBIDDEN`: User is not Manager
 
@@ -287,18 +307,20 @@ Manage order lifecycle from creation to payment.
 **Description**: Create or add to existing unpaid order for a table
 
 **Input**:
+
 ```typescript
 {
   tableId: number
   items: Array<{
     dishId: number
-    quantity: number          // > 0
+    quantity: number // > 0
     specialInstructions?: string
   }>
 }
 ```
 
 **Output**:
+
 ```typescript
 {
   orderId: number
@@ -314,11 +336,13 @@ Manage order lifecycle from creation to payment.
 ```
 
 **Business Logic**:
+
 - If table has active unpaid order, add items to existing order
 - Otherwise, create new order with status "Pending"
 - Store current dish price as `priceAtOrder` for historical accuracy
 
 **Errors**:
+
 - `NOT_FOUND`: Table ID or Dish ID does not exist
 - `BAD_REQUEST`: Invalid quantities or dish unavailable
 
@@ -330,6 +354,7 @@ Manage order lifecycle from creation to payment.
 **Description**: Submit order to kitchen and reduce inventory
 
 **Input**:
+
 ```typescript
 {
   orderId: number
@@ -337,6 +362,7 @@ Manage order lifecycle from creation to payment.
 ```
 
 **Output**:
+
 ```typescript
 {
   orderId: number
@@ -347,19 +373,24 @@ Manage order lifecycle from creation to payment.
 ```
 
 **Business Logic**:
+
 - Atomically reduce ingredient quantities based on recipes
 - Use database transaction with `FOR UPDATE` lock
 - Broadcast NEW_ORDER event via WebSocket to kitchen
 
 **Errors**:
+
 - `NOT_FOUND`: Order ID does not exist
 - `BAD_REQUEST`: Insufficient stock for one or more dishes
 
 **WebSocket Event**:
+
 ```typescript
 {
   type: "NEW_ORDER"
-  order: { /* order details */ }
+  order: {
+    /* order details */
+  }
   timestamp: string
 }
 ```
@@ -372,6 +403,7 @@ Manage order lifecycle from creation to payment.
 **Description**: Update order status
 
 **Input**:
+
 ```typescript
 {
   orderId: number
@@ -380,6 +412,7 @@ Manage order lifecycle from creation to payment.
 ```
 
 **Output**:
+
 ```typescript
 {
   orderId: number
@@ -389,14 +422,17 @@ Manage order lifecycle from creation to payment.
 ```
 
 **Business Logic**:
+
 - Create audit trail entry in OrderStatusHistory
 - If status is "ReadyToServe", broadcast ORDER_READY event to serving staff
 
 **Errors**:
+
 - `NOT_FOUND`: Order ID does not exist
 - `FORBIDDEN`: User lacks permission for this transition
 
 **WebSocket Event** (ReadyToServe):
+
 ```typescript
 {
   type: "ORDER_READY"
@@ -414,6 +450,7 @@ Manage order lifecycle from creation to payment.
 **Description**: Get orders for kitchen dashboard
 
 **Input**:
+
 ```typescript
 {
   status?: "Pending" | "InKitchen" | "ReadyToServe"
@@ -421,6 +458,7 @@ Manage order lifecycle from creation to payment.
 ```
 
 **Output**:
+
 ```typescript
 {
   orders: Array<{
@@ -447,6 +485,7 @@ Manage order lifecycle from creation to payment.
 **Input**: None
 
 **Output**:
+
 ```typescript
 {
   orders: Array<{
@@ -459,12 +498,13 @@ Manage order lifecycle from creation to payment.
     }>
     totalAmount: number
     readySince: string | null
-    waitTime: number  // Minutes since ready
+    waitTime: number // Minutes since ready
   }>
 }
 ```
 
 **Business Logic**:
+
 - Sort by waitTime DESC (oldest first)
 
 ---
@@ -479,6 +519,7 @@ Manage ingredient stock and low-stock alerts.
 **Description**: Get all ingredients with stock status
 
 **Input**:
+
 ```typescript
 {
   includeRecipes?: boolean  // Default: false
@@ -486,6 +527,7 @@ Manage ingredient stock and low-stock alerts.
 ```
 
 **Output**:
+
 ```typescript
 {
   ingredients: Array<{
@@ -494,9 +536,10 @@ Manage ingredient stock and low-stock alerts.
     quantity: number
     unit: string
     threshold: number
-    isLowStock: boolean      // quantity < threshold
+    isLowStock: boolean // quantity < threshold
     updatedAt: Date
-    usedInDishes?: Array<{  // If includeRecipes=true
+    usedInDishes?: Array<{
+      // If includeRecipes=true
       dishId: number
       dishName: string
       quantityRequired: number
@@ -506,6 +549,7 @@ Manage ingredient stock and low-stock alerts.
 ```
 
 **Errors**:
+
 - `FORBIDDEN`: User is not Manager
 
 ---
@@ -516,6 +560,7 @@ Manage ingredient stock and low-stock alerts.
 **Description**: Manually adjust ingredient quantity
 
 **Input**:
+
 ```typescript
 {
   ingredientId: number
@@ -525,6 +570,7 @@ Manage ingredient stock and low-stock alerts.
 ```
 
 **Output**:
+
 ```typescript
 {
   ingredientId: number
@@ -534,18 +580,23 @@ Manage ingredient stock and low-stock alerts.
 ```
 
 **Business Logic**:
+
 - Prevent negative quantities (clamp to 0)
 - Broadcast LOW_STOCK_ALERT if new quantity < threshold
 
 **Errors**:
+
 - `NOT_FOUND`: Ingredient ID does not exist
 - `FORBIDDEN`: User is not Manager
 
 **WebSocket Event** (Low Stock):
+
 ```typescript
 {
   type: "LOW_STOCK_ALERT"
-  ingredient: { /* ingredient details */ }
+  ingredient: {
+    /* ingredient details */
+  }
   timestamp: string
 }
 ```
@@ -558,14 +609,16 @@ Manage ingredient stock and low-stock alerts.
 **Description**: Update low-stock alert threshold
 
 **Input**:
+
 ```typescript
 {
   ingredientId: number
-  threshold: number         // >= 0
+  threshold: number // >= 0
 }
 ```
 
 **Output**:
+
 ```typescript
 {
   ingredientId: number
@@ -586,6 +639,7 @@ Process cash payments and clear table sessions.
 **Description**: Record cash payment for order
 
 **Input**:
+
 ```typescript
 {
   orderId: number
@@ -595,6 +649,7 @@ Process cash payments and clear table sessions.
 ```
 
 **Output**:
+
 ```typescript
 {
   paymentId: number
@@ -606,12 +661,14 @@ Process cash payments and clear table sessions.
 ```
 
 **Business Logic**:
+
 - Validate order status is "Completed" or "Served"
 - Validate amount matches order totalAmount
 - Update order status to "Paid"
 - Clear table session (allows new orders)
 
 **Errors**:
+
 - `NOT_FOUND`: Order ID does not exist
 - `BAD_REQUEST`: Amount mismatch or invalid order status
 - `FORBIDDEN`: User is not Waiter or Manager
@@ -624,6 +681,7 @@ Process cash payments and clear table sessions.
 **Description**: Get payment history
 
 **Input**:
+
 ```typescript
 {
   startDate?: Date
@@ -633,6 +691,7 @@ Process cash payments and clear table sessions.
 ```
 
 **Output**:
+
 ```typescript
 {
   payments: Array<{
@@ -655,13 +714,13 @@ Process cash payments and clear table sessions.
 
 ### Error Codes
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `BAD_REQUEST` | 400 | Invalid input or business rule violation |
-| `UNAUTHORIZED` | 401 | Authentication required |
-| `FORBIDDEN` | 403 | Insufficient permissions |
-| `NOT_FOUND` | 404 | Resource does not exist |
-| `INTERNAL_SERVER_ERROR` | 500 | Server error (logged server-side) |
+| Code                    | HTTP Status | Description                              |
+| ----------------------- | ----------- | ---------------------------------------- |
+| `BAD_REQUEST`           | 400         | Invalid input or business rule violation |
+| `UNAUTHORIZED`          | 401         | Authentication required                  |
+| `FORBIDDEN`             | 403         | Insufficient permissions                 |
+| `NOT_FOUND`             | 404         | Resource does not exist                  |
+| `INTERNAL_SERVER_ERROR` | 500         | Server error (logged server-side)        |
 
 ### Error Response Format
 
@@ -695,6 +754,7 @@ Process cash payments and clear table sessions.
 **Authenticated Endpoints**: 300 requests per minute per user
 
 **Rate Limit Headers**:
+
 ```
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95

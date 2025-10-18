@@ -1,12 +1,14 @@
-import { OrderCard } from "./order-card";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { RefreshCw, Wifi, WifiOff } from "lucide-react";
-import { useCallback, useState } from "react";
-import { queryClient } from "@/utils/trpc";
-import { useWebSocket } from "@/hooks/use-websocket";
-import { toast } from "sonner";
+import { RefreshCw, Wifi, WifiOff } from "lucide-react"
+import { useCallback, useState } from "react"
+import { toast } from "sonner"
+
+import { useWebSocket } from "@/hooks/use-websocket"
+import { queryClient } from "@/utils/trpc"
+
+import { OrderCard } from "./order-card"
+import { Badge } from "./ui/badge"
+import { Button } from "./ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 /**
  * T069: OrdersBoard Component
@@ -28,28 +30,28 @@ import { toast } from "sonner";
  */
 
 interface OrderItem {
-  dishName: string;
-  quantity: number;
-  specialInstructions: string | null;
+  dishName: string
+  quantity: number
+  specialInstructions: string | null
 }
 
 interface Order {
-  id: number;
-  tableNumber: number;
-  status: "Pending" | "InKitchen" | "ReadyToServe";
-  items: OrderItem[];
-  createdAt: Date;
-  updatedAt: Date;
-  waitTime: number;
+  id: number
+  tableNumber: number
+  status: "Pending" | "InKitchen" | "ReadyToServe"
+  items: OrderItem[]
+  createdAt: Date
+  updatedAt: Date
+  waitTime: number
 }
 
 interface OrdersBoardProps {
-  orders: Order[];
-  onRefresh: () => void;
+  orders: Order[]
+  onRefresh: () => void
 }
 
 export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(false)
 
   /**
    * T071 & T074: WebSocket integration for real-time updates
@@ -60,91 +62,91 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
    */
   const handleWebSocketMessage = useCallback(
     (message: { type: string; [key: string]: unknown }) => {
-      console.log("[OrdersBoard] WebSocket message:", message);
+      console.log("[OrdersBoard] WebSocket message:", message)
 
       switch (message.type) {
         case "NEW_ORDER":
           // Invalidate queries to refetch kitchen orders
-          console.log("[OrdersBoard] Invalidating kitchen orders query for NEW_ORDER");
+          console.log("[OrdersBoard] Invalidating kitchen orders query for NEW_ORDER")
           queryClient.invalidateQueries({
             predicate: (query) => {
               // tRPC query keys are arrays like [["orders", "getKitchenOrders"], {...input}]
-              const queryKey = query.queryKey[0];
+              const queryKey = query.queryKey[0]
               const match =
                 Array.isArray(queryKey) &&
                 queryKey[0] === "orders" &&
-                queryKey[1] === "getKitchenOrders";
-              console.log("[OrdersBoard] Checking query:", queryKey, "Match:", match);
-              return match;
+                queryKey[1] === "getKitchenOrders"
+              console.log("[OrdersBoard] Checking query:", queryKey, "Match:", match)
+              return match
             },
-          });
+          })
 
           // Show notification
-          const order = message.order as { id?: number; tableNumber?: number };
+          const order = message.order as { id?: number; tableNumber?: number }
           if (order?.tableNumber) {
             toast.success(`New order from Table ${order.tableNumber}`, {
               description: `Order #${order.id}`,
-            });
+            })
           }
-          break;
+          break
 
         case "ORDER_STATUS_CHANGED":
           // Invalidate queries to refetch kitchen orders
-          console.log("[OrdersBoard] Invalidating kitchen orders query for ORDER_STATUS_CHANGED");
+          console.log("[OrdersBoard] Invalidating kitchen orders query for ORDER_STATUS_CHANGED")
           queryClient.invalidateQueries({
             predicate: (query) => {
               // tRPC query keys are arrays like [["orders", "getKitchenOrders"], {...input}]
-              const queryKey = query.queryKey[0];
+              const queryKey = query.queryKey[0]
               const match =
                 Array.isArray(queryKey) &&
                 queryKey[0] === "orders" &&
-                queryKey[1] === "getKitchenOrders";
-              console.log("[OrdersBoard] Checking query:", queryKey, "Match:", match);
-              return match;
+                queryKey[1] === "getKitchenOrders"
+              console.log("[OrdersBoard] Checking query:", queryKey, "Match:", match)
+              return match
             },
-          });
-          break;
+          })
+          break
 
         default:
           // Ignore other message types
-          break;
+          break
       }
     },
     []
-  );
+  )
 
   // Connect to WebSocket with 'kitchen' role
   const { getStatus } = useWebSocket({
     role: "kitchen",
     onMessage: handleWebSocketMessage,
     onConnect: () => {
-      console.log("[OrdersBoard] WebSocket connected");
-      setIsConnected(true);
+      console.log("[OrdersBoard] WebSocket connected")
+      setIsConnected(true)
     },
     onDisconnect: () => {
-      console.log("[OrdersBoard] WebSocket disconnected");
-      setIsConnected(false);
+      console.log("[OrdersBoard] WebSocket disconnected")
+      setIsConnected(false)
     },
-  });
+  })
 
   const handleWebSocketUpdate = useCallback(() => {
     // Invalidate kitchen orders query to trigger refetch
-    console.log("[OrdersBoard] Manual invalidation triggered");
+    console.log("[OrdersBoard] Manual invalidation triggered")
     queryClient.invalidateQueries({
       predicate: (query) => {
         // tRPC query keys are arrays like [["orders", "getKitchenOrders"], {...input}]
-        const queryKey = query.queryKey[0];
+        const queryKey = query.queryKey[0]
         const match =
-          Array.isArray(queryKey) && queryKey[0] === "orders" && queryKey[1] === "getKitchenOrders";
-        return match;
+          Array.isArray(queryKey) && queryKey[0] === "orders" && queryKey[1] === "getKitchenOrders"
+        return match
       },
-    });
-  }, []);
+    })
+  }, [])
 
   // Group orders by status
-  const pendingOrders = orders.filter((o) => o.status === "Pending");
-  const inKitchenOrders = orders.filter((o) => o.status === "InKitchen");
-  const readyOrders = orders.filter((o) => o.status === "ReadyToServe");
+  const pendingOrders = orders.filter((o) => o.status === "Pending")
+  const inKitchenOrders = orders.filter((o) => o.status === "InKitchen")
+  const readyOrders = orders.filter((o) => o.status === "ReadyToServe")
 
   // Column configuration
   const columns = [
@@ -169,7 +171,7 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
       color: "green",
       description: "Ready for pickup",
     },
-  ];
+  ]
 
   return (
     <div className="space-y-4">
@@ -246,5 +248,5 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
         </Card>
       )}
     </div>
-  );
+  )
 }

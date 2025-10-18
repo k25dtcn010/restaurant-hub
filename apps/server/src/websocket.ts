@@ -18,82 +18,79 @@
  * export default { fetch: app.fetch, websocket }
  */
 
-import { upgradeWebSocket, websocket } from "hono/bun";
-import type { WSContext } from "hono/ws";
+import { upgradeWebSocket, websocket } from "hono/bun"
+import type { WSContext } from "hono/ws"
 
-export type WebSocketRole = "kitchen" | "serving" | "manager" | "anonymous";
+export type WebSocketRole = "kitchen" | "serving" | "manager" | "anonymous"
 
 // Connection pools by role
 const connections = {
-	kitchen: new Set<WSContext>(),
-	serving: new Set<WSContext>(),
-	manager: new Set<WSContext>(),
-	anonymous: new Set<WSContext>(),
-};
+  kitchen: new Set<WSContext>(),
+  serving: new Set<WSContext>(),
+  manager: new Set<WSContext>(),
+  anonymous: new Set<WSContext>(),
+}
 
 /**
  * Broadcast message to specific role(s)
  */
-export function broadcast(
-	roles: WebSocketRole[],
-	message: Record<string, unknown>,
-) {
-	const messageStr = JSON.stringify(message);
-	for (const role of roles) {
-		connections[role].forEach((ws) => {
-			try {
-				ws.send(messageStr);
-			} catch (error) {
-				console.error(`[WebSocket] Failed to send to ${role}:`, error);
-			}
-		});
-	}
+export function broadcast(roles: WebSocketRole[], message: Record<string, unknown>) {
+  const messageStr = JSON.stringify(message)
+  for (const role of roles) {
+    connections[role].forEach((ws) => {
+      try {
+        ws.send(messageStr)
+      } catch (error) {
+        console.error(`[WebSocket] Failed to send to ${role}:`, error)
+      }
+    })
+  }
 }
 
 /**
  * Notify kitchen staff of new orders
  */
 export function notifyKitchen(order: unknown) {
-	broadcast(["kitchen", "manager"], {
-		type: "NEW_ORDER",
-		order,
-		timestamp: new Date().toISOString(),
-	});
+  broadcast(["kitchen", "manager"], {
+    type: "NEW_ORDER",
+    order,
+    timestamp: new Date().toISOString(),
+  })
 }
 
 /**
  * Notify serving staff that order is ready
  */
 export function notifyServing(orderId: number, tableId: number) {
-	broadcast(["serving", "manager"], {
-		type: "ORDER_READY",
-		orderId,
-		tableId,
-		timestamp: new Date().toISOString(),
-	});
+  broadcast(["serving", "manager"], {
+    type: "ORDER_READY",
+    orderId,
+    tableId,
+    timestamp: new Date().toISOString(),
+  })
 }
 
 /**
  * Notify all relevant parties of order status change
  */
 export function notifyOrderStatusChanged(orderId: number, status: string) {
-	broadcast(["kitchen", "serving", "manager"], {
-		type: "ORDER_STATUS_CHANGED",
-		orderId,
-		status,
-		timestamp: new Date().toISOString(),
-	});
+  broadcast(["kitchen", "serving", "manager"], {
+    type: "ORDER_STATUS_CHANGED",
+    orderId,
+    status,
+    timestamp: new Date().toISOString(),
+  })
 }
 
 /**
  * Notify managers of low stock alert
  */
 export function notifyLowStock(ingredient: unknown) {
-	broadcast(["manager"], {
-		type: "LOW_STOCK_ALERT",
-		ingredient,
-		timestamp: new Date().toISOString(),
-	});
+  broadcast(["manager"], {
+    type: "LOW_STOCK_ALERT",
+    ingredient,
+    timestamp: new Date().toISOString(),
+  })
 }
 
 /**
@@ -102,73 +99,73 @@ export function notifyLowStock(ingredient: unknown) {
  * Example: /ws?role=kitchen
  */
 export function createWebSocketHandler() {
-	return upgradeWebSocket((c) => {
-		const role = (c.req.query("role") as WebSocketRole) || "anonymous";
-		let ws: WSContext;
+  return upgradeWebSocket((c) => {
+    const role = (c.req.query("role") as WebSocketRole) || "anonymous"
+    let ws: WSContext
 
-		return {
-			onOpen(_event, wsContext) {
-				ws = wsContext;
-				connections[role].add(ws);
-				console.log(`[WebSocket] Client connected as ${role}`);
+    return {
+      onOpen(_event, wsContext) {
+        ws = wsContext
+        connections[role].add(ws)
+        console.log(`[WebSocket] Client connected as ${role}`)
 
-				// Send welcome message
-				ws.send(
-					JSON.stringify({
-						type: "CONNECTED",
-						role,
-						timestamp: new Date().toISOString(),
-					}),
-				);
-			},
+        // Send welcome message
+        ws.send(
+          JSON.stringify({
+            type: "CONNECTED",
+            role,
+            timestamp: new Date().toISOString(),
+          })
+        )
+      },
 
-			onMessage(event) {
-				try {
-					const data = JSON.parse(event.data.toString());
-					console.log(`[WebSocket] Message from ${role}:`, data);
+      onMessage(event) {
+        try {
+          const data = JSON.parse(event.data.toString())
+          console.log(`[WebSocket] Message from ${role}:`, data)
 
-					// Handle client messages (e.g., ping)
-					if (data.type === "PING") {
-						ws.send(
-							JSON.stringify({
-								type: "PONG",
-								timestamp: new Date().toISOString(),
-							}),
-						);
-					}
-				} catch (error) {
-					console.error("[WebSocket] Failed to parse message:", error);
-				}
-			},
+          // Handle client messages (e.g., ping)
+          if (data.type === "PING") {
+            ws.send(
+              JSON.stringify({
+                type: "PONG",
+                timestamp: new Date().toISOString(),
+              })
+            )
+          }
+        } catch (error) {
+          console.error("[WebSocket] Failed to parse message:", error)
+        }
+      },
 
-			onClose() {
-				connections[role].delete(ws);
-				console.log(`[WebSocket] Client disconnected from ${role}`);
-			},
+      onClose() {
+        connections[role].delete(ws)
+        console.log(`[WebSocket] Client disconnected from ${role}`)
+      },
 
-			onError(error) {
-				console.error(`[WebSocket] Error for ${role}:`, error);
-			},
-		};
-	});
+      onError(error) {
+        console.error(`[WebSocket] Error for ${role}:`, error)
+      },
+    }
+  })
 }
 
 /**
  * Get current connection count by role
  */
 export function getConnectionStats() {
-	return {
-		kitchen: connections.kitchen.size,
-		serving: connections.serving.size,
-		manager: connections.manager.size,
-		anonymous: connections.anonymous.size,
-		total:
-			connections.kitchen.size +
-			connections.serving.size +
-			connections.manager.size +
-			connections.anonymous.size,
-	};
+  return {
+    kitchen: connections.kitchen.size,
+    serving: connections.serving.size,
+    manager: connections.manager.size,
+    anonymous: connections.anonymous.size,
+    total:
+      connections.kitchen.size +
+      connections.serving.size +
+      connections.manager.size +
+      connections.anonymous.size,
+  }
 }
 
 // Export websocket for Bun server integration
-export { websocket };
+export { websocket }

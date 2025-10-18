@@ -1,15 +1,16 @@
-import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
-import { authClient } from "@/lib/auth-client";
-import { trpc, queryClient, trpcClient } from "@/utils/trpc";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Loader from "@/components/loader";
-import { OrderBillView } from "@/components/order-bill-view";
-import { PaymentConfirmation } from "@/components/payment-confirmation";
-import { toast } from "sonner";
-import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router"
+import { ArrowLeft } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+
+import Loader from "@/components/loader"
+import { OrderBillView } from "@/components/order-bill-view"
+import { PaymentConfirmation } from "@/components/payment-confirmation"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { authClient } from "@/lib/auth-client"
+import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
 /**
  * T120: Payment Route
@@ -29,13 +30,13 @@ import { ArrowLeft } from "lucide-react";
 export const Route = createFileRoute("/payment")({
   component: RouteComponent,
   beforeLoad: async () => {
-    const session = await authClient.getSession();
+    const session = await authClient.getSession()
 
     // Check if user is authenticated
     if (!session.data) {
       throw redirect({
         to: "/login",
-      });
+      })
     }
 
     // Note: Role checking commented out for MVP - will be enabled when user.role is available
@@ -47,21 +48,21 @@ export const Route = createFileRoute("/payment")({
     // 	});
     // }
 
-    return { session };
+    return { session }
   },
   validateSearch: (search: Record<string, unknown>) => {
     return {
       orderId: search.orderId ? Number(search.orderId) : undefined,
-    };
+    }
   },
-});
+})
 
 function RouteComponent() {
-  const navigate = useNavigate();
-  const { session } = Route.useRouteContext();
-  const { orderId } = Route.useSearch();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const navigate = useNavigate()
+  const { session } = Route.useRouteContext()
+  const { orderId } = Route.useSearch()
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
 
   // Fetch order details
   const {
@@ -72,7 +73,7 @@ function RouteComponent() {
   } = useQuery({
     ...trpc.orders.getById.queryOptions({ orderId: orderId ?? 0 }),
     enabled: !!orderId,
-  });
+  })
 
   /**
    * T123: Payment processing workflow
@@ -93,50 +94,50 @@ function RouteComponent() {
       queryClient.invalidateQueries({
         predicate: (query) => {
           // tRPC query keys are arrays like [["orders", "getServingOrders"], {...input}]
-          const queryKey = query.queryKey[0];
+          const queryKey = query.queryKey[0]
           return (
             Array.isArray(queryKey) &&
             queryKey[0] === "orders" &&
             (queryKey[1] === "getServingOrders" || queryKey[1] === "getById")
-          );
+          )
         },
-      });
+      })
 
       toast.success("Payment processed successfully!", {
         description: `Table ${order?.tableNumber} has been cleared for new customers.`,
-      });
+      })
 
       // Navigate back to serving dashboard
       setTimeout(() => {
-        navigate({ to: "/serving" });
-      }, 2000);
+        navigate({ to: "/serving" })
+      }, 2000)
     },
     onError: (error: Error) => {
-      setIsProcessing(false);
+      setIsProcessing(false)
       toast.error("Payment processing failed", {
         description: error.message,
-      });
+      })
     },
-  });
+  })
 
   const handleProcessPayment = () => {
-    setShowConfirmation(true);
-  };
+    setShowConfirmation(true)
+  }
 
   const handleConfirmPayment = () => {
-    if (!order) return;
+    if (!order) return
 
-    setIsProcessing(true);
+    setIsProcessing(true)
     createPaymentMutation.mutate({
       orderId: order.id,
       amount: order.totalAmount,
       method: "Cash",
-    });
-  };
+    })
+  }
 
   const handleCancelPayment = () => {
-    setShowConfirmation(false);
-  };
+    setShowConfirmation(false)
+  }
 
   // No order ID in URL
   if (!orderId) {
@@ -158,7 +159,7 @@ function RouteComponent() {
           </Card>
         </div>
       </div>
-    );
+    )
   }
 
   // Loading state
@@ -169,7 +170,7 @@ function RouteComponent() {
           <Loader />
         </div>
       </div>
-    );
+    )
   }
 
   // Error state
@@ -193,7 +194,7 @@ function RouteComponent() {
           </Card>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -238,5 +239,5 @@ function RouteComponent() {
         />
       )}
     </div>
-  );
+  )
 }

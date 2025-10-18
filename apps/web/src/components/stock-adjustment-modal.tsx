@@ -1,3 +1,11 @@
+import { useMutation } from "@tanstack/react-query"
+import { useState } from "react"
+import { toast } from "sonner"
+
+import { queryClient, trpcClient } from "@/utils/trpc"
+
+import type { IngredientData } from "./inventory-table"
+import { Button } from "./ui/button"
 import {
   Dialog,
   DialogContent,
@@ -5,15 +13,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import type { IngredientData } from "./inventory-table";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { queryClient, trpcClient } from "@/utils/trpc";
-import { toast } from "sonner";
+} from "./ui/dialog"
+import { Input } from "./ui/input"
+import { Label } from "./ui/label"
 
 /**
  * T107: StockAdjustmentModal Component
@@ -27,9 +29,9 @@ import { toast } from "sonner";
  */
 
 interface StockAdjustmentModalProps {
-  ingredient: IngredientData;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  ingredient: IngredientData
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export function StockAdjustmentModal({
@@ -37,8 +39,8 @@ export function StockAdjustmentModal({
   open,
   onOpenChange,
 }: StockAdjustmentModalProps) {
-  const [adjustment, setAdjustment] = useState<string>("");
-  const [reason, setReason] = useState<string>("");
+  const [adjustment, setAdjustment] = useState<string>("")
+  const [reason, setReason] = useState<string>("")
 
   // Mutation for adjusting stock
   const adjustStockMutation = useMutation({
@@ -49,58 +51,58 @@ export function StockAdjustmentModal({
       queryClient.invalidateQueries({
         predicate: (query) => {
           // tRPC query keys are arrays like [["inventory", "getAll"], {...input}]
-          const queryKey = query.queryKey[0];
-          return Array.isArray(queryKey) && queryKey[0] === "inventory" && queryKey[1] === "getAll";
+          const queryKey = query.queryKey[0]
+          return Array.isArray(queryKey) && queryKey[0] === "inventory" && queryKey[1] === "getAll"
         },
-      });
+      })
       toast.success("Stock adjusted successfully", {
         description: `${ingredient.name}: ${data.oldQuantity} → ${data.newQuantity} ${ingredient.unit}`,
-      });
-      handleClose();
+      })
+      handleClose()
     },
     onError: (error: Error) => {
       toast.error("Failed to adjust stock", {
         description: error.message,
-      });
+      })
     },
-  });
+  })
 
   const handleClose = () => {
-    setAdjustment("");
-    setReason("");
-    onOpenChange(false);
-  };
+    setAdjustment("")
+    setReason("")
+    onOpenChange(false)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    const adjustmentValue = parseFloat(adjustment);
+    const adjustmentValue = parseFloat(adjustment)
     if (isNaN(adjustmentValue) || adjustmentValue === 0) {
       toast.error("Invalid adjustment", {
         description: "Please enter a non-zero number",
-      });
-      return;
+      })
+      return
     }
 
     // Calculate new quantity for validation
-    const newQuantity = ingredient.quantity + adjustmentValue;
+    const newQuantity = ingredient.quantity + adjustmentValue
     if (newQuantity < 0) {
       toast.error("Invalid adjustment", {
         description: `Adjustment would result in negative quantity: ${ingredient.quantity} + ${adjustmentValue} = ${newQuantity}`,
-      });
-      return;
+      })
+      return
     }
 
     adjustStockMutation.mutate({
       ingredientId: ingredient.id,
       adjustment: adjustmentValue,
       reason: reason || undefined,
-    });
-  };
+    })
+  }
 
   const newQuantity = adjustment
     ? ingredient.quantity + parseFloat(adjustment)
-    : ingredient.quantity;
+    : ingredient.quantity
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -174,5 +176,5 @@ export function StockAdjustmentModal({
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

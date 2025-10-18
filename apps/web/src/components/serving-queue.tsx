@@ -1,13 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { RefreshCw, Wifi, WifiOff, Clock, DollarSign } from "lucide-react";
-import { useCallback, useState } from "react";
-import { queryClient, trpc, trpcClient } from "@/utils/trpc";
-import { useWebSocket } from "@/hooks/use-websocket";
-import { toast } from "sonner";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
+import { Clock, DollarSign, RefreshCw, Wifi, WifiOff } from "lucide-react"
+import { useCallback, useState } from "react"
+import { toast } from "sonner"
+
+import { useWebSocket } from "@/hooks/use-websocket"
+import { queryClient, trpc, trpcClient } from "@/utils/trpc"
+
+import { Badge } from "./ui/badge"
+import { Button } from "./ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 /**
  * T090: ServingQueue Component
@@ -36,28 +38,28 @@ import { Link } from "@tanstack/react-router";
  */
 
 interface OrderItem {
-  dishName: string;
-  quantity: number;
+  dishName: string
+  quantity: number
 }
 
 interface ServingOrder {
-  id: number;
-  tableNumber: number;
-  status: "ReadyToServe" | "Served";
-  items: OrderItem[];
-  totalAmount: number;
-  readySince: string | null; // Changed from Date to string to match API response
-  waitTime: number; // in minutes
+  id: number
+  tableNumber: number
+  status: "ReadyToServe" | "Served"
+  items: OrderItem[]
+  totalAmount: number
+  readySince: string | null // Changed from Date to string to match API response
+  waitTime: number // in minutes
 }
 
 interface ServingQueueProps {
-  orders: ServingOrder[];
-  onRefresh: () => void;
+  orders: ServingOrder[]
+  onRefresh: () => void
 }
 
 export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
-  const [isConnected, setIsConnected] = useState(false);
-  const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
+  const [isConnected, setIsConnected] = useState(false)
+  const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null)
 
   // Mutation for updating order status
   const updateStatusMutation = useMutation({
@@ -68,28 +70,28 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
       queryClient.invalidateQueries({
         predicate: (query) => {
           // tRPC query keys are arrays like [["orders", "getServingOrders"], {...input}]
-          const queryKey = query.queryKey[0];
+          const queryKey = query.queryKey[0]
           return (
             Array.isArray(queryKey) &&
             queryKey[0] === "orders" &&
             queryKey[1] === "getServingOrders"
-          );
+          )
         },
-      });
-      toast.success("Order status updated successfully");
+      })
+      toast.success("Order status updated successfully")
     },
     onError: (error: Error) => {
       toast.error("Failed to update order status", {
         description: error.message,
-      });
+      })
     },
-  });
+  })
 
   // Query for detailed order information when expanded
   const { data: orderDetails } = useQuery({
     ...trpc.orders.getById.queryOptions({ orderId: expandedOrderId! }),
     enabled: expandedOrderId !== null,
-  });
+  })
 
   /**
    * T091: WebSocket integration for real-time updates
@@ -100,95 +102,95 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
    */
   const handleWebSocketMessage = useCallback(
     (message: { type: string; [key: string]: unknown }) => {
-      console.log("[ServingQueue] WebSocket message:", message);
+      console.log("[ServingQueue] WebSocket message:", message)
 
       switch (message.type) {
         case "ORDER_READY":
           // Invalidate queries to refetch serving orders
-          console.log("[ServingQueue] Invalidating serving orders query for ORDER_READY");
+          console.log("[ServingQueue] Invalidating serving orders query for ORDER_READY")
           queryClient.invalidateQueries({
             predicate: (query) => {
               // tRPC query keys are arrays like [["orders", "getServingOrders"], {...input}]
-              const queryKey = query.queryKey[0];
+              const queryKey = query.queryKey[0]
               const match =
                 Array.isArray(queryKey) &&
                 queryKey[0] === "orders" &&
-                queryKey[1] === "getServingOrders";
-              console.log("[ServingQueue] Checking query:", queryKey, "Match:", match);
-              return match;
+                queryKey[1] === "getServingOrders"
+              console.log("[ServingQueue] Checking query:", queryKey, "Match:", match)
+              return match
             },
-          });
+          })
 
           // Show notification
-          const order = message.order as { id?: number; tableNumber?: number };
+          const order = message.order as { id?: number; tableNumber?: number }
           if (order?.tableNumber) {
             toast.info(`Order ready for Table ${order.tableNumber}`, {
               description: `Order #${order.id} is ready to serve`,
-            });
+            })
           }
-          break;
+          break
 
         case "ORDER_STATUS_CHANGED":
           // Invalidate queries to refetch serving orders
-          console.log("[ServingQueue] Invalidating serving orders query for ORDER_STATUS_CHANGED");
+          console.log("[ServingQueue] Invalidating serving orders query for ORDER_STATUS_CHANGED")
           queryClient.invalidateQueries({
             predicate: (query) => {
               // tRPC query keys are arrays like [["orders", "getServingOrders"], {...input}]
-              const queryKey = query.queryKey[0];
+              const queryKey = query.queryKey[0]
               const match =
                 Array.isArray(queryKey) &&
                 queryKey[0] === "orders" &&
-                queryKey[1] === "getServingOrders";
-              console.log("[ServingQueue] Checking query:", queryKey, "Match:", match);
-              return match;
+                queryKey[1] === "getServingOrders"
+              console.log("[ServingQueue] Checking query:", queryKey, "Match:", match)
+              return match
             },
-          });
-          break;
+          })
+          break
 
         default:
           // Ignore other message types
-          break;
+          break
       }
     },
     []
-  );
+  )
 
   // Connect to WebSocket with 'serving' role
   useWebSocket({
     role: "serving",
     onMessage: handleWebSocketMessage,
     onConnect: () => {
-      console.log("[ServingQueue] WebSocket connected");
-      setIsConnected(true);
+      console.log("[ServingQueue] WebSocket connected")
+      setIsConnected(true)
     },
     onDisconnect: () => {
-      console.log("[ServingQueue] WebSocket disconnected");
-      setIsConnected(false);
+      console.log("[ServingQueue] WebSocket disconnected")
+      setIsConnected(false)
     },
-  });
+  })
 
   // T092: Handle status transitions
   const handleMarkAsServed = (orderId: number) => {
-    updateStatusMutation.mutate({ orderId, newStatus: "Served" });
-  };
+    updateStatusMutation.mutate({ orderId, newStatus: "Served" })
+  }
 
   const handleMarkAsCompleted = (orderId: number) => {
-    updateStatusMutation.mutate({ orderId, newStatus: "Completed" });
-  };
+    updateStatusMutation.mutate({ orderId, newStatus: "Completed" })
+  }
 
   // T093: Toggle order details to show status history
   const handleToggleDetails = (orderId: number) => {
     if (expandedOrderId === orderId) {
-      setExpandedOrderId(null);
+      setExpandedOrderId(null)
     } else {
-      setExpandedOrderId(orderId);
+      setExpandedOrderId(orderId)
       // The query will automatically refetch when enabled
     }
-  };
+  }
 
   // Separate orders by status
-  const readyOrders = orders.filter((o) => o.status === "ReadyToServe");
-  const servedOrders = orders.filter((o) => o.status === "Served");
+  const readyOrders = orders.filter((o) => o.status === "ReadyToServe")
+  const servedOrders = orders.filter((o) => o.status === "Served")
 
   return (
     <div className="space-y-4">
@@ -431,5 +433,5 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
         </Card>
       )}
     </div>
-  );
+  )
 }

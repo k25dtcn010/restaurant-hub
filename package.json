@@ -28,7 +28,8 @@
     "db:push": "bun run --filter @learn-bettert/db db:push",
     "db:studio": "bun run --filter @learn-bettert/db db:studio",
     "db:generate": "bun run --filter @learn-bettert/db db:generate",
-    "db:migrate": "bun run --filter @learn-bettert/db db:migrate"
+    "db:migrate": "bun run --filter @learn-bettert/db db:migrate",
+    "format": "prettier --write ."
   },
   "packageManager": "bun@1.3.0",
   "dependencies": {
@@ -36,6 +37,7 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
     "@types/bun": "^1.2.6",
     "@typescript-eslint/eslint-plugin": "^8.46.1",
     "@typescript-eslint/parser": "^8.46.1",

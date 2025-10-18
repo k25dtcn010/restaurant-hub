@@ -8,6 +8,7 @@
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
+
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
 - Include exact file paths in descriptions
@@ -18,13 +19,13 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [X] T001 Initialize monorepo structure per plan.md (apps/server, apps/web, packages/api, packages/auth, packages/db)
-- [X] T002 Configure TypeScript 5.7+ strict mode in tsconfig.base.json and workspace tsconfig.json files
-- [X] T003 [P] Setup Bun workspace configuration in bts.jsonc with proper package references
-- [X] T004 [P] Install core dependencies: Hono 4.8+, tRPC 11.5+, Drizzle ORM, Better-Auth 1.3+
-- [X] T005 [P] Configure Prettier, ESLint for code quality standards
-- [X] T006 Create environment configuration templates (.env.example for apps/server and apps/web)
-- [X] T007 [P] Setup Bun test runner configuration with 80% coverage threshold
+- [x] T001 Initialize monorepo structure per plan.md (apps/server, apps/web, packages/api, packages/auth, packages/db)
+- [x] T002 Configure TypeScript 5.7+ strict mode in tsconfig.base.json and workspace tsconfig.json files
+- [x] T003 [P] Setup Bun workspace configuration in bts.jsonc with proper package references
+- [x] T004 [P] Install core dependencies: Hono 4.8+, tRPC 11.5+, Drizzle ORM, Better-Auth 1.3+
+- [x] T005 [P] Configure Prettier, ESLint for code quality standards
+- [x] T006 Create environment configuration templates (.env.example for apps/server and apps/web)
+- [x] T007 [P] Setup Bun test runner configuration with 80% coverage threshold
 
 ---
 
@@ -38,45 +39,45 @@
 
 ### Database Schema & Migrations
 
-- [X] T008 Create Drizzle config in packages/db/drizzle.config.ts with SQLite and Turso support | **Reference**: [research.md Section 10](./research.md#10-deployment-and-environment-configuration)
-- [X] T009 [P] Define User schema in packages/db/src/schema/auth.ts (id, email, password, name, role, createdAt) | **Reference**: [data-model.md Section 1](./data-model.md#1-user) - includes validation rules and TypeScript types
-- [X] T010 [P] Define Table schema in packages/db/src/schema/tables.ts (id, number, qrCode, capacity, createdAt) | **Reference**: [data-model.md Section 2](./data-model.md#2-table) - includes QR code format and validation
-- [X] T011 [P] Define Dish schema in packages/db/src/schema/dishes.ts (id, name, description, price, photoUrl, isAvailable, createdAt, updatedAt) | **Reference**: [data-model.md Section 5](./data-model.md#5-dish) - includes availability logic
-- [X] T012 [P] Define Ingredient schema in packages/db/src/schema/ingredients.ts (id, name, quantity, unit, threshold, updatedAt) | **Reference**: [data-model.md Section 6](./data-model.md#6-ingredient) - includes low-stock threshold logic
-- [X] T013 [P] Define Recipe schema in packages/db/src/schema/recipes.ts (id, dishId FK, ingredientId FK, quantityRequired) | **Reference**: [data-model.md Section 7](./data-model.md#7-recipe) - includes composite uniqueness constraint
-- [X] T014 Define Order schema in packages/db/src/schema/orders.ts (id, tableId FK, status enum, totalAmount, createdAt, updatedAt) | **Reference**: [data-model.md Section 3](./data-model.md#3-order) - includes status enum values and state transition rules
-- [X] T015 [P] Define OrderItem schema in packages/db/src/schema/order-items.ts (id, orderId FK, dishId FK, quantity, priceAtOrder, specialInstructions, createdAt) | **Reference**: [data-model.md Section 4](./data-model.md#4-orderitem) - includes cascade delete and historical pricing
-- [X] T016 [P] Define OrderStatusHistory schema in packages/db/src/schema/order-status-history.ts (id, orderId FK, status, changedBy userId FK, changedAt) | **Reference**: [data-model.md Section 8](./data-model.md#8-orderstatushistory) - audit trail pattern
-- [X] T017 [P] Define Payment schema in packages/db/src/schema/payments.ts (id, orderId FK, amount, method, paidAt) | **Reference**: [data-model.md Section 9](./data-model.md#9-payment) - includes 1:1 relationship with Order
-- [X] T018 Export all schemas and types from packages/db/src/index.ts | **Reference**: [data-model.md Type Exports Summary](./data-model.md#type-exports-summary)
-- [X] T019 Generate initial Drizzle migration files with proper indexes | **Reference**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes critical index definitions
-- [X] T020 Create database seed script in packages/db/src/seed.ts (30 tables, 3 test users, 15 dishes, 20 ingredients with recipes) | **Reference**: [data-model.md Seed Data Requirements](./data-model.md#seed-data-requirements) - includes complete seed data specification
+- [x] T008 Create Drizzle config in packages/db/drizzle.config.ts with SQLite and Turso support | **Reference**: [research.md Section 10](./research.md#10-deployment-and-environment-configuration)
+- [x] T009 [P] Define User schema in packages/db/src/schema/auth.ts (id, email, password, name, role, createdAt) | **Reference**: [data-model.md Section 1](./data-model.md#1-user) - includes validation rules and TypeScript types
+- [x] T010 [P] Define Table schema in packages/db/src/schema/tables.ts (id, number, qrCode, capacity, createdAt) | **Reference**: [data-model.md Section 2](./data-model.md#2-table) - includes QR code format and validation
+- [x] T011 [P] Define Dish schema in packages/db/src/schema/dishes.ts (id, name, description, price, photoUrl, isAvailable, createdAt, updatedAt) | **Reference**: [data-model.md Section 5](./data-model.md#5-dish) - includes availability logic
+- [x] T012 [P] Define Ingredient schema in packages/db/src/schema/ingredients.ts (id, name, quantity, unit, threshold, updatedAt) | **Reference**: [data-model.md Section 6](./data-model.md#6-ingredient) - includes low-stock threshold logic
+- [x] T013 [P] Define Recipe schema in packages/db/src/schema/recipes.ts (id, dishId FK, ingredientId FK, quantityRequired) | **Reference**: [data-model.md Section 7](./data-model.md#7-recipe) - includes composite uniqueness constraint
+- [x] T014 Define Order schema in packages/db/src/schema/orders.ts (id, tableId FK, status enum, totalAmount, createdAt, updatedAt) | **Reference**: [data-model.md Section 3](./data-model.md#3-order) - includes status enum values and state transition rules
+- [x] T015 [P] Define OrderItem schema in packages/db/src/schema/order-items.ts (id, orderId FK, dishId FK, quantity, priceAtOrder, specialInstructions, createdAt) | **Reference**: [data-model.md Section 4](./data-model.md#4-orderitem) - includes cascade delete and historical pricing
+- [x] T016 [P] Define OrderStatusHistory schema in packages/db/src/schema/order-status-history.ts (id, orderId FK, status, changedBy userId FK, changedAt) | **Reference**: [data-model.md Section 8](./data-model.md#8-orderstatushistory) - audit trail pattern
+- [x] T017 [P] Define Payment schema in packages/db/src/schema/payments.ts (id, orderId FK, amount, method, paidAt) | **Reference**: [data-model.md Section 9](./data-model.md#9-payment) - includes 1:1 relationship with Order
+- [x] T018 Export all schemas and types from packages/db/src/index.ts | **Reference**: [data-model.md Type Exports Summary](./data-model.md#type-exports-summary)
+- [x] T019 Generate initial Drizzle migration files with proper indexes | **Reference**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes critical index definitions
+- [x] T020 Create database seed script in packages/db/src/seed.ts (30 tables, 3 test users, 15 dishes, 20 ingredients with recipes) | **Reference**: [data-model.md Seed Data Requirements](./data-model.md#seed-data-requirements) - includes complete seed data specification
 
 ### Authentication Setup
 
-- [X] T021 Configure Better-Auth in packages/auth/src/index.ts with role-based permissions (Manager, KitchenStaff, Waiter) | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes complete implementation pattern with role enum and user fields
-- [X] T022 Implement auth middleware for tRPC context in packages/api/src/context.ts | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes context creation pattern with session extraction
-- [X] T023 Create auth client configuration in apps/web/src/lib/auth-client.ts | **Reference**: [plan.md Task 1.5](./plan.md#task-15-setup-better-auth)
+- [x] T021 Configure Better-Auth in packages/auth/src/index.ts with role-based permissions (Manager, KitchenStaff, Waiter) | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes complete implementation pattern with role enum and user fields
+- [x] T022 Implement auth middleware for tRPC context in packages/api/src/context.ts | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes context creation pattern with session extraction
+- [x] T023 Create auth client configuration in apps/web/src/lib/auth-client.ts | **Reference**: [plan.md Task 1.5](./plan.md#task-15-setup-better-auth)
 
 ### API Infrastructure
 
-- [X] T024 Setup tRPC app router structure in packages/api/src/index.ts with router aggregation | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
-- [X] T025 Create tRPC context with auth and DB client in packages/api/src/context.ts | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes protected procedure pattern
-- [X] T026 Configure Hono server entry point in apps/server/src/index.ts with tRPC integration | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
-- [X] T027 Setup WebSocket handler in apps/server/src/websocket.ts with role-based connection management (kitchen, serving, manager) | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) - includes complete WebSocket implementation pattern with connection pooling by role
-- [X] T028 Configure CORS and middleware for Hono server | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
+- [x] T024 Setup tRPC app router structure in packages/api/src/index.ts with router aggregation | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
+- [x] T025 Create tRPC context with auth and DB client in packages/api/src/context.ts | **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) - includes protected procedure pattern
+- [x] T026 Configure Hono server entry point in apps/server/src/index.ts with tRPC integration | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
+- [x] T027 Setup WebSocket handler in apps/server/src/websocket.ts with role-based connection management (kitchen, serving, manager) | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) - includes complete WebSocket implementation pattern with connection pooling by role
+- [x] T028 Configure CORS and middleware for Hono server | **Reference**: [plan.md Task 1.6](./plan.md#task-16-setup-trpc-infrastructure)
 
 ### Frontend Foundation
 
-- [X] T029 Configure Vite for React 18+ in apps/web/vite.config.ts with bundle size optimization | **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies) - includes code splitting and bundle optimization
-- [X] T030 Setup TanStack Router in apps/web/src/main.tsx with file-based routing | **Reference**: [plan.md Task 1.8](./plan.md#task-18-frontend-trpc-client-setup)
-- [X] T031 Create root layout in apps/web/src/routes/__root.tsx with Header and ThemeProvider | **Reference**: [plan.md Project Structure](./plan.md#source-code-repository-root)
-- [X] T032 Setup tRPC client in apps/web/src/utils/trpc.ts with React Query integration | **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies) - includes tRPC batching configuration
-- [X] T033 [P] Setup shadcn/ui configuration in apps/web/components.json
-- [X] T034 [P] Install base shadcn/ui components (Button, Card, Input, Label, Dropdown, Skeleton, Sonner)
-- [X] T035 Create theme provider in apps/web/src/components/theme-provider.tsx
-- [X] T036 Create header component in apps/web/src/components/header.tsx with mode toggle and navigation
-- [X] T037 Create loader component in apps/web/src/components/loader.tsx for async states
+- [x] T029 Configure Vite for React 18+ in apps/web/vite.config.ts with bundle size optimization | **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies) - includes code splitting and bundle optimization
+- [x] T030 Setup TanStack Router in apps/web/src/main.tsx with file-based routing | **Reference**: [plan.md Task 1.8](./plan.md#task-18-frontend-trpc-client-setup)
+- [x] T031 Create root layout in apps/web/src/routes/\_\_root.tsx with Header and ThemeProvider | **Reference**: [plan.md Project Structure](./plan.md#source-code-repository-root)
+- [x] T032 Setup tRPC client in apps/web/src/utils/trpc.ts with React Query integration | **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies) - includes tRPC batching configuration
+- [x] T033 [P] Setup shadcn/ui configuration in apps/web/components.json
+- [x] T034 [P] Install base shadcn/ui components (Button, Card, Input, Label, Dropdown, Skeleton, Sonner)
+- [x] T035 Create theme provider in apps/web/src/components/theme-provider.tsx
+- [x] T036 Create header component in apps/web/src/components/header.tsx with mode toggle and navigation
+- [x] T037 Create loader component in apps/web/src/components/loader.tsx for async states
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -128,12 +129,12 @@
 
 #### Customer Frontend (QR Ordering Flow)
 
-- [X] T054 [P] [US1] Create landing page route in apps/web/src/routes/index.tsx with QR parameter handling | **QR Session Logic**: [research.md Section 4](./research.md#4-qr-code-generation-and-table-session-management) | **Acceptance**: [spec.md US1 Scenario 1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) | **Plan Reference**: [plan.md Task 2.2](./plan.md#task-22-build-customer-menu-ui)
-- [X] T055 [P] [US1] Create MenuList component in apps/web/src/components/menu-list.tsx to display available dishes | **Acceptance**: [spec.md US1 Scenario 1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
-- [X] T056 [P] [US1] Create OrderCart component in apps/web/src/components/order-cart.tsx to manage order items | **Acceptance**: [spec.md US1 Scenario 2](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
-- [X] T057 [US1] Implement order submission flow in apps/web/src/routes/index.tsx with success/error handling | **Acceptance**: [spec.md US1 Scenario 3](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) | **Plan Reference**: [plan.md Task 2.5](./plan.md#task-25-build-order-cart--submission-ui)
-- [X] T058 [US1] Add out-of-stock indicators and unavailable dish handling in MenuList component | **Acceptance**: [spec.md US1 Scenario 4](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
-- [X] T059 [US1] Add loading states and optimistic updates for order submission | **State Management**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates)
+- [x] T054 [P] [US1] Create landing page route in apps/web/src/routes/index.tsx with QR parameter handling | **QR Session Logic**: [research.md Section 4](./research.md#4-qr-code-generation-and-table-session-management) | **Acceptance**: [spec.md US1 Scenario 1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) | **Plan Reference**: [plan.md Task 2.2](./plan.md#task-22-build-customer-menu-ui)
+- [x] T055 [P] [US1] Create MenuList component in apps/web/src/components/menu-list.tsx to display available dishes | **Acceptance**: [spec.md US1 Scenario 1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
+- [x] T056 [P] [US1] Create OrderCart component in apps/web/src/components/order-cart.tsx to manage order items | **Acceptance**: [spec.md US1 Scenario 2](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
+- [x] T057 [US1] Implement order submission flow in apps/web/src/routes/index.tsx with success/error handling | **Acceptance**: [spec.md US1 Scenario 3](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) | **Plan Reference**: [plan.md Task 2.5](./plan.md#task-25-build-order-cart--submission-ui)
+- [x] T058 [US1] Add out-of-stock indicators and unavailable dish handling in MenuList component | **Acceptance**: [spec.md US1 Scenario 4](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)
+- [x] T059 [US1] Add loading states and optimistic updates for order submission | **State Management**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates)
 
 **Checkpoint**: User Story 1 complete - customers can order via QR, orders appear in kitchen, inventory updates automatically
 
@@ -151,29 +152,29 @@
 
 ### Tests for User Story 2 (TDD-First)
 
-- [X] T060 [P] [US2] Contract test for orders.getAll with status filtering in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 8](./contracts/orders-router.md#8-ordersgetkitchenorders)
-- [X] T061 [P] [US2] Contract test for orders.updateStatus in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **State Transitions**: [data-model.md Order Section](./data-model.md#3-order)
-- [X] T062 [P] [US2] Integration test for kitchen workflow (Pending → In Kitchen → Ready) in apps/server/tests/integration/kitchen-workflow.test.ts | **Plan Reference**: [plan.md Task 3.4](./plan.md#task-34-implement-ordersupdatestatus-mutation)
-- [X] T063 [P] [US2] WebSocket notification test for kitchen alerts in apps/server/tests/integration/websocket.test.ts | **WebSocket Events**: [orders-router.md WebSocket Notifications](./contracts/orders-router.md#2-orderssubmit)
+- [x] T060 [P] [US2] Contract test for orders.getAll with status filtering in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 8](./contracts/orders-router.md#8-ordersgetkitchenorders)
+- [x] T061 [P] [US2] Contract test for orders.updateStatus in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **State Transitions**: [data-model.md Order Section](./data-model.md#3-order)
+- [x] T062 [P] [US2] Integration test for kitchen workflow (Pending → In Kitchen → Ready) in apps/server/tests/integration/kitchen-workflow.test.ts | **Plan Reference**: [plan.md Task 3.4](./plan.md#task-34-implement-ordersupdatestatus-mutation)
+- [x] T063 [P] [US2] WebSocket notification test for kitchen alerts in apps/server/tests/integration/websocket.test.ts | **WebSocket Events**: [orders-router.md WebSocket Notifications](./contracts/orders-router.md#2-orderssubmit)
 
 ### Implementation for User Story 2
 
 #### Orders Router Extensions (Status Management)
 
-- [X] T064 [P] [US2] Implement orders.getAll query in packages/api/src/routers/orders.ts with filtering by status and table | **Contract**: [orders-router.md Procedure 8](./contracts/orders-router.md#8-ordersgetkitchenorders) | **Business Logic**: Group by table, sort by createdAt ASC | **Plan Reference**: [plan.md Task 3.1](./plan.md#task-31-implement-ordersgetkitchenorders-query)
-- [X] T065 [US2] Implement orders.updateStatus mutation in packages/api/src/routers/orders.ts with status history tracking | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **Data Model**: [data-model.md OrderStatusHistory](./data-model.md#8-orderstatushistory) | **Plan Reference**: [plan.md Task 3.4](./plan.md#task-34-implement-ordersupdatestatus-mutation)
-- [X] T066 [US2] Add WebSocket notification broadcasting to orders.updateStatus for serving staff alerts (Ready to Serve) | **WebSocket Pattern**: [research.md Section 1](./research.md#1-real-time-notification-architecture) | **Contract**: [orders-router.md ORDER_READY Event](./contracts/orders-router.md#5-ordersupdatestatus)
-- [X] T067 [US2] Implement orders.getById query in packages/api/src/routers/orders.ts with full order details | **Contract**: [orders-router.md Procedure 6](./contracts/orders-router.md#6-ordersgetbyid)
+- [x] T064 [P] [US2] Implement orders.getAll query in packages/api/src/routers/orders.ts with filtering by status and table | **Contract**: [orders-router.md Procedure 8](./contracts/orders-router.md#8-ordersgetkitchenorders) | **Business Logic**: Group by table, sort by createdAt ASC | **Plan Reference**: [plan.md Task 3.1](./plan.md#task-31-implement-ordersgetkitchenorders-query)
+- [x] T065 [US2] Implement orders.updateStatus mutation in packages/api/src/routers/orders.ts with status history tracking | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **Data Model**: [data-model.md OrderStatusHistory](./data-model.md#8-orderstatushistory) | **Plan Reference**: [plan.md Task 3.4](./plan.md#task-34-implement-ordersupdatestatus-mutation)
+- [x] T066 [US2] Add WebSocket notification broadcasting to orders.updateStatus for serving staff alerts (Ready to Serve) | **WebSocket Pattern**: [research.md Section 1](./research.md#1-real-time-notification-architecture) | **Contract**: [orders-router.md ORDER_READY Event](./contracts/orders-router.md#5-ordersupdatestatus)
+- [x] T067 [US2] Implement orders.getById query in packages/api/src/routers/orders.ts with full order details | **Contract**: [orders-router.md Procedure 6](./contracts/orders-router.md#6-ordersgetbyid)
 
 #### Kitchen Dashboard Frontend
 
-- [X] T068 [P] [US2] Create kitchen route in apps/web/src/routes/kitchen.tsx with authentication guard (KitchenStaff role) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) | **Acceptance**: [spec.md US2 Scenario 1-2](./spec.md#user-story-2---kitchen-order-management-priority-p1) | **Plan Reference**: [plan.md Task 3.2](./plan.md#task-32-build-kitchen-dashboard-ui)
-- [X] T069 [P] [US2] Create OrdersBoard component in apps/web/src/components/orders-board.tsx with status columns (Pending, In Kitchen, Ready) | **Acceptance**: [spec.md US2 Scenario 5](./spec.md#user-story-2---kitchen-order-management-priority-p1)
-- [X] T070 [P] [US2] Create OrderCard component in apps/web/src/components/order-card.tsx displaying table, dishes, quantities, timestamps | **Acceptance**: [spec.md US2 Scenario 1](./spec.md#user-story-2---kitchen-order-management-priority-p1)
-- [X] T071 [US2] Implement WebSocket connection in kitchen.tsx for real-time order updates | **WebSocket Integration**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates) - includes query invalidation pattern | **Plan Reference**: [plan.md Task 3.3](./plan.md#task-33-implement-websocket-integration-for-new_order)
-- [X] T072 [US2] Add status transition buttons to OrderCard for moving orders through workflow | **Acceptance**: [spec.md US2 Scenario 3-4](./spec.md#user-story-2---kitchen-order-management-priority-p1) | **Plan Reference**: [plan.md Task 3.5](./plan.md#task-35-add-status-update-buttons-to-kitchen-dashboard)
-- [X] T073 [US2] Add visual distinction between different order statuses with color coding | **Acceptance**: [spec.md US2 Scenario 5](./spec.md#user-story-2---kitchen-order-management-priority-p1)
-- [X] T074 [US2] Implement auto-refresh and real-time notification handling in kitchen dashboard | **State Management**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates)
+- [x] T068 [P] [US2] Create kitchen route in apps/web/src/routes/kitchen.tsx with authentication guard (KitchenStaff role) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) | **Acceptance**: [spec.md US2 Scenario 1-2](./spec.md#user-story-2---kitchen-order-management-priority-p1) | **Plan Reference**: [plan.md Task 3.2](./plan.md#task-32-build-kitchen-dashboard-ui)
+- [x] T069 [P] [US2] Create OrdersBoard component in apps/web/src/components/orders-board.tsx with status columns (Pending, In Kitchen, Ready) | **Acceptance**: [spec.md US2 Scenario 5](./spec.md#user-story-2---kitchen-order-management-priority-p1)
+- [x] T070 [P] [US2] Create OrderCard component in apps/web/src/components/order-card.tsx displaying table, dishes, quantities, timestamps | **Acceptance**: [spec.md US2 Scenario 1](./spec.md#user-story-2---kitchen-order-management-priority-p1)
+- [x] T071 [US2] Implement WebSocket connection in kitchen.tsx for real-time order updates | **WebSocket Integration**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates) - includes query invalidation pattern | **Plan Reference**: [plan.md Task 3.3](./plan.md#task-33-implement-websocket-integration-for-new_order)
+- [x] T072 [US2] Add status transition buttons to OrderCard for moving orders through workflow | **Acceptance**: [spec.md US2 Scenario 3-4](./spec.md#user-story-2---kitchen-order-management-priority-p1) | **Plan Reference**: [plan.md Task 3.5](./plan.md#task-35-add-status-update-buttons-to-kitchen-dashboard)
+- [x] T073 [US2] Add visual distinction between different order statuses with color coding | **Acceptance**: [spec.md US2 Scenario 5](./spec.md#user-story-2---kitchen-order-management-priority-p1)
+- [x] T074 [US2] Implement auto-refresh and real-time notification handling in kitchen dashboard | **State Management**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates)
 
 **Checkpoint**: User Story 2 complete - kitchen staff can view and manage orders in real-time
 
@@ -191,21 +192,21 @@
 
 ### Tests for User Story 3 (TDD-First)
 
-- [X] T075 [P] [US3] Contract test for staff order creation with authentication in packages/api/tests/routers/orders.test.ts | **Contract**: Reuses [orders-router.md Procedure 1](./contracts/orders-router.md#1-orderscreate) with authenticated context | **Acceptance**: [spec.md US3 Scenario 3](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
-- [X] T076 [P] [US3] Integration test for waiter-created orders matching QR order behavior in apps/server/tests/integration/staff-ordering.test.ts | **Acceptance**: [spec.md US3 Scenario 3](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [x] T075 [P] [US3] Contract test for staff order creation with authentication in packages/api/tests/routers/orders.test.ts | **Contract**: Reuses [orders-router.md Procedure 1](./contracts/orders-router.md#1-orderscreate) with authenticated context | **Acceptance**: [spec.md US3 Scenario 3](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [x] T076 [P] [US3] Integration test for waiter-created orders matching QR order behavior in apps/server/tests/integration/staff-ordering.test.ts | **Acceptance**: [spec.md US3 Scenario 3](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
 
 ### Implementation for User Story 3
 
 #### Staff Order Creation Frontend
 
-- [X] T077 [P] [US3] Create login route in apps/web/src/routes/login.tsx with Better-Auth integration | **Auth Pattern**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) | **Plan Reference**: [plan.md Task 4.1](./plan.md#task-41-build-staff-order-creation-ui)
-- [X] T078 [P] [US3] Create sign-in form component in apps/web/src/components/sign-in-form.tsx | **Seed Users**: [data-model.md Seed Data](./data-model.md#seed-data-requirements) - use waiter@restauranthub.com / password123
-- [X] T079 [P] [US3] Create dashboard route in apps/web/src/routes/dashboard.tsx with role-based redirection | **Access Control**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth)
-- [X] T080 [US3] Create staff-ordering route in apps/web/src/routes/staff-order.tsx (Waiter/Manager access) | **Acceptance**: [spec.md US3 Scenario 1-2](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
-- [X] T081 [US3] Create TableSelector component in apps/web/src/components/table-selector.tsx for choosing table | **Acceptance**: [spec.md US3 Scenario 1](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
-- [X] T082 [US3] Reuse MenuList and OrderCart components for staff order creation | **Acceptance**: [spec.md US3 Scenario 2](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
-- [X] T083 [US3] Add authentication guards to protected routes using Better-Auth session checks | **Auth Middleware**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth)
-- [X] T084 [US3] Create user menu component in apps/web/src/components/user-menu.tsx with logout functionality
+- [x] T077 [P] [US3] Create login route in apps/web/src/routes/login.tsx with Better-Auth integration | **Auth Pattern**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) | **Plan Reference**: [plan.md Task 4.1](./plan.md#task-41-build-staff-order-creation-ui)
+- [x] T078 [P] [US3] Create sign-in form component in apps/web/src/components/sign-in-form.tsx | **Seed Users**: [data-model.md Seed Data](./data-model.md#seed-data-requirements) - use waiter@restauranthub.com / password123
+- [x] T079 [P] [US3] Create dashboard route in apps/web/src/routes/dashboard.tsx with role-based redirection | **Access Control**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth)
+- [x] T080 [US3] Create staff-ordering route in apps/web/src/routes/staff-order.tsx (Waiter/Manager access) | **Acceptance**: [spec.md US3 Scenario 1-2](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [x] T081 [US3] Create TableSelector component in apps/web/src/components/table-selector.tsx for choosing table | **Acceptance**: [spec.md US3 Scenario 1](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [x] T082 [US3] Reuse MenuList and OrderCart components for staff order creation | **Acceptance**: [spec.md US3 Scenario 2](./spec.md#user-story-3---staff-assisted-ordering-priority-p2)
+- [x] T083 [US3] Add authentication guards to protected routes using Better-Auth session checks | **Auth Middleware**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth)
+- [x] T084 [US3] Create user menu component in apps/web/src/components/user-menu.tsx with logout functionality
 
 **Checkpoint**: User Story 3 complete - staff can create orders on behalf of customers
 
@@ -223,21 +224,21 @@
 
 ### Tests for User Story 4 (TDD-First)
 
-- [X] T085 [P] [US4] Contract test for orders.getAll with ReadyToServe filter in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 9](./contracts/orders-router.md#9-ordersgetservingorders) | **Implementation**: orders.getServingOrders procedure implemented ✅
-- [X] T086 [P] [US4] Contract test for order status transitions (Served, Completed) in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **State Transitions**: [data-model.md Order Status](./data-model.md#3-order) | **Tests**: 4/4 passing ✅
-- [X] T087 [P] [US4] WebSocket notification test for serving alerts in packages/api/tests/integration/websocket.test.ts | **WebSocket Event**: [orders-router.md ORDER_READY](./contracts/orders-router.md#5-ordersupdatestatus) | **Tests**: 4/4 passing ✅
-- [X] T088 [P] [US4] Integration test for complete serving workflow in packages/api/tests/integration/serving-workflow.test.ts | **Acceptance**: [spec.md US4 All Scenarios](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2) | **Tests**: 7/7 passing ✅
+- [x] T085 [P] [US4] Contract test for orders.getAll with ReadyToServe filter in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 9](./contracts/orders-router.md#9-ordersgetservingorders) | **Implementation**: orders.getServingOrders procedure implemented ✅
+- [x] T086 [P] [US4] Contract test for order status transitions (Served, Completed) in packages/api/tests/routers/orders.test.ts | **Contract**: [orders-router.md Procedure 5](./contracts/orders-router.md#5-ordersupdatestatus) | **State Transitions**: [data-model.md Order Status](./data-model.md#3-order) | **Tests**: 4/4 passing ✅
+- [x] T087 [P] [US4] WebSocket notification test for serving alerts in packages/api/tests/integration/websocket.test.ts | **WebSocket Event**: [orders-router.md ORDER_READY](./contracts/orders-router.md#5-ordersupdatestatus) | **Tests**: 4/4 passing ✅
+- [x] T088 [P] [US4] Integration test for complete serving workflow in packages/api/tests/integration/serving-workflow.test.ts | **Acceptance**: [spec.md US4 All Scenarios](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2) | **Tests**: 7/7 passing ✅
 
 ### Implementation for User Story 4
 
 #### Serving Dashboard Frontend
 
-- [X] T089 [P] [US4] Create serving route in apps/web/src/routes/serving.tsx with authentication guard (Waiter role) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) | **Acceptance**: [spec.md US4 Scenario 1](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2) | **Plan Reference**: [plan.md Task 4.2](./plan.md#task-42-implement-ordersgetservingorders-query)
-- [X] T090 [P] [US4] Create ServingQueue component in apps/web/src/components/serving-queue.tsx showing Ready and Served orders | **Contract**: [orders-router.md Procedure 9](./contracts/orders-router.md#9-ordersgetservingorders) | **Acceptance**: [spec.md US4 Scenario 3](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2)
-- [X] T091 [US4] Implement WebSocket connection in serving.tsx for real-time Ready to Serve notifications | **WebSocket Integration**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates) | **Acceptance**: [spec.md US4 Scenario 1](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2)
-- [X] T092 [US4] Add status transition actions (mark as Served, mark as Completed) to ServingQueue | **Contract**: [orders-router.md updateStatus](./contracts/orders-router.md#5-ordersupdatestatus) | **Acceptance**: [spec.md US4 Scenario 2, 4](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2)
-- [X] T093 [US4] Display full order status history with timestamps in order detail view | **Data Model**: [data-model.md OrderStatusHistory](./data-model.md#8-orderstatushistory) | **Acceptance**: [spec.md US4 Scenario 5](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2)
-- [X] T094 [US4] Add priority sorting (oldest orders first) in serving queue | **Business Logic**: [orders-router.md Procedure 9](./contracts/orders-router.md#9-ordersgetservingorders) - sort by waitTime DESC
+- [x] T089 [P] [US4] Create serving route in apps/web/src/routes/serving.tsx with authentication guard (Waiter role) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) | **Acceptance**: [spec.md US4 Scenario 1](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2) | **Plan Reference**: [plan.md Task 4.2](./plan.md#task-42-implement-ordersgetservingorders-query)
+- [x] T090 [P] [US4] Create ServingQueue component in apps/web/src/components/serving-queue.tsx showing Ready and Served orders | **Contract**: [orders-router.md Procedure 9](./contracts/orders-router.md#9-ordersgetservingorders) | **Acceptance**: [spec.md US4 Scenario 3](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2)
+- [x] T091 [US4] Implement WebSocket connection in serving.tsx for real-time Ready to Serve notifications | **WebSocket Integration**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates) | **Acceptance**: [spec.md US4 Scenario 1](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2)
+- [x] T092 [US4] Add status transition actions (mark as Served, mark as Completed) to ServingQueue | **Contract**: [orders-router.md updateStatus](./contracts/orders-router.md#5-ordersupdatestatus) | **Acceptance**: [spec.md US4 Scenario 2, 4](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2)
+- [x] T093 [US4] Display full order status history with timestamps in order detail view | **Data Model**: [data-model.md OrderStatusHistory](./data-model.md#8-orderstatushistory) | **Acceptance**: [spec.md US4 Scenario 5](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2)
+- [x] T094 [US4] Add priority sorting (oldest orders first) in serving queue | **Business Logic**: [orders-router.md Procedure 9](./contracts/orders-router.md#9-ordersgetservingorders) - sort by waitTime DESC
 
 **Checkpoint**: User Story 4 complete - serving staff can track and manage order delivery
 
@@ -255,30 +256,30 @@
 
 ### Tests for User Story 5 (TDD-First)
 
-- [X] T095 [P] [US5] Contract test for inventory.getAll in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 1](./contracts/inventory-router.md#1-inventorygetall) | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [X] T096 [P] [US5] Contract test for inventory.adjustStock in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 3](./contracts/inventory-router.md#3-inventoryadjuststock) | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [X] T097 [P] [US5] Contract test for inventory.updateThreshold in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 4](./contracts/inventory-router.md#4-inventoryupdatethreshold) | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [X] T098 [P] [US5] Integration test for low-stock alerts in apps/server/tests/integration/inventory-alerts.test.ts | **Acceptance**: [spec.md US5 Scenario 2, 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T095 [P] [US5] Contract test for inventory.getAll in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 1](./contracts/inventory-router.md#1-inventorygetall) | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T096 [P] [US5] Contract test for inventory.adjustStock in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 3](./contracts/inventory-router.md#3-inventoryadjuststock) | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T097 [P] [US5] Contract test for inventory.updateThreshold in packages/api/tests/routers/inventory.test.ts | **Contract**: [inventory-router.md Procedure 4](./contracts/inventory-router.md#4-inventoryupdatethreshold) | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T098 [P] [US5] Integration test for low-stock alerts in apps/server/tests/integration/inventory-alerts.test.ts | **Acceptance**: [spec.md US5 Scenario 2, 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
 
 ### Implementation for User Story 5
 
 #### Inventory Router
 
-- [X] T099 [P] [US5] Implement inventory.getAll query in packages/api/src/routers/inventory.ts with low-stock calculation | **Contract**: [inventory-router.md Procedure 1](./contracts/inventory-router.md#1-inventorygetall) | **Data Model**: [data-model.md Ingredient](./data-model.md#6-ingredient) | **Business Logic**: Compute isLowStock = quantity < threshold | **Plan Reference**: [plan.md Task 5.1](./plan.md#task-51-implement-inventory-router-procedures)
-- [X] T100 [P] [US5] Implement inventory.getById query in packages/api/src/routers/inventory.ts with dish usage details | **Contract**: [inventory-router.md Procedure 2](./contracts/inventory-router.md#2-inventorygetbyid) | **Data Model**: Join with Recipe and Dish tables
-- [X] T101 [P] [US5] Implement inventory.adjustStock mutation in packages/api/src/routers/inventory.ts with validation | **Contract**: [inventory-router.md Procedure 3](./contracts/inventory-router.md#3-inventoryadjuststock) | **Business Logic**: Prevent negative quantities | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [X] T102 [P] [US5] Implement inventory.updateThreshold mutation in packages/api/src/routers/inventory.ts | **Contract**: [inventory-router.md Procedure 4](./contracts/inventory-router.md#4-inventoryupdatethreshold) | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [X] T103 [US5] Add inventory router to main app router in packages/api/src/routers/index.ts
+- [x] T099 [P] [US5] Implement inventory.getAll query in packages/api/src/routers/inventory.ts with low-stock calculation | **Contract**: [inventory-router.md Procedure 1](./contracts/inventory-router.md#1-inventorygetall) | **Data Model**: [data-model.md Ingredient](./data-model.md#6-ingredient) | **Business Logic**: Compute isLowStock = quantity < threshold | **Plan Reference**: [plan.md Task 5.1](./plan.md#task-51-implement-inventory-router-procedures)
+- [x] T100 [P] [US5] Implement inventory.getById query in packages/api/src/routers/inventory.ts with dish usage details | **Contract**: [inventory-router.md Procedure 2](./contracts/inventory-router.md#2-inventorygetbyid) | **Data Model**: Join with Recipe and Dish tables
+- [x] T101 [P] [US5] Implement inventory.adjustStock mutation in packages/api/src/routers/inventory.ts with validation | **Contract**: [inventory-router.md Procedure 3](./contracts/inventory-router.md#3-inventoryadjuststock) | **Business Logic**: Prevent negative quantities | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T102 [P] [US5] Implement inventory.updateThreshold mutation in packages/api/src/routers/inventory.ts | **Contract**: [inventory-router.md Procedure 4](./contracts/inventory-router.md#4-inventoryupdatethreshold) | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T103 [US5] Add inventory router to main app router in packages/api/src/routers/index.ts
 
 #### Inventory Dashboard Frontend
 
-- [X] T104 [P] [US5] Create inventory route in apps/web/src/routes/inventory.tsx with authentication guard (Manager only) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) - Manager only access | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3) | **Plan Reference**: [plan.md Task 5.2](./plan.md#task-52-build-inventory-dashboard)
-- [X] T105 [P] [US5] Create InventoryTable component in apps/web/src/components/inventory-table.tsx showing all ingredients | **Contract**: [inventory-router.md Procedure 1 Output](./contracts/inventory-router.md#1-inventorygetall) | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [X] T106 [P] [US5] Create IngredientRow component in apps/web/src/components/ingredient-row.tsx with low-stock highlighting | **Acceptance**: [spec.md US5 Scenario 2](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3) - red background or warning icon
-- [X] T107 [US5] Create StockAdjustmentModal component in apps/web/src/components/stock-adjustment-modal.tsx for editing quantities | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [X] T108 [US5] Create ThresholdEditor component in apps/web/src/components/threshold-editor.tsx for setting alert levels | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [X] T109 [US5] Add visual alerts (red highlighting, warning icons) for low-stock ingredients | **Acceptance**: [spec.md US5 Scenario 2](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [X] T110 [US5] Display which dishes use each ingredient in inventory detail view | **Contract**: [inventory-router.md Procedure 1 with includeRecipes=true](./contracts/inventory-router.md#1-inventorygetall)
+- [x] T104 [P] [US5] Create inventory route in apps/web/src/routes/inventory.tsx with authentication guard (Manager only) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) - Manager only access | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3) | **Plan Reference**: [plan.md Task 5.2](./plan.md#task-52-build-inventory-dashboard)
+- [x] T105 [P] [US5] Create InventoryTable component in apps/web/src/components/inventory-table.tsx showing all ingredients | **Contract**: [inventory-router.md Procedure 1 Output](./contracts/inventory-router.md#1-inventorygetall) | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T106 [P] [US5] Create IngredientRow component in apps/web/src/components/ingredient-row.tsx with low-stock highlighting | **Acceptance**: [spec.md US5 Scenario 2](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3) - red background or warning icon
+- [x] T107 [US5] Create StockAdjustmentModal component in apps/web/src/components/stock-adjustment-modal.tsx for editing quantities | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T108 [US5] Create ThresholdEditor component in apps/web/src/components/threshold-editor.tsx for setting alert levels | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T109 [US5] Add visual alerts (red highlighting, warning icons) for low-stock ingredients | **Acceptance**: [spec.md US5 Scenario 2](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [x] T110 [US5] Display which dishes use each ingredient in inventory detail view | **Contract**: [inventory-router.md Procedure 1 with includeRecipes=true](./contracts/inventory-router.md#1-inventorygetall)
 
 **Checkpoint**: User Story 5 complete - managers can monitor and manage inventory
 
@@ -313,12 +314,12 @@
 
 #### Payment Processing Frontend
 
-- [X] T120 [P] [US6] Create payment route in apps/web/src/routes/payment.tsx with authentication guard (Waiter/Manager) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) - Waiter and Manager access | **Plan Reference**: [plan.md Task 4.4](./plan.md#task-44-build-payment-ui)
-- [X] T121 [P] [US6] Create OrderBillView component in apps/web/src/components/order-bill-view.tsx showing itemized order | **Acceptance**: [spec.md US6 Scenario 1](./spec.md#user-story-6---cash-payment-processing-priority-p2) - display dishes, quantities, prices, total
-- [X] T122 [P] [US6] Create PaymentConfirmation component in apps/web/src/components/payment-confirmation.tsx | **Acceptance**: [spec.md US6 Scenario 2](./spec.md#user-story-6---cash-payment-processing-priority-p2)
-- [X] T123 [US6] Implement payment processing workflow in payment.tsx (calculate total, confirm payment, clear table) | **Contract**: [payments-router.md create](./contracts/payments-router.md#1-paymentscreate) | **Acceptance**: [spec.md US6 Scenario 2-3](./spec.md#user-story-6---cash-payment-processing-priority-p2)
-- [X] T124 [US6] Create PaymentHistory component in apps/web/src/components/payment-history.tsx for viewing past transactions | **Contract**: [payments-router.md getHistory](./contracts/payments-router.md#3-paymentsgethistory) | **Acceptance**: [spec.md US6 Scenario 4](./spec.md#user-story-6---cash-payment-processing-priority-p2)
-- [X] T125 [US6] Add payment history view to manager dashboard | **Auth**: Manager-only access
+- [x] T120 [P] [US6] Create payment route in apps/web/src/routes/payment.tsx with authentication guard (Waiter/Manager) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) - Waiter and Manager access | **Plan Reference**: [plan.md Task 4.4](./plan.md#task-44-build-payment-ui)
+- [x] T121 [P] [US6] Create OrderBillView component in apps/web/src/components/order-bill-view.tsx showing itemized order | **Acceptance**: [spec.md US6 Scenario 1](./spec.md#user-story-6---cash-payment-processing-priority-p2) - display dishes, quantities, prices, total
+- [x] T122 [P] [US6] Create PaymentConfirmation component in apps/web/src/components/payment-confirmation.tsx | **Acceptance**: [spec.md US6 Scenario 2](./spec.md#user-story-6---cash-payment-processing-priority-p2)
+- [x] T123 [US6] Implement payment processing workflow in payment.tsx (calculate total, confirm payment, clear table) | **Contract**: [payments-router.md create](./contracts/payments-router.md#1-paymentscreate) | **Acceptance**: [spec.md US6 Scenario 2-3](./spec.md#user-story-6---cash-payment-processing-priority-p2)
+- [x] T124 [US6] Create PaymentHistory component in apps/web/src/components/payment-history.tsx for viewing past transactions | **Contract**: [payments-router.md getHistory](./contracts/payments-router.md#3-paymentsgethistory) | **Acceptance**: [spec.md US6 Scenario 4](./spec.md#user-story-6---cash-payment-processing-priority-p2)
+- [x] T125 [US6] Add payment history view to manager dashboard | **Auth**: Manager-only access
 
 **Checkpoint**: User Story 6 complete - staff can process payments and clear table sessions
 
@@ -332,46 +333,46 @@
 
 **Reference**: [spec.md Functional Requirements](./spec.md#functional-requirements) - FR-001a, FR-001b, FR-001c
 
-- [X] T126 [P] Implement dishes.create mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 3](./contracts/dishes-router.md#3-dishescreate) | **Auth**: Manager only
-- [X] T127 [P] Implement dishes.update mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 4](./contracts/dishes-router.md#4-dishesupdate) | **Auth**: Manager only
-- [X] T128 [P] Implement dishes.toggleAvailability mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 5](./contracts/dishes-router.md#5-dishestoggleavailability) | **Auth**: Manager only
-- [X] T129 Create menu-management route in apps/web/src/routes/menu-management.tsx (Manager only) | **Auth Guard**: Manager-only access
-- [X] T130 Create DishEditor component in apps/web/src/components/dish-editor.tsx for add/edit operations | **Data Model**: [data-model.md Dish](./data-model.md#5-dish)
+- [x] T126 [P] Implement dishes.create mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 3](./contracts/dishes-router.md#3-dishescreate) | **Auth**: Manager only
+- [x] T127 [P] Implement dishes.update mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 4](./contracts/dishes-router.md#4-dishesupdate) | **Auth**: Manager only
+- [x] T128 [P] Implement dishes.toggleAvailability mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 5](./contracts/dishes-router.md#5-dishestoggleavailability) | **Auth**: Manager only
+- [x] T129 Create menu-management route in apps/web/src/routes/menu-management.tsx (Manager only) | **Auth Guard**: Manager-only access
+- [x] T130 Create DishEditor component in apps/web/src/components/dish-editor.tsx for add/edit operations | **Data Model**: [data-model.md Dish](./data-model.md#5-dish)
 
 ### Error Handling & Validation
 
 **Reference**: [research.md Section 9](./research.md#9-error-handling-and-validation)
 
-- [X] T131 [P] Add comprehensive Zod validation schemas for all tRPC inputs | **Pattern**: [research.md Section 9 Error Handling Pattern](./research.md#9-error-handling-and-validation) - includes Zod schema examples
-- [X] T132 [P] Implement global error handler in apps/server/src/index.ts | **Best Practices**: Never expose database errors to frontend
-- [X] T133 [P] Add error boundaries in apps/web/src/routes/__root.tsx | **UX**: User-friendly error messages
-- [X] T134 Add user-friendly error messages with toast notifications using Sonner | **Error Categories**: [research.md Section 9 Error Categories](./research.md#9-error-handling-and-validation)
+- [x] T131 [P] Add comprehensive Zod validation schemas for all tRPC inputs | **Pattern**: [research.md Section 9 Error Handling Pattern](./research.md#9-error-handling-and-validation) - includes Zod schema examples
+- [x] T132 [P] Implement global error handler in apps/server/src/index.ts | **Best Practices**: Never expose database errors to frontend
+- [x] T133 [P] Add error boundaries in apps/web/src/routes/\_\_root.tsx | **UX**: User-friendly error messages
+- [x] T134 Add user-friendly error messages with toast notifications using Sonner | **Error Categories**: [research.md Section 9 Error Categories](./research.md#9-error-handling-and-validation)
 
 ### Performance Optimization
 
 **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies)
 
-- [X] T135 [P] Add database indexes for frequently queried fields (orders.status, orders.tableId, ingredients.quantity) | **Indexes**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes all critical index definitions
-- [X] T136 [P] Implement tRPC query batching in apps/web/src/utils/trpc.ts | **Pattern**: [research.md Section 8 tRPC Batching](./research.md#8-performance-optimization-strategies) - includes httpBatchLink configuration
-- [X] T137 [P] Optimize WebSocket connection pooling in apps/server/src/websocket.ts | **Pattern**: [research.md Section 1 WebSocket](./research.md#1-real-time-notification-architecture)
-- [X] T138 Add loading skeletons for all async data fetching in frontend components | **UX**: Loading states < 200ms requirement
+- [x] T135 [P] Add database indexes for frequently queried fields (orders.status, orders.tableId, ingredients.quantity) | **Indexes**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes all critical index definitions
+- [x] T136 [P] Implement tRPC query batching in apps/web/src/utils/trpc.ts | **Pattern**: [research.md Section 8 tRPC Batching](./research.md#8-performance-optimization-strategies) - includes httpBatchLink configuration
+- [x] T137 [P] Optimize WebSocket connection pooling in apps/server/src/websocket.ts | **Pattern**: [research.md Section 1 WebSocket](./research.md#1-real-time-notification-architecture)
+- [x] T138 Add loading skeletons for all async data fetching in frontend components | **UX**: Loading states < 200ms requirement
 
 ### Documentation & Developer Experience
 
-- [X] T139 [P] Create API documentation from tRPC schema in docs/api-reference.md | **Contracts**: Reference all contracts/*.md files
-- [X] T140 [P] Document WebSocket message types and flows in docs/websocket-protocol.md | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) and all contract WebSocket sections
-- [X] T141 [P] Update README.md with setup instructions and architecture overview | **Reference**: [quickstart.md](./quickstart.md) for setup steps
-- [X] T142 Run quickstart.md validation (verify all setup steps work correctly) | **Validation**: [plan.md Checkpoint 1.3](./plan.md#checkpoint-13--foundation-complete)
+- [x] T139 [P] Create API documentation from tRPC schema in docs/api-reference.md | **Contracts**: Reference all contracts/\*.md files
+- [x] T140 [P] Document WebSocket message types and flows in docs/websocket-protocol.md | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) and all contract WebSocket sections
+- [x] T141 [P] Update README.md with setup instructions and architecture overview | **Reference**: [quickstart.md](./quickstart.md) for setup steps
+- [x] T142 Run quickstart.md validation (verify all setup steps work correctly) | **Validation**: [plan.md Checkpoint 1.3](./plan.md#checkpoint-13--foundation-complete)
 
 ### Security & Production Readiness
 
 **Reference**: [research.md Section 10](./research.md#10-deployment-and-environment-configuration)
 
-- [X] T143 [P] Implement rate limiting for public endpoints (orders.create) | **Security**: Constitution security standards
-- [X] T144 [P] Add CSRF protection for authenticated mutations | **Security**: Better-Auth provides CSRF tokens
-- [X] T145 [P] Configure environment-specific CORS policies | **Config**: [research.md Section 10 Environment Config](./research.md#10-deployment-and-environment-configuration)
-- [X] T146 Add security headers (HSTS, CSP, X-Frame-Options) in Hono middleware | **Best Practices**: Constitution security standards
-- [X] T147 Create production environment configuration for Turso database | **Deployment**: [research.md Section 10 Deployment Checklist](./research.md#10-deployment-and-environment-configuration)
+- [x] T143 [P] Implement rate limiting for public endpoints (orders.create) | **Security**: Constitution security standards
+- [x] T144 [P] Add CSRF protection for authenticated mutations | **Security**: Better-Auth provides CSRF tokens
+- [x] T145 [P] Configure environment-specific CORS policies | **Config**: [research.md Section 10 Environment Config](./research.md#10-deployment-and-environment-configuration)
+- [x] T146 Add security headers (HSTS, CSP, X-Frame-Options) in Hono middleware | **Best Practices**: Constitution security standards
+- [x] T147 Create production environment configuration for Turso database | **Deployment**: [research.md Section 10 Deployment Checklist](./research.md#10-deployment-and-environment-configuration)
 
 ---
 
@@ -410,17 +411,21 @@
 ### Parallel Opportunities
 
 #### Phase 1 (Setup)
+
 - All tasks marked [P] can run in parallel (T003, T004, T005, T007)
 
 #### Phase 2 (Foundational)
+
 Within database schema: T009-T013, T015-T017 can run in parallel (different schema files)
 Within frontend foundation: T033-T034 can run in parallel (independent UI components)
 
 #### After Phase 2 Completion
+
 - **US1 and US2 can start in parallel** (different routers: tables/dishes/orders vs. orders status management)
 - **US5 can start in parallel with US1/US2** (separate inventory router)
 
 #### Within Each User Story
+
 - All test tasks marked [P] within a story can run in parallel
 - All router procedure implementations marked [P] can run in parallel
 - All independent frontend components marked [P] can run in parallel
@@ -519,6 +524,7 @@ With multiple developers:
 **Total Tasks**: 147 tasks across 9 phases
 
 **Task Breakdown by Phase**:
+
 - Phase 1 (Setup): 7 tasks
 - Phase 2 (Foundational): 30 tasks ⚠️ BLOCKING
 - Phase 3 (US1 - Customer Ordering): 22 tasks (5 tests + 17 implementation)
@@ -530,6 +536,7 @@ With multiple developers:
 - Phase 9 (Polish): 22 tasks
 
 **Task Breakdown by User Story**:
+
 - User Story 1 (P1): 22 tasks - Customer self-service QR ordering
 - User Story 2 (P1): 15 tasks - Kitchen order management
 - User Story 3 (P2): 10 tasks - Staff-assisted ordering
@@ -538,12 +545,14 @@ With multiple developers:
 - User Story 6 (P2): 15 tasks - Cash payment processing
 
 **Parallel Opportunities**:
+
 - Phase 1: 4 tasks can run in parallel
 - Phase 2: 13 tasks can run in parallel
 - After Phase 2: US1, US2, and US5 can start in parallel (56 tasks across 3 stories)
 - Within each user story: 5-10 tasks can run in parallel (tests, models, components)
 
 **MVP Scope** (Recommended first delivery):
+
 - Setup + Foundational + US1 + US2 = **74 tasks**
 - Delivers: Customer QR ordering + Kitchen dashboard + Real-time notifications + Inventory reduction
 - Estimated effort: 2-3 weeks for 1 developer, 1-2 weeks for 2 developers working in parallel
@@ -558,18 +567,19 @@ With multiple developers:
 
 ### Design Documents Overview
 
-| Document | Purpose | Key Content |
-|----------|---------|-------------|
-| [plan.md](./plan.md) | Implementation roadmap | Week-by-week breakdown, task dependencies, checkpoints |
-| [spec.md](./spec.md) | Feature specification | 6 user stories with acceptance scenarios, functional requirements |
-| [data-model.md](./data-model.md) | Database schema | 9 entity definitions with validation rules, relationships, TypeScript types |
-| [research.md](./research.md) | Technical decisions | 10 architectural patterns with code examples |
-| [quickstart.md](./quickstart.md) | Developer onboarding | Setup instructions, TDD workflow examples |
-| [contracts/*.md](./contracts/) | API specifications | 5 tRPC routers with input/output schemas, business logic |
+| Document                         | Purpose                | Key Content                                                                 |
+| -------------------------------- | ---------------------- | --------------------------------------------------------------------------- |
+| [plan.md](./plan.md)             | Implementation roadmap | Week-by-week breakdown, task dependencies, checkpoints                      |
+| [spec.md](./spec.md)             | Feature specification  | 6 user stories with acceptance scenarios, functional requirements           |
+| [data-model.md](./data-model.md) | Database schema        | 9 entity definitions with validation rules, relationships, TypeScript types |
+| [research.md](./research.md)     | Technical decisions    | 10 architectural patterns with code examples                                |
+| [quickstart.md](./quickstart.md) | Developer onboarding   | Setup instructions, TDD workflow examples                                   |
+| [contracts/\*.md](./contracts/)  | API specifications     | 5 tRPC routers with input/output schemas, business logic                    |
 
 ### Key Sections by Implementation Area
 
 #### Database Schema (Phase 2: T008-T020)
+
 - **User**: [data-model.md Section 1](./data-model.md#1-user) - roles, validation, auth integration
 - **Table**: [data-model.md Section 2](./data-model.md#2-table) - QR code format, capacity
 - **Order**: [data-model.md Section 3](./data-model.md#3-order) - status enum, state transitions
@@ -583,6 +593,7 @@ With multiple developers:
 - **Seed Data**: [data-model.md Seed Data Requirements](./data-model.md#seed-data-requirements)
 
 #### API Routers (Phases 3-8)
+
 - **Orders**: [contracts/orders-router.md](./contracts/orders-router.md) - 10 procedures including create, submit, updateStatus, getKitchenOrders, getServingOrders
 - **Dishes**: [contracts/dishes-router.md](./contracts/dishes-router.md) - getAll, getById, create, update, toggleAvailability
 - **Inventory**: [contracts/inventory-router.md](./contracts/inventory-router.md) - getAll, adjustStock, updateThreshold
@@ -590,6 +601,7 @@ With multiple developers:
 - **Payments**: [contracts/payments-router.md](./contracts/payments-router.md) - create, getById, getHistory
 
 #### Technical Patterns (All Phases)
+
 - **WebSocket**: [research.md Section 1](./research.md#1-real-time-notification-architecture) - connection pooling, broadcasting by role
 - **Database Transactions**: [research.md Section 3](./research.md#3-inventory-management-and-stock-validation) - atomic stock reduction with FOR UPDATE lock
 - **QR Code Session**: [research.md Section 4](./research.md#4-qr-code-generation-and-table-session-management) - table session logic
@@ -601,6 +613,7 @@ With multiple developers:
 - **Deployment**: [research.md Section 10](./research.md#10-deployment-and-environment-configuration) - environment variables, Turso setup
 
 #### User Story Acceptance Criteria (Phases 3-8)
+
 - **US1 (Customer Ordering)**: [spec.md US1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) - 6 scenarios
 - **US2 (Kitchen Management)**: [spec.md US2](./spec.md#user-story-2---kitchen-order-management-priority-p1) - 5 scenarios
 - **US3 (Staff Ordering)**: [spec.md US3](./spec.md#user-story-3---staff-assisted-ordering-priority-p2) - 5 scenarios
@@ -609,30 +622,35 @@ With multiple developers:
 - **US6 (Payment)**: [spec.md US6](./spec.md#user-story-6---cash-payment-processing-priority-p2) - 5 scenarios
 
 #### Functional Requirements
+
 - **FR-001 to FR-036**: [spec.md Functional Requirements](./spec.md#functional-requirements) - complete requirements list with traceability
 
 ### Task-to-Document Mapping
 
 #### When implementing schema tasks (T009-T017):
+
 1. Read corresponding entity section in data-model.md
 2. Check validation rules and constraints
 3. Review TypeScript type exports
 4. Reference seed data requirements
 
 #### When implementing API router tasks (T043-T125):
-1. Read procedure specification in contracts/*.md
+
+1. Read procedure specification in contracts/\*.md
 2. Check input/output schemas (Zod)
 3. Review business logic requirements
 4. Check WebSocket notification requirements
 5. Reference related data model sections
 
 #### When implementing frontend tasks (T054-T125):
+
 1. Read acceptance scenarios in spec.md
 2. Check contract output schemas for data structure
 3. Review state management patterns in research.md Section 6
 4. Check auth guard requirements in research.md Section 5
 
 #### When writing tests (T038-T113):
+
 1. Read TDD workflow in quickstart.md
 2. Review acceptance scenarios in spec.md
 3. Check contract specifications for expected behavior
@@ -640,24 +658,25 @@ With multiple developers:
 
 ### File Path Quick Reference
 
-| Component | File Path | Primary Reference |
-|-----------|-----------|-------------------|
-| Database Schemas | `packages/db/src/schema/*.ts` | [data-model.md](./data-model.md) |
-| Orders API | `packages/api/src/routers/orders.ts` | [orders-router.md](./contracts/orders-router.md) |
-| Dishes API | `packages/api/src/routers/dishes.ts` | [dishes-router.md](./contracts/dishes-router.md) |
-| Inventory API | `packages/api/src/routers/inventory.ts` | [inventory-router.md](./contracts/inventory-router.md) |
-| Tables API | `packages/api/src/routers/tables.ts` | [tables-router.md](./contracts/tables-router.md) |
-| Payments API | `packages/api/src/routers/payments.ts` | [payments-router.md](./contracts/payments-router.md) |
-| WebSocket | `apps/server/src/websocket.ts` | [research.md Sec 1](./research.md#1-real-time-notification-architecture) |
-| Auth Config | `packages/auth/src/index.ts` | [research.md Sec 5](./research.md#5-role-based-access-control-with-better-auth) |
-| Customer Menu | `apps/web/src/routes/index.tsx` | [spec.md US1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1) |
-| Kitchen Dashboard | `apps/web/src/routes/kitchen.tsx` | [spec.md US2](./spec.md#user-story-2---kitchen-order-management-priority-p1) |
-| Serving Dashboard | `apps/web/src/routes/serving.tsx` | [spec.md US4](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2) |
-| Inventory Dashboard | `apps/web/src/routes/inventory.tsx` | [spec.md US5](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3) |
+| Component           | File Path                               | Primary Reference                                                                     |
+| ------------------- | --------------------------------------- | ------------------------------------------------------------------------------------- |
+| Database Schemas    | `packages/db/src/schema/*.ts`           | [data-model.md](./data-model.md)                                                      |
+| Orders API          | `packages/api/src/routers/orders.ts`    | [orders-router.md](./contracts/orders-router.md)                                      |
+| Dishes API          | `packages/api/src/routers/dishes.ts`    | [dishes-router.md](./contracts/dishes-router.md)                                      |
+| Inventory API       | `packages/api/src/routers/inventory.ts` | [inventory-router.md](./contracts/inventory-router.md)                                |
+| Tables API          | `packages/api/src/routers/tables.ts`    | [tables-router.md](./contracts/tables-router.md)                                      |
+| Payments API        | `packages/api/src/routers/payments.ts`  | [payments-router.md](./contracts/payments-router.md)                                  |
+| WebSocket           | `apps/server/src/websocket.ts`          | [research.md Sec 1](./research.md#1-real-time-notification-architecture)              |
+| Auth Config         | `packages/auth/src/index.ts`            | [research.md Sec 5](./research.md#5-role-based-access-control-with-better-auth)       |
+| Customer Menu       | `apps/web/src/routes/index.tsx`         | [spec.md US1](./spec.md#user-story-1---customer-self-service-ordering-priority-p1)    |
+| Kitchen Dashboard   | `apps/web/src/routes/kitchen.tsx`       | [spec.md US2](./spec.md#user-story-2---kitchen-order-management-priority-p1)          |
+| Serving Dashboard   | `apps/web/src/routes/serving.tsx`       | [spec.md US4](./spec.md#user-story-4---order-status-tracking-and-serving-priority-p2) |
+| Inventory Dashboard | `apps/web/src/routes/inventory.tsx`     | [spec.md US5](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)   |
 
 ### Validation Checkpoints
 
 Refer to [plan.md Implementation Roadmap](./plan.md#implementation-roadmap) for detailed validation checkpoints at each phase:
+
 - **Checkpoint 1.1**: Database schema validation (after T020)
 - **Checkpoint 1.2**: tRPC infrastructure validation (after T026)
 - **Checkpoint 1.3**: Foundation complete (after T037)
@@ -674,6 +693,7 @@ Refer to [plan.md Implementation Roadmap](./plan.md#implementation-roadmap) for 
 ## Usage Guide for Developers/LLMs
 
 ### Starting a Task
+
 1. **Read the task description** with file path
 2. **Follow the Reference links** (marked with `|` separator)
 3. **Review acceptance scenarios** if US task
@@ -682,6 +702,7 @@ Refer to [plan.md Implementation Roadmap](./plan.md#implementation-roadmap) for 
 6. **Review technical pattern** from research.md if complex
 
 ### Example: Implementing T050 (orders.submit)
+
 ```
 Task: Implement orders.submit mutation in packages/api/src/routers/orders.ts with transactional inventory reduction
 
@@ -700,6 +721,7 @@ Implementation steps:
 ```
 
 ### Common Patterns
+
 - **All tRPC procedures**: Use Zod for input validation, reference contract for schema
 - **All WebSocket events**: Reference research.md Section 1 for broadcast pattern
 - **All database transactions**: Reference research.md Section 3 for FOR UPDATE lock

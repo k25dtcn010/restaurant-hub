@@ -1,13 +1,14 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { authClient } from "@/lib/auth-client";
-import { trpc, trpcClient, queryClient } from "@/utils/trpc";
-import { useState, useMemo } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { MenuList } from "@/components/menu-list";
-import { OrderCart } from "@/components/order-cart";
-import { TableSelector } from "@/components/table-selector";
-import { toast } from "sonner";
-import { TRPCClientError } from "@trpc/client";
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import { TRPCClientError } from "@trpc/client"
+import { useMemo, useState } from "react"
+import { toast } from "sonner"
+
+import { MenuList } from "@/components/menu-list"
+import { OrderCart } from "@/components/order-cart"
+import { TableSelector } from "@/components/table-selector"
+import { authClient } from "@/lib/auth-client"
+import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
 /**
  * T080: Staff-Order Route
@@ -25,13 +26,13 @@ import { TRPCClientError } from "@trpc/client";
 export const Route = createFileRoute("/staff-order")({
   component: RouteComponent,
   beforeLoad: async () => {
-    const session = await authClient.getSession();
+    const session = await authClient.getSession()
 
     // Check if user is authenticated
     if (!session.data) {
       throw redirect({
         to: "/login",
-      });
+      })
     }
 
     // Note: Role checking commented out for MVP - will be enabled when user.role is available
@@ -43,99 +44,97 @@ export const Route = createFileRoute("/staff-order")({
     // 	});
     // }
 
-    return { session };
+    return { session }
   },
-});
+})
 
 interface CartItem {
-  dishId: number;
-  dishName: string;
-  quantity: number;
-  priceAtOrder: number;
+  dishId: number
+  dishName: string
+  quantity: number
+  priceAtOrder: number
 }
 
 function RouteComponent() {
-  const routeContext = Route.useRouteContext();
-  const session = routeContext.session;
+  const routeContext = Route.useRouteContext()
+  const session = routeContext.session
 
-  const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
-  const [cart, setCart] = useState<Map<number, CartItem>>(new Map());
+  const [selectedTableId, setSelectedTableId] = useState<number | null>(null)
+  const [cart, setCart] = useState<Map<number, CartItem>>(new Map())
 
   // Fetch all tables
-  const { data: tablesData, isLoading: tablesLoading } = useQuery(
-    trpc.tables.getAll.queryOptions()
-  );
+  const { data: tablesData, isLoading: tablesLoading } = useQuery(trpc.tables.getAll.queryOptions())
 
   // Fetch dishes
   const { data: dishesData, isLoading: dishesLoading } = useQuery(
     trpc.dishes.getAll.queryOptions({
       includeDisabled: false,
     })
-  );
+  )
 
   // Order creation mutation
   const createOrderMutation = useMutation({
     mutationFn: (variables: {
-      tableId: number;
-      items: Array<{ dishId: number; quantity: number }>;
+      tableId: number
+      items: Array<{ dishId: number; quantity: number }>
     }) => trpcClient.orders.create.mutate(variables),
-  });
+  })
 
   const submitOrderMutation = useMutation({
     mutationFn: (variables: { orderId: number }) => trpcClient.orders.submit.mutate(variables),
-  });
+  })
 
-  const tables = tablesData?.tables || [];
-  const dishes = dishesData?.dishes || [];
+  const tables = tablesData?.tables || []
+  const dishes = dishesData?.dishes || []
 
-  const selectedTable = tables.find((t) => t.id === selectedTableId);
+  const selectedTable = tables.find((t) => t.id === selectedTableId)
 
   // Handle table selection
   const handleSelectTable = (tableId: number) => {
-    setSelectedTableId(tableId);
-  };
+    setSelectedTableId(tableId)
+  }
 
   // Handle adding/removing items from cart
   const handleAddToCart = (dishId: number, quantity: number) => {
     if (quantity === 0) {
       // Remove from cart
       setCart((prev) => {
-        const newCart = new Map(prev);
-        newCart.delete(dishId);
-        return newCart;
-      });
-      return;
+        const newCart = new Map(prev)
+        newCart.delete(dishId)
+        return newCart
+      })
+      return
     }
 
-    const dish = dishes.find((d: { id: number; name: string; price: number }) => d.id === dishId);
-    if (!dish) return;
+    const dish = dishes.find((d: { id: number; name: string; price: number }) => d.id === dishId)
+    if (!dish) return
 
     setCart((prev) => {
-      const newCart = new Map(prev);
+      const newCart = new Map(prev)
       newCart.set(dishId, {
         dishId,
         dishName: dish.name,
         quantity,
         priceAtOrder: dish.price,
-      });
-      return newCart;
-    });
-  };
+      })
+      return newCart
+    })
+  }
 
   const handleRemoveItem = (dishId: number) => {
-    handleAddToCart(dishId, 0);
-  };
+    handleAddToCart(dishId, 0)
+  }
 
   // Handle order submission
   const handleSubmitOrder = async () => {
     if (!selectedTableId) {
-      toast.error("Please select a table first.");
-      return;
+      toast.error("Please select a table first.")
+      return
     }
 
     if (cart.size === 0) {
-      toast.error("Cart is empty. Add items before submitting.");
-      return;
+      toast.error("Cart is empty. Add items before submitting.")
+      return
     }
 
     try {
@@ -143,64 +142,64 @@ function RouteComponent() {
       const items = Array.from(cart.values()).map((item) => ({
         dishId: item.dishId,
         quantity: item.quantity,
-      }));
+      }))
 
       const createResult = await createOrderMutation.mutateAsync({
         tableId: selectedTableId,
         items,
-      });
+      })
 
       // Submit order to kitchen
       await submitOrderMutation.mutateAsync({
         orderId: createResult.orderId,
-      });
+      })
 
       // Success!
       toast.success(
         createResult.isNew ? "Order submitted to kitchen!" : "Items added to existing order!"
-      );
+      )
 
       // Clear cart but keep table selected for next order
-      setCart(new Map());
+      setCart(new Map())
 
       // Invalidate tables query to update active order status
       queryClient.invalidateQueries({
         queryKey: trpc.tables.getAll.queryKey(),
-      });
+      })
 
       // Invalidate kitchen orders query so kitchen page shows the new order
       queryClient.invalidateQueries({
         predicate: (query) => {
           // tRPC query keys are arrays like [["orders", "getKitchenOrders"], {...input}]
-          const queryKey = query.queryKey[0];
+          const queryKey = query.queryKey[0]
           return (
             Array.isArray(queryKey) &&
             queryKey[0] === "orders" &&
             queryKey[1] === "getKitchenOrders"
-          );
+          )
         },
-      });
+      })
     } catch (error) {
       // Handle errors
       if (error instanceof TRPCClientError) {
-        toast.error(error.message);
+        toast.error(error.message)
       } else {
-        toast.error("Failed to submit order. Please try again.");
+        toast.error("Failed to submit order. Please try again.")
       }
-      console.error("Order submission error:", error);
+      console.error("Order submission error:", error)
     }
-  };
+  }
 
-  const cartItems = Array.from(cart.values());
+  const cartItems = Array.from(cart.values())
   const cartQuantities = useMemo(() => {
-    const map = new Map<number, number>();
+    const map = new Map<number, number>()
     cart.forEach((item, dishId) => {
-      map.set(dishId, item.quantity);
-    });
-    return map;
-  }, [cart]);
+      map.set(dishId, item.quantity)
+    })
+    return map
+  }, [cart])
 
-  const isLoading = tablesLoading || dishesLoading;
+  const isLoading = tablesLoading || dishesLoading
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -253,5 +252,5 @@ function RouteComponent() {
         </div>
       )}
     </div>
-  );
+  )
 }

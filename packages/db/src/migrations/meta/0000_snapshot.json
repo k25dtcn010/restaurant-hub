@@ -105,12 +105,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -182,9 +178,7 @@
       "indexes": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "isUnique": true
         }
       },
@@ -193,12 +187,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -271,9 +261,7 @@
       "indexes": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -452,9 +440,7 @@
       "indexes": {
         "ingredients_name_unique": {
           "name": "ingredients_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -519,16 +505,12 @@
       "indexes": {
         "idx_order_items_order_id": {
           "name": "idx_order_items_order_id",
-          "columns": [
-            "order_id"
-          ],
+          "columns": ["order_id"],
           "isUnique": false
         },
         "idx_order_items_dish_id": {
           "name": "idx_order_items_dish_id",
-          "columns": [
-            "dish_id"
-          ],
+          "columns": ["dish_id"],
           "isUnique": false
         }
       },
@@ -537,12 +519,8 @@
           "name": "order_items_order_id_orders_id_fk",
           "tableFrom": "order_items",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -550,12 +528,8 @@
           "name": "order_items_dish_id_dishes_id_fk",
           "tableFrom": "order_items",
           "tableTo": "dishes",
-          "columnsFrom": [
-            "dish_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["dish_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -606,9 +580,7 @@
       "indexes": {
         "idx_order_status_history_order_id": {
           "name": "idx_order_status_history_order_id",
-          "columns": [
-            "order_id"
-          ],
+          "columns": ["order_id"],
           "isUnique": false
         }
       },
@@ -617,12 +589,8 @@
           "name": "order_status_history_order_id_orders_id_fk",
           "tableFrom": "order_status_history",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -630,12 +598,8 @@
           "name": "order_status_history_changed_by_user_id_fk",
           "tableFrom": "order_status_history",
           "tableTo": "user",
-          "columnsFrom": [
-            "changed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["changed_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -695,23 +659,17 @@
       "indexes": {
         "idx_orders_table_id": {
           "name": "idx_orders_table_id",
-          "columns": [
-            "table_id"
-          ],
+          "columns": ["table_id"],
           "isUnique": false
         },
         "idx_orders_status": {
           "name": "idx_orders_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         },
         "idx_orders_created_at": {
           "name": "idx_orders_created_at",
-          "columns": [
-            "created_at"
-          ],
+          "columns": ["created_at"],
           "isUnique": false
         }
       },
@@ -720,12 +678,8 @@
           "name": "orders_table_id_tables_id_fk",
           "tableFrom": "orders",
           "tableTo": "tables",
-          "columnsFrom": [
-            "table_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["table_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -777,9 +731,7 @@
       "indexes": {
         "payments_order_id_unique": {
           "name": "payments_order_id_unique",
-          "columns": [
-            "order_id"
-          ],
+          "columns": ["order_id"],
           "isUnique": true
         }
       },
@@ -788,12 +740,8 @@
           "name": "payments_order_id_orders_id_fk",
           "tableFrom": "payments",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -837,10 +785,7 @@
       "indexes": {
         "idx_recipe_dish_ingredient": {
           "name": "idx_recipe_dish_ingredient",
-          "columns": [
-            "dish_id",
-            "ingredient_id"
-          ],
+          "columns": ["dish_id", "ingredient_id"],
           "isUnique": true
         }
       },
@@ -849,12 +794,8 @@
           "name": "recipes_dish_id_dishes_id_fk",
           "tableFrom": "recipes",
           "tableTo": "dishes",
-          "columnsFrom": [
-            "dish_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["dish_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -862,12 +803,8 @@
           "name": "recipes_ingredient_id_ingredients_id_fk",
           "tableFrom": "recipes",
           "tableTo": "ingredients",
-          "columnsFrom": [
-            "ingredient_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ingredient_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -919,16 +856,12 @@
       "indexes": {
         "tables_number_unique": {
           "name": "tables_number_unique",
-          "columns": [
-            "number"
-          ],
+          "columns": ["number"],
           "isUnique": true
         },
         "tables_qr_code_unique": {
           "name": "tables_qr_code_unique",
-          "columns": [
-            "qr_code"
-          ],
+          "columns": ["qr_code"],
           "isUnique": true
         }
       },

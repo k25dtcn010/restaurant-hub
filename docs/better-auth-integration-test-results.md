@@ -18,7 +18,7 @@ The integration tests demonstrate that Better-Auth is properly configured and fu
 #### ✅ Passing Tests
 
 1. **Waiter can process payment** - Validates Waiter role can create payments
-2. **Manager can process payment** - Validates Manager role can create payments  
+2. **Manager can process payment** - Validates Manager role can create payments
 3. **KitchenStaff can process payment** - Validates KitchenStaff role can create payments
 4. **Customer cannot process payment** - Validates unauthorized access is blocked (FORBIDDEN)
 5. **Only Manager can view payment history** - Validates Manager-only access to payment history
@@ -36,6 +36,7 @@ The integration tests demonstrate that Better-Auth is properly configured and fu
 **Results**: 6 out of 6 tests passing (100%)
 
 All payment workflow tests pass, including:
+
 - Complete payment flow with order lifecycle
 - Payment validation (incorrect amount, non-completed order)
 - Table session clearing after payment
@@ -49,6 +50,7 @@ All payment workflow tests pass, including:
 **Results**: 6 out of 8 tests passing (75%)
 
 Most tests passing, with 2 failures due to test data setup issues (not auth-related):
+
 - Test table already exists (UNIQUE constraint)
 - Null reference on test table
 
@@ -59,6 +61,7 @@ Most tests passing, with 2 failures due to test data setup issues (not auth-rela
 Location: `packages/db/src/schema/auth.ts`
 
 Tables defined:
+
 - **user** - With role field (Manager, KitchenStaff, Waiter)
 - **session** - Session management with expiry
 - **account** - OAuth and password authentication
@@ -69,6 +72,7 @@ Tables defined:
 Location: `packages/auth/src/index.ts`
 
 Features enabled:
+
 - **Drizzle adapter** - SQLite/Turso database integration
 - **Email and password** - Authentication method
 - **Role-based access** - Custom role field with default "Waiter"
@@ -80,6 +84,7 @@ Features enabled:
 Location: `packages/api/src/context.ts`
 
 Context includes:
+
 - **session** - Better-Auth session with user data
 - **user** - User object with role
 - **role** - Extracted role for authorization checks
@@ -90,6 +95,7 @@ Context includes:
 Location: `packages/api/src/routers/payments.ts`
 
 Authorization checks:
+
 - **payments.create** - Requires Waiter, Manager, or KitchenStaff role
 - **payments.getHistory** - Requires Manager role only
 - Proper FORBIDDEN error codes when unauthorized
@@ -120,6 +126,7 @@ All payment-related routes have authentication guards:
 Location: `apps/web/src/lib/auth-client.ts`
 
 Features:
+
 - Better-Auth React hooks
 - Session management
 - Sign in/sign out/sign up functions
@@ -130,9 +137,10 @@ Features:
 ✅ Database schema pushed successfully  
 ✅ Better-Auth tables created  
 ✅ Test users seeded with proper roles:
-   - `waiter@restauranthub.com` - Waiter role
-   - `chef@restauranthub.com` - KitchenStaff role
-   - `admin@restauranthub.com` - Manager role
+
+- `waiter@restauranthub.com` - Waiter role
+- `chef@restauranthub.com` - KitchenStaff role
+- `admin@restauranthub.com` - Manager role
 
 ## Key Test Scenarios Validated
 
@@ -146,7 +154,7 @@ waiterContext: {
   role: "Waiter"
 }
 
-// Manager Context  
+// Manager Context
 managerContext: {
   session: { /* Better-Auth session */ },
   user: { role: "Manager" },
@@ -206,6 +214,7 @@ session: {
 ✅ **Better-Auth is properly integrated and working**
 
 The integration tests demonstrate:
+
 1. Role-based access control is enforced
 2. Session management is functional
 3. Authorization checks are working correctly

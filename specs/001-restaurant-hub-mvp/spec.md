@@ -15,7 +15,7 @@
 - Q: Can items be removed from an order after submission? → A: Only before "In Kitchen" - Items can be removed while status is "Pending"
 - Q: How many tables should the system support? → A: 25-30 tables
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Customer Self-Service Ordering (Priority: P1)
 
@@ -138,11 +138,12 @@ When a customer is ready to pay, serving staff view the order total, mark the or
 - What happens when network connectivity is lost while a customer is ordering? (Order should queue locally and retry submission when connection is restored, or show error message if submission fails)
 - What happens when a table QR code is damaged or unreadable? (Staff can manually create an order for that table using staff interface)
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
 **Ordering and Menu**
+
 - **FR-001**: System MUST display a complete menu with dish name, description, price, and photo for each item
 - **FR-001a**: System MUST allow managers to add new dishes with name, description, price, and photo
 - **FR-001b**: System MUST allow managers to edit existing dish details (name, description, price, photo)
@@ -154,6 +155,7 @@ When a customer is ready to pay, serving staff view the order total, mark the or
 - **FR-006**: System MUST generate a unique QR code for each table that links to that table's ordering session
 
 **Inventory Management**
+
 - **FR-007**: System MUST track ingredient quantities and units of measure for all menu items
 - **FR-008**: System MUST define recipes that specify which ingredients and quantities are required for each dish
 - **FR-009**: System MUST automatically reduce ingredient stock when an order is submitted based on recipe requirements
@@ -163,6 +165,7 @@ When a customer is ready to pay, serving staff view the order total, mark the or
 - **FR-013**: System MUST prevent ingredient quantities from going negative by blocking orders when stock is insufficient
 
 **Order Lifecycle**
+
 - **FR-014**: System MUST assign each order one of the following statuses: "Pending", "In Kitchen", "Ready to Serve", "Served", "Completed", "Paid"
 - **FR-015**: System MUST allow authorized staff to change order status at any time
 - **FR-016**: System MUST record timestamps for each status change in order history
@@ -174,6 +177,7 @@ When a customer is ready to pay, serving staff view the order total, mark the or
 - **FR-019**: System MUST group orders by table number in all dashboards
 
 **Kitchen Management**
+
 - **FR-020**: System MUST display all active orders on the kitchen dashboard, grouped by table
 - **FR-021**: System MUST sort orders by submission time (oldest first) within each status category
 - **FR-022**: System MUST allow kitchen staff to update order status from Pending → In Kitchen → Ready to Serve
@@ -181,6 +185,7 @@ When a customer is ready to pay, serving staff view the order total, mark the or
 - **FR-024**: System MUST visually distinguish between different order statuses (Pending, In Kitchen, Ready)
 
 **Serving and Payment**
+
 - **FR-025**: System MUST display a dashboard for serving staff showing orders that are "Ready to Serve" or "Served"
 - **FR-026**: System MUST allow serving staff to mark orders as "Served" when food is delivered to the table
 - **FR-027**: System MUST calculate and display the total amount due for each order
@@ -189,6 +194,7 @@ When a customer is ready to pay, serving staff view the order total, mark the or
 - **FR-030**: System MUST maintain payment history with order details, timestamps, and amounts
 
 **User Roles and Access**
+
 - **FR-031**: System MUST support three staff roles: Manager, Kitchen Staff, and Waiter
 - **FR-032**: Managers MUST have access to all dashboards (inventory, orders, kitchen, serving, payment history)
 - **FR-033**: Kitchen Staff MUST have access only to the kitchen dashboard
@@ -207,7 +213,7 @@ When a customer is ready to pay, serving staff view the order total, mark the or
 - **User**: Represents staff members with roles (Manager, Kitchen Staff, Waiter); used for authentication and access control
 - **Payment**: Represents a completed cash transaction; linked to an order with payment timestamp and amount
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
@@ -250,4 +256,3 @@ When a customer is ready to pay, serving staff view the order total, mark the or
 - Discount codes, promotions, or dynamic pricing
 - Kitchen display screens with order timers or priority queues
 - Voice ordering or accessibility features beyond standard mobile browser support
-

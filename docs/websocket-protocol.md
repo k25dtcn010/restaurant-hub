@@ -26,10 +26,11 @@ This document describes all WebSocket events, connection management, and real-ti
 Connect to WebSocket endpoint with role query parameter:
 
 ```typescript
-const ws = new WebSocket('ws://localhost:3000/ws?role=kitchen');
+const ws = new WebSocket("ws://localhost:3000/ws?role=kitchen")
 ```
 
 **Supported Roles**:
+
 - `kitchen` - Receives order creation events
 - `serving` - Receives ready-to-serve events
 - `manager` - Receives all events (monitoring)
@@ -58,11 +59,12 @@ connections = {
   kitchen: Set<WebSocket>,
   serving: Set<WebSocket>,
   manager: Set<WebSocket>,
-  anonymous: Set<WebSocket>
+  anonymous: Set<WebSocket>,
 }
 ```
 
 **Connection Statistics**: `GET /ws/stats`
+
 ```typescript
 {
   kitchen: 5,
@@ -84,6 +86,7 @@ connections = {
 **Description**: New order submitted and needs preparation
 
 **Message Format**:
+
 ```typescript
 {
   type: "NEW_ORDER"
@@ -97,13 +100,14 @@ connections = {
       specialInstructions?: string
     }>
     totalAmount: number
-    createdAt: string  // ISO 8601
+    createdAt: string // ISO 8601
   }
-  timestamp: string    // ISO 8601
+  timestamp: string // ISO 8601
 }
 ```
 
 **Example**:
+
 ```json
 {
   "type": "NEW_ORDER",
@@ -130,15 +134,16 @@ connections = {
 ```
 
 **Client Handling**:
+
 ```typescript
 ws.onmessage = (event) => {
-  const message = JSON.parse(event.data);
-  if (message.type === 'NEW_ORDER') {
+  const message = JSON.parse(event.data)
+  if (message.type === "NEW_ORDER") {
     // Add order to kitchen board
-    queryClient.invalidateQueries(['orders.getKitchenOrders']);
-    toast.success(`New order for Table ${message.order.tableNumber}`);
+    queryClient.invalidateQueries(["orders.getKitchenOrders"])
+    toast.success(`New order for Table ${message.order.tableNumber}`)
   }
-};
+}
 ```
 
 ---
@@ -150,6 +155,7 @@ ws.onmessage = (event) => {
 **Description**: Order status updated (any transition)
 
 **Message Format**:
+
 ```typescript
 {
   type: "ORDER_STATUS_CHANGED"
@@ -160,6 +166,7 @@ ws.onmessage = (event) => {
 ```
 
 **Example**:
+
 ```json
 {
   "type": "ORDER_STATUS_CHANGED",
@@ -178,6 +185,7 @@ ws.onmessage = (event) => {
 **Description**: Order is ready for serving staff to deliver
 
 **Message Format**:
+
 ```typescript
 {
   type: "ORDER_READY"
@@ -188,6 +196,7 @@ ws.onmessage = (event) => {
 ```
 
 **Example**:
+
 ```json
 {
   "type": "ORDER_READY",
@@ -198,17 +207,18 @@ ws.onmessage = (event) => {
 ```
 
 **Client Handling**:
+
 ```typescript
 ws.onmessage = (event) => {
-  const message = JSON.parse(event.data);
-  if (message.type === 'ORDER_READY') {
+  const message = JSON.parse(event.data)
+  if (message.type === "ORDER_READY") {
     // Update serving queue
-    queryClient.invalidateQueries(['orders.getServingOrders']);
-    toast.info(`Order #${message.orderId} ready for Table ${message.tableId}`);
+    queryClient.invalidateQueries(["orders.getServingOrders"])
+    toast.info(`Order #${message.orderId} ready for Table ${message.tableId}`)
     // Play notification sound
-    playNotificationSound();
+    playNotificationSound()
   }
-};
+}
 ```
 
 ---
@@ -220,6 +230,7 @@ ws.onmessage = (event) => {
 **Description**: Ingredient stock below minimum threshold
 
 **Message Format**:
+
 ```typescript
 {
   type: "LOW_STOCK_ALERT"
@@ -235,6 +246,7 @@ ws.onmessage = (event) => {
 ```
 
 **Example**:
+
 ```json
 {
   "type": "LOW_STOCK_ALERT",
@@ -255,12 +267,12 @@ ws.onmessage = (event) => {
 
 ### Event Distribution Matrix
 
-| Event Type | Kitchen | Serving | Manager | Anonymous |
-|------------|---------|---------|---------|-----------|
-| NEW_ORDER | ✓ | ✗ | ✓ | ✗ |
-| ORDER_STATUS_CHANGED | ✓ | ✓ | ✓ | ✗ |
-| ORDER_READY | ✗ | ✓ | ✓ | ✗ |
-| LOW_STOCK_ALERT | ✗ | ✗ | ✓ | ✗ |
+| Event Type           | Kitchen | Serving | Manager | Anonymous |
+| -------------------- | ------- | ------- | ------- | --------- |
+| NEW_ORDER            | ✓       | ✗       | ✓       | ✗         |
+| ORDER_STATUS_CHANGED | ✓       | ✓       | ✓       | ✗         |
+| ORDER_READY          | ✗       | ✓       | ✓       | ✗         |
+| LOW_STOCK_ALERT      | ✗       | ✗       | ✓       | ✗         |
 
 ### Broadcasting Logic
 
@@ -295,22 +307,22 @@ All messages follow this structure:
 
 ```typescript
 {
-  type: string           // Event type identifier
-  timestamp: string      // ISO 8601 timestamp
+  type: string // Event type identifier
+  timestamp: string // ISO 8601 timestamp
   // ... event-specific fields
 }
 ```
 
 ### Field Types
 
-| Field | Type | Format | Example |
-|-------|------|--------|---------|
-| `type` | string | UPPER_SNAKE_CASE | "NEW_ORDER" |
-| `timestamp` | string | ISO 8601 | "2025-10-18T03:20:00.000Z" |
-| `orderId` | number | Integer | 42 |
-| `tableId` | number | Integer | 5 |
-| `status` | string | Enum | "Pending", "InKitchen", etc. |
-| `amount` | number | Cents | 2500 (= $25.00) |
+| Field       | Type   | Format           | Example                      |
+| ----------- | ------ | ---------------- | ---------------------------- |
+| `type`      | string | UPPER_SNAKE_CASE | "NEW_ORDER"                  |
+| `timestamp` | string | ISO 8601         | "2025-10-18T03:20:00.000Z"   |
+| `orderId`   | number | Integer          | 42                           |
+| `tableId`   | number | Integer          | 5                            |
+| `status`    | string | Enum             | "Pending", "InKitchen", etc. |
+| `amount`    | number | Cents            | 2500 (= $25.00)              |
 
 ---
 
@@ -320,35 +332,35 @@ All messages follow this structure:
 
 ```typescript
 ws.onerror = (error) => {
-  console.error('[WebSocket Error]', error);
-  toast.error('Connection error. Reconnecting...');
+  console.error("[WebSocket Error]", error)
+  toast.error("Connection error. Reconnecting...")
   // Implement exponential backoff reconnection
-};
+}
 ```
 
 ### Reconnection Strategy
 
 ```typescript
-let reconnectAttempts = 0;
-const maxReconnectAttempts = 5;
-const baseDelay = 1000; // 1 second
+let reconnectAttempts = 0
+const maxReconnectAttempts = 5
+const baseDelay = 1000 // 1 second
 
 function connect() {
-  const ws = new WebSocket('ws://localhost:3000/ws?role=kitchen');
-  
+  const ws = new WebSocket("ws://localhost:3000/ws?role=kitchen")
+
   ws.onclose = () => {
     if (reconnectAttempts < maxReconnectAttempts) {
-      const delay = baseDelay * Math.pow(2, reconnectAttempts);
+      const delay = baseDelay * Math.pow(2, reconnectAttempts)
       setTimeout(() => {
-        reconnectAttempts++;
-        connect();
-      }, delay);
+        reconnectAttempts++
+        connect()
+      }, delay)
     }
-  };
-  
+  }
+
   ws.onopen = () => {
-    reconnectAttempts = 0; // Reset on successful connection
-  };
+    reconnectAttempts = 0 // Reset on successful connection
+  }
 }
 ```
 
@@ -357,13 +369,13 @@ function connect() {
 ```typescript
 ws.onmessage = (event) => {
   try {
-    const message = JSON.parse(event.data);
-    handleMessage(message);
+    const message = JSON.parse(event.data)
+    handleMessage(message)
   } catch (error) {
-    console.error('[WebSocket Parse Error]', error);
+    console.error("[WebSocket Parse Error]", error)
     // Ignore malformed messages
   }
-};
+}
 ```
 
 ---
@@ -373,57 +385,58 @@ ws.onmessage = (event) => {
 ### React Hook for WebSocket
 
 ```typescript
-import { useEffect, useState, useCallback } from 'react';
-import { queryClient } from '@/utils/trpc';
-import { toast } from 'sonner';
+import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
 
-export function useWebSocket(role: 'kitchen' | 'serving' | 'manager') {
-  const [isConnected, setIsConnected] = useState(false);
-  
+import { queryClient } from "@/utils/trpc"
+
+export function useWebSocket(role: "kitchen" | "serving" | "manager") {
+  const [isConnected, setIsConnected] = useState(false)
+
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:3000/ws?role=${role}`);
-    
+    const ws = new WebSocket(`ws://localhost:3000/ws?role=${role}`)
+
     ws.onopen = () => {
-      console.log('[WebSocket] Connected as', role);
-      setIsConnected(true);
-    };
-    
+      console.log("[WebSocket] Connected as", role)
+      setIsConnected(true)
+    }
+
     ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      console.log('[WebSocket Message]', message);
-      
+      const message = JSON.parse(event.data)
+      console.log("[WebSocket Message]", message)
+
       switch (message.type) {
-        case 'NEW_ORDER':
-          queryClient.invalidateQueries(['orders.getKitchenOrders']);
-          toast.success(`New order for Table ${message.order.tableNumber}`);
-          break;
-          
-        case 'ORDER_READY':
-          queryClient.invalidateQueries(['orders.getServingOrders']);
-          toast.info(`Order #${message.orderId} ready`);
-          break;
-          
-        case 'LOW_STOCK_ALERT':
-          toast.warning(`Low stock: ${message.ingredient.name}`);
-          break;
+        case "NEW_ORDER":
+          queryClient.invalidateQueries(["orders.getKitchenOrders"])
+          toast.success(`New order for Table ${message.order.tableNumber}`)
+          break
+
+        case "ORDER_READY":
+          queryClient.invalidateQueries(["orders.getServingOrders"])
+          toast.info(`Order #${message.orderId} ready`)
+          break
+
+        case "LOW_STOCK_ALERT":
+          toast.warning(`Low stock: ${message.ingredient.name}`)
+          break
       }
-    };
-    
+    }
+
     ws.onclose = () => {
-      console.log('[WebSocket] Disconnected');
-      setIsConnected(false);
-    };
-    
+      console.log("[WebSocket] Disconnected")
+      setIsConnected(false)
+    }
+
     ws.onerror = (error) => {
-      console.error('[WebSocket Error]', error);
-    };
-    
+      console.error("[WebSocket Error]", error)
+    }
+
     return () => {
-      ws.close();
-    };
-  }, [role]);
-  
-  return { isConnected };
+      ws.close()
+    }
+  }, [role])
+
+  return { isConnected }
 }
 ```
 
@@ -433,7 +446,7 @@ export function useWebSocket(role: 'kitchen' | 'serving' | 'manager') {
 // Kitchen Dashboard
 function KitchenDashboard() {
   const { isConnected } = useWebSocket('kitchen');
-  
+
   return (
     <div>
       <StatusIndicator connected={isConnected} />
@@ -445,7 +458,7 @@ function KitchenDashboard() {
 // Serving Dashboard
 function ServingDashboard() {
   const { isConnected } = useWebSocket('serving');
-  
+
   return (
     <div>
       <StatusIndicator connected={isConnected} />

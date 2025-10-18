@@ -1,10 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Clock, ChefHat, CheckCircle2 } from "lucide-react";
-import { trpc, trpcClient, queryClient } from "@/utils/trpc";
-import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query"
+import { CheckCircle2, ChefHat, Clock } from "lucide-react"
+import { toast } from "sonner"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
 /**
  * T070: OrderCard Component
@@ -25,24 +26,24 @@ import { useMutation } from "@tanstack/react-query";
  */
 
 interface OrderItem {
-  dishName: string;
-  quantity: number;
-  specialInstructions: string | null;
+  dishName: string
+  quantity: number
+  specialInstructions: string | null
 }
 
 interface Order {
-  id: number;
-  tableNumber: number;
-  status: "Pending" | "InKitchen" | "ReadyToServe";
-  items: OrderItem[];
-  createdAt: Date;
-  updatedAt: Date;
-  waitTime: number; // in minutes
+  id: number
+  tableNumber: number
+  status: "Pending" | "InKitchen" | "ReadyToServe"
+  items: OrderItem[]
+  createdAt: Date
+  updatedAt: Date
+  waitTime: number // in minutes
 }
 
 interface OrderCardProps {
-  order: Order;
-  onStatusUpdate?: () => void;
+  order: Order
+  onStatusUpdate?: () => void
 }
 
 // Status badge styling based on status
@@ -59,72 +60,72 @@ const statusStyles = {
     variant: "default" as const,
     className: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
   },
-};
+}
 
 // Card border styling based on status (T073)
 const cardBorderStyles = {
   Pending: "border-l-4 border-l-yellow-500",
   InKitchen: "border-l-4 border-l-blue-500",
   ReadyToServe: "border-l-4 border-l-green-500",
-};
+}
 
 export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
   // Mutation for updating order status
   const updateStatusMutation = useMutation({
     mutationFn: (variables: {
-      orderId: number;
-      newStatus: "InKitchen" | "ReadyToServe" | "Served" | "Completed" | "Paid";
+      orderId: number
+      newStatus: "InKitchen" | "ReadyToServe" | "Served" | "Completed" | "Paid"
     }) => trpcClient.orders.updateStatus.mutate(variables),
     onSuccess: () => {
       // Invalidate and refetch kitchen orders
       queryClient.invalidateQueries({
         predicate: (query) => {
           // tRPC query keys are arrays like [["orders", "getKitchenOrders"], {...input}]
-          const queryKey = query.queryKey[0];
+          const queryKey = query.queryKey[0]
           return (
             Array.isArray(queryKey) &&
             queryKey[0] === "orders" &&
             queryKey[1] === "getKitchenOrders"
-          );
+          )
         },
-      });
-      toast.success(`Order #${order.id} status updated`);
-      onStatusUpdate?.();
+      })
+      toast.success(`Order #${order.id} status updated`)
+      onStatusUpdate?.()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update order: ${error.message}`);
+      toast.error(`Failed to update order: ${error.message}`)
     },
-  });
+  })
 
   // Determine next status based on current status
   const getNextStatus = (): "InKitchen" | "ReadyToServe" | null => {
-    if (order.status === "Pending") return "InKitchen";
-    if (order.status === "InKitchen") return "ReadyToServe";
-    return null;
-  };
+    if (order.status === "Pending") return "InKitchen"
+    if (order.status === "InKitchen") return "ReadyToServe"
+    return null
+  }
 
   const handleStatusUpdate = () => {
-    const nextStatus = getNextStatus();
-    if (!nextStatus) return;
+    const nextStatus = getNextStatus()
+    if (!nextStatus) return
 
     updateStatusMutation.mutate({
       orderId: order.id,
       newStatus: nextStatus,
-    });
-  };
+    })
+  }
 
-  const nextStatus = getNextStatus();
-  const statusStyle = statusStyles[order.status];
-  const borderStyle = cardBorderStyles[order.status];
+  const nextStatus = getNextStatus()
+  const statusStyle = statusStyles[order.status]
+  const borderStyle = cardBorderStyles[order.status]
 
   // Format timestamp
   const formatTime = (date: Date) => {
-    const d = new Date(date);
+    const d = new Date(date)
     return d.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-    });
-  };
+    })
+  }
 
   // Get status button label and icon
   const getStatusButton = () => {
@@ -132,18 +133,18 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
       return {
         label: "Start Cooking",
         icon: <ChefHat className="mr-2 h-4 w-4" />,
-      };
+      }
     }
     if (order.status === "InKitchen") {
       return {
         label: "Mark Ready",
         icon: <CheckCircle2 className="mr-2 h-4 w-4" />,
-      };
+      }
     }
-    return null;
-  };
+    return null
+  }
 
-  const statusButton = getStatusButton();
+  const statusButton = getStatusButton()
 
   return (
     <Card className={`transition-all hover:shadow-md ${borderStyle}`}>
@@ -208,5 +209,5 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
         )}
       </CardContent>
     </Card>
-  );
+  )
 }

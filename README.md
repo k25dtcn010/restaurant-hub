@@ -5,11 +5,13 @@ A lightweight restaurant management platform built with the Better-T-Stack, enab
 ## Features
 
 ### Customer Experience
+
 - **QR Code Ordering** - Scan table QR code to browse menu and place orders
 - **Real-Time Menu** - View available dishes with automatic stock availability
 - **Order Tracking** - Track order status from submission to completion
 
 ### Staff Management
+
 - **Kitchen Dashboard** - Real-time order board with status management
 - **Serving Queue** - Priority-based serving workflow with notifications
 - **Inventory Management** - Track ingredient stock with low-stock alerts
@@ -17,6 +19,7 @@ A lightweight restaurant management platform built with the Better-T-Stack, enab
 - **Payment Processing** - Simple cash payment recording
 
 ### Technical Stack
+
 - **TypeScript 5.7+** - Full type safety from database to UI
 - **Bun 1.3+** - Fast runtime and package manager
 - **Hono 4.8+** - Lightweight, performant server framework
@@ -37,23 +40,27 @@ A lightweight restaurant management platform built with the Better-T-Stack, enab
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/k25dtcn010/restaurant-hub.git
 cd restaurant-hub
 ```
 
 2. Install dependencies:
+
 ```bash
 bun install
 ```
 
 3. Setup environment variables:
+
 ```bash
 # Copy example env files
 cp apps/server/.env.example apps/server/.env
 ```
 
 4. Initialize database:
+
 ```bash
 # Push schema to database
 bun db:push
@@ -65,11 +72,13 @@ cd packages/db && bun run src/seed.ts
 ### Development
 
 Start all services in development mode:
+
 ```bash
 bun dev
 ```
 
 Or start services individually:
+
 ```bash
 # Frontend only (port 3001)
 bun dev:web
@@ -79,6 +88,7 @@ bun dev:server
 ```
 
 Access the application:
+
 - **Web App**: http://localhost:3001
 - **API**: http://localhost:3000
 - **WebSocket**: ws://localhost:3000/ws
@@ -139,21 +149,25 @@ restaurant-hub/
 ## Available Scripts
 
 ### Development
+
 - `bun dev` - Start all applications in development mode
 - `bun dev:web` - Start only the frontend (port 3001)
 - `bun dev:server` - Start only the backend (port 3000)
 
 ### Build
+
 - `bun build` - Build all applications for production
 - `bun check-types` - Check TypeScript types across all packages
 
 ### Database
+
 - `bun db:push` - Push schema changes to database
 - `bun db:generate` - Generate migration files
 - `bun db:migrate` - Run database migrations
 - `bun db:studio` - Open Drizzle Studio (database GUI)
 
 ### Testing
+
 - `bun test` - Run all tests
 - `bun test packages/api` - Run API tests only
 - `bun test:coverage` - Run tests with coverage report
@@ -163,6 +177,7 @@ restaurant-hub/
 ### Database Schema
 
 9 core entities with full type safety:
+
 - **User** - Authentication and role-based access
 - **Table** - Restaurant tables with QR codes
 - **Dish** - Menu items with pricing
@@ -176,6 +191,7 @@ restaurant-hub/
 ### API Endpoints
 
 5 tRPC routers with comprehensive validation:
+
 - **tables** - QR code validation and table management
 - **dishes** - Menu CRUD with recipe management
 - **orders** - Order lifecycle from creation to completion
@@ -187,6 +203,7 @@ See [docs/api-reference.md](./docs/api-reference.md) for complete API documentat
 ### Real-Time Communication
 
 WebSocket connections with role-based event routing:
+
 - **Kitchen** - Receives NEW_ORDER events
 - **Serving** - Receives ORDER_READY notifications
 - **Manager** - Monitors all events
@@ -195,12 +212,12 @@ See [docs/websocket-protocol.md](./docs/websocket-protocol.md) for protocol deta
 
 ## User Roles
 
-| Role | Permissions |
-|------|-------------|
-| **Manager** | Full access to all features including menu and inventory management |
-| **Kitchen Staff** | Update order status (Pending → In Kitchen → Ready to Serve) |
-| **Waiter** | Create orders, mark served/paid, process payments |
-| **Customer** | View menu and place orders via QR code (unauthenticated) |
+| Role              | Permissions                                                         |
+| ----------------- | ------------------------------------------------------------------- |
+| **Manager**       | Full access to all features including menu and inventory management |
+| **Kitchen Staff** | Update order status (Pending → In Kitchen → Ready to Serve)         |
+| **Waiter**        | Create orders, mark served/paid, process payments                   |
+| **Customer**      | View menu and place orders via QR code (unauthenticated)            |
 
 ## Development Workflow
 
@@ -224,6 +241,7 @@ Test coverage goal: 80% minimum for business logic.
 ### Constitution
 
 See [.github/instructions](./. github/instructions) for the project constitution defining:
+
 - TDD requirements
 - Type safety standards
 - Performance goals

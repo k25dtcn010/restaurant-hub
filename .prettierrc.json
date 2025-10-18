@@ -1,5 +1,5 @@
 {
-  "semi": true,
+  "semi": false,
   "trailingComma": "es5",
   "singleQuote": false,
   "printWidth": 100,
@@ -8,5 +8,9 @@
   "endOfLine": "lf",
   "arrowParens": "always",
   "bracketSpacing": true,
-  "plugins": []
+  "plugins": ["@ianvs/prettier-plugin-sort-imports"],
+  "importOrder": ["^@learn-bettert/(.*)$", "", "^@/(.*)$", "", "^[./]"],
+  "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
+  "importOrderTypeScriptVersion": "5.0.0",
+  "importOrderCaseSensitive": false
 }

@@ -16,8 +16,8 @@ This step creates or updates the `.specify/memory/constitution.md` file with you
 
 With your project principles established, you can now create the functional specifications. Use the `/speckit.specify` command and then provide the concrete requirements for the project you want to develop.
 
->[!IMPORTANT]
->Be as explicit as possible about _what_ you are trying to build and _why_. **Do not focus on the tech stack at this point**.
+> [!IMPORTANT]
+> Be as explicit as possible about _what_ you are trying to build and _why_. **Do not focus on the tech stack at this point**.
 
 An example prompt:
 
@@ -74,6 +74,7 @@ With the baseline specification created, you can go ahead and clarify any of the
 You should run the structured clarification workflow **before** creating a technical plan to reduce rework downstream.
 
 Preferred order:
+
 1. Use `/speckit.clarify` (structured) – sequential, coverage-based questioning that records answers in a Clarifications section.
 2. Optionally follow up with ad-hoc free-form refinement if something still feels vague.
 
@@ -159,8 +160,8 @@ researching .NET Aspire in general and I don't think that's gonna do much for us
 That's way too untargeted research. The research needs to help you solve a specific targeted question.
 ```
 
->[!NOTE]
->Claude Code might be over-eager and add components that you did not ask for. Ask it to clarify the rationale and the source of the change.
+> [!NOTE]
+> Claude Code might be over-eager and add components that you did not ask for. Ask it to clarify the rationale and the source of the change.
 
 ### **STEP 5:** Have Claude Code validate the plan
 
@@ -178,8 +179,8 @@ This helps refine the implementation plan and helps you avoid potential blind sp
 
 You can also ask Claude Code (if you have the [GitHub CLI](https://docs.github.com/en/github-cli/github-cli) installed) to go ahead and create a pull request from your current branch to `main` with a detailed description, to make sure that the effort is properly tracked.
 
->[!NOTE]
->Before you have the agent implement it, it's also worth prompting Claude Code to cross-check the details to see if there are any over-engineered pieces (remember - it can be over-eager). If over-engineered components or decisions exist, you can ask Claude Code to resolve them. Ensure that Claude Code follows the [constitution](base/memory/constitution.md) as the foundational piece that it must adhere to when establishing the plan.
+> [!NOTE]
+> Before you have the agent implement it, it's also worth prompting Claude Code to cross-check the details to see if there are any over-engineered pieces (remember - it can be over-eager). If over-engineered components or decisions exist, you can ask Claude Code to resolve them. Ensure that Claude Code follows the [constitution](base/memory/constitution.md) as the foundational piece that it must adhere to when establishing the plan.
 
 ### **STEP 6:** Generate task breakdown with /speckit.tasks
 
@@ -209,14 +210,14 @@ Once ready, use the `/speckit.implement` command to execute your implementation 
 ```
 
 The `/speckit.implement` command will:
+
 - Validate that all prerequisites are in place (constitution, spec, plan, and tasks)
 - Parse the task breakdown from `tasks.md`
 - Execute tasks in the correct order, respecting dependencies and parallel execution markers
 - Follow the TDD approach defined in your task plan
 - Provide progress updates and handle errors appropriately
 
->[!IMPORTANT]
->The AI agent will execute local CLI commands (such as `dotnet`, `npm`, etc.) - make sure you have the required tools installed on your machine.
+> [!IMPORTANT]
+> The AI agent will execute local CLI commands (such as `dotnet`, `npm`, etc.) - make sure you have the required tools installed on your machine.
 
 Once the implementation is complete, test the application and resolve any runtime errors that may not be visible in CLI logs (e.g., browser console errors). You can copy and paste such errors back to your AI agent for resolution.
-
