@@ -121,6 +121,13 @@ export const paymentsRouter = router({
 				paidAt: new Date(),
 			}).returning();
 
+			if (!payment) {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Failed to create payment record",
+				});
+			}
+
 			// Update order status to Paid
 			await db.update(orders)
 				.set({ status: "Paid", updatedAt: new Date() })
@@ -276,9 +283,11 @@ export const paymentsRouter = router({
 					? [...conditions, eq(orders.tableId, tableId)]
 					: conditions;
 				
-				paymentsQuery = paymentsQuery.where(
-					whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0]
-				);
+				if (whereConditions.length > 0) {
+					paymentsQuery = paymentsQuery.where(
+						whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0]!
+					) as typeof paymentsQuery;
+				}
 			}
 
 			// Get paginated results
@@ -298,12 +307,15 @@ export const paymentsRouter = router({
 					? [...conditions, eq(orders.tableId, tableId)]
 					: conditions;
 				
-				countQuery = countQuery.where(
-					whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0]
-				) as any;
+				if (whereConditions.length > 0) {
+					countQuery = countQuery.where(
+						whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0]!
+					) as any;
+				}
 			}
 
-			const [{ count: total }] = await countQuery;
+			const countResult = await countQuery;
+			const total = countResult[0]?.count ?? 0;
 
 			// Calculate total revenue
 			let revenueQuery = db
@@ -316,12 +328,15 @@ export const paymentsRouter = router({
 					? [...conditions, eq(orders.tableId, tableId)]
 					: conditions;
 				
-				revenueQuery = revenueQuery.where(
-					whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0]
-				) as any;
+				if (whereConditions.length > 0) {
+					revenueQuery = revenueQuery.where(
+						whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0]!
+					) as any;
+				}
 			}
 
-			const [{ totalRevenue }] = await revenueQuery;
+			const revenueResult = await revenueQuery;
+			const totalRevenue = revenueResult[0]?.totalRevenue ?? 0;
 
 			return {
 				payments: results.map(p => ({
