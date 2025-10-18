@@ -139,7 +139,7 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T014 [P] Create tRPC router skeleton packages/api/src/routers/modifiers.ts
+- [X] T014 [P] Create tRPC router skeleton packages/api/src/routers/modifiers.ts
   - **Contract Reference**: See `contracts/modifiers-router.md` for all procedure signatures
   - **Procedures to Create** (empty implementations returning TODO error or empty arrays):
     - `list: publicProcedure.input(z.object({ availableOnly: z.boolean().optional().default(false) })).query(...)` 
@@ -167,7 +167,7 @@
   - **Temporary Implementation**: Return TODO errors or empty arrays
   - **Validation**: TypeScript should compile without errors
 
-- [ ] T016 [P] Create tRPC router skeleton packages/api/src/routers/reservations.ts
+- [X] T016 [P] Create tRPC router skeleton packages/api/src/routers/reservations.ts
   - **Contract Reference**: See `contracts/reservations-router.md` for all procedure signatures
   - **Procedures to Create** (empty implementations):
     - `getOperatingHours: publicProcedure.query(...)`
@@ -182,7 +182,7 @@
     - `suggestAlternativeTimes: publicProcedure.input(z.object({ reservationDate, reservationTime, partySize })).query(...)`
   - **Temporary Implementation**: Return TODO errors or empty arrays
 
-- [ ] T017 [P] Create tRPC router skeleton packages/api/src/routers/shifts.ts
+- [X] T017 [P] Create tRPC router skeleton packages/api/src/routers/shifts.ts
   - **Contract Reference**: See `contracts/shifts-router.md` for all procedure signatures
   - **Procedures to Create** (empty implementations):
     - `start: protectedProcedure.input(z.object({ shiftType, staffIds: z.array(z.string()), notes? })).mutation(...)`
@@ -193,7 +193,7 @@
     - `removeStaff: protectedProcedure.input(z.object({ shiftId, userId })).mutation(...)`
   - **Temporary Implementation**: Return TODO errors or empty arrays
 
-- [ ] T018 Register all new routers in packages/api/src/index.ts
+- [X] T018 Register all new routers in packages/api/src/index.ts
   - **Imports to Add**:
     ```typescript
     import { modifiersRouter } from './routers/modifiers';
@@ -215,7 +215,7 @@
     - Run `bun run check-types` - zero errors
     - Start dev server `bun run dev` and check tRPC panel shows 4 new routers
 
-- [ ] T019 Extend packages/api/src/routers/dishes.ts to include variant and flag fields
+- [X] T019 Extend packages/api/src/routers/dishes.ts to include variant and flag fields
   - **Contract Reference**: See existing dishes router, extend getDishDetails and list procedures
   - **Changes to getDishDetails Procedure**:
     - Add `variants` array to output schema (query dishVariants WHERE dishId = input.id, ordered by displayOrder)
@@ -226,7 +226,7 @@
   - **Data Model Reference**: See `data-model.md` § 3.1 for dishVariants schema, § 4.1 for dish flag columns
   - **Validation**: Query should return dishes with new fields populated
 
-- [ ] T020 Extend packages/api/src/routers/orders.ts to accept modifiers and special requests
+- [X] T020 Extend packages/api/src/routers/orders.ts to accept modifiers and special requests
   - **Contract Reference**: See existing orders router, extend createOrder procedure
   - **Changes to createOrder Input Schema**:
     - Extend `items` array schema to accept:
