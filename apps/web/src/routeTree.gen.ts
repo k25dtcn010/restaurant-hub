@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StaffOrderRouteImport } from './routes/staff-order'
 import { Route as ServingRouteImport } from './routes/serving'
+import { Route as PaymentHistoryRouteImport } from './routes/payment-history'
+import { Route as PaymentRouteImport } from './routes/payment'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KitchenRouteImport } from './routes/kitchen'
 import { Route as InventoryRouteImport } from './routes/inventory'
@@ -25,6 +27,16 @@ const StaffOrderRoute = StaffOrderRouteImport.update({
 const ServingRoute = ServingRouteImport.update({
   id: '/serving',
   path: '/serving',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentHistoryRoute = PaymentHistoryRouteImport.update({
+  id: '/payment-history',
+  path: '/payment-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentRoute = PaymentRouteImport.update({
+  id: '/payment',
+  path: '/payment',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -59,6 +71,8 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof InventoryRoute
   '/kitchen': typeof KitchenRoute
   '/login': typeof LoginRoute
+  '/payment': typeof PaymentRoute
+  '/payment-history': typeof PaymentHistoryRoute
   '/serving': typeof ServingRoute
   '/staff-order': typeof StaffOrderRoute
 }
@@ -68,6 +82,8 @@ export interface FileRoutesByTo {
   '/inventory': typeof InventoryRoute
   '/kitchen': typeof KitchenRoute
   '/login': typeof LoginRoute
+  '/payment': typeof PaymentRoute
+  '/payment-history': typeof PaymentHistoryRoute
   '/serving': typeof ServingRoute
   '/staff-order': typeof StaffOrderRoute
 }
@@ -78,6 +94,8 @@ export interface FileRoutesById {
   '/inventory': typeof InventoryRoute
   '/kitchen': typeof KitchenRoute
   '/login': typeof LoginRoute
+  '/payment': typeof PaymentRoute
+  '/payment-history': typeof PaymentHistoryRoute
   '/serving': typeof ServingRoute
   '/staff-order': typeof StaffOrderRoute
 }
@@ -89,6 +107,8 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/kitchen'
     | '/login'
+    | '/payment'
+    | '/payment-history'
     | '/serving'
     | '/staff-order'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +118,8 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/kitchen'
     | '/login'
+    | '/payment'
+    | '/payment-history'
     | '/serving'
     | '/staff-order'
   id:
@@ -107,6 +129,8 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/kitchen'
     | '/login'
+    | '/payment'
+    | '/payment-history'
     | '/serving'
     | '/staff-order'
   fileRoutesById: FileRoutesById
@@ -117,6 +141,8 @@ export interface RootRouteChildren {
   InventoryRoute: typeof InventoryRoute
   KitchenRoute: typeof KitchenRoute
   LoginRoute: typeof LoginRoute
+  PaymentRoute: typeof PaymentRoute
+  PaymentHistoryRoute: typeof PaymentHistoryRoute
   ServingRoute: typeof ServingRoute
   StaffOrderRoute: typeof StaffOrderRoute
 }
@@ -135,6 +161,20 @@ declare module '@tanstack/react-router' {
       path: '/serving'
       fullPath: '/serving'
       preLoaderRoute: typeof ServingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment-history': {
+      id: '/payment-history'
+      path: '/payment-history'
+      fullPath: '/payment-history'
+      preLoaderRoute: typeof PaymentHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment': {
+      id: '/payment'
+      path: '/payment'
+      fullPath: '/payment'
+      preLoaderRoute: typeof PaymentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -181,6 +221,8 @@ const rootRouteChildren: RootRouteChildren = {
   InventoryRoute: InventoryRoute,
   KitchenRoute: KitchenRoute,
   LoginRoute: LoginRoute,
+  PaymentRoute: PaymentRoute,
+  PaymentHistoryRoute: PaymentHistoryRoute,
   ServingRoute: ServingRoute,
   StaffOrderRoute: StaffOrderRoute,
 }

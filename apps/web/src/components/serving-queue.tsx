@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { RefreshCw, Wifi, WifiOff, Clock } from "lucide-react";
+import { RefreshCw, Wifi, WifiOff, Clock, DollarSign } from "lucide-react";
 import { useCallback, useState } from "react";
 import { queryClient, trpc, trpcClient } from "@/utils/trpc";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 
 /**
  * T090: ServingQueue Component
@@ -346,6 +347,16 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
 											variant="default"
 										>
 											Mark as Completed
+										</Button>
+										<Button
+											asChild
+											variant="outline"
+											className="flex-1"
+										>
+											<Link to="/payment" search={{ orderId: order.id }}>
+												<DollarSign className="mr-2 h-4 w-4" />
+												Process Payment
+											</Link>
 										</Button>
 										<Button
 											onClick={() => handleToggleDetails(order.id)}

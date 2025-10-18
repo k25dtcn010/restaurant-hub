@@ -4,7 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
-import { ChefHat, ClipboardList, UtensilsCrossed, TruckIcon } from "lucide-react";
+import { ChefHat, ClipboardList, UtensilsCrossed, TruckIcon, History, Package } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
@@ -114,6 +114,46 @@ function RouteComponent() {
 					</CardContent>
 				</Card>
 
+				{/* Inventory Management */}
+				<Card className="hover:shadow-lg transition-shadow">
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Package className="h-5 w-5" />
+							Inventory
+						</CardTitle>
+						<CardDescription>
+							Manage ingredient stock levels
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Button asChild className="w-full">
+							<Link to="/inventory">
+								Go to Inventory
+							</Link>
+						</Button>
+					</CardContent>
+				</Card>
+
+				{/* Payment History - T125: Manager access only */}
+				<Card className="hover:shadow-lg transition-shadow">
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<History className="h-5 w-5" />
+							Payment History
+						</CardTitle>
+						<CardDescription>
+							View transaction history and revenue
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Button asChild className="w-full" variant="outline">
+							<Link to="/payment-history">
+								View History
+							</Link>
+						</Button>
+					</CardContent>
+				</Card>
+
 				{/* Browse Menu */}
 				<Card className="hover:shadow-lg transition-shadow">
 					<CardHeader>
@@ -127,7 +167,7 @@ function RouteComponent() {
 					</CardHeader>
 					<CardContent>
 						<Button asChild variant="outline" className="w-full">
-							<Link to="/">
+							<Link to="/" search={{ table: undefined }}>
 								View Menu
 							</Link>
 						</Button>
