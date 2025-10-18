@@ -342,19 +342,19 @@
 
 **Reference**: [research.md Section 9](./research.md#9-error-handling-and-validation)
 
-- [ ] T131 [P] Add comprehensive Zod validation schemas for all tRPC inputs | **Pattern**: [research.md Section 9 Error Handling Pattern](./research.md#9-error-handling-and-validation) - includes Zod schema examples
-- [ ] T132 [P] Implement global error handler in apps/server/src/index.ts | **Best Practices**: Never expose database errors to frontend
-- [ ] T133 [P] Add error boundaries in apps/web/src/routes/__root.tsx | **UX**: User-friendly error messages
-- [ ] T134 Add user-friendly error messages with toast notifications using Sonner | **Error Categories**: [research.md Section 9 Error Categories](./research.md#9-error-handling-and-validation)
+- [X] T131 [P] Add comprehensive Zod validation schemas for all tRPC inputs | **Pattern**: [research.md Section 9 Error Handling Pattern](./research.md#9-error-handling-and-validation) - includes Zod schema examples
+- [X] T132 [P] Implement global error handler in apps/server/src/index.ts | **Best Practices**: Never expose database errors to frontend
+- [X] T133 [P] Add error boundaries in apps/web/src/routes/__root.tsx | **UX**: User-friendly error messages
+- [X] T134 Add user-friendly error messages with toast notifications using Sonner | **Error Categories**: [research.md Section 9 Error Categories](./research.md#9-error-handling-and-validation)
 
 ### Performance Optimization
 
 **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies)
 
-- [ ] T135 [P] Add database indexes for frequently queried fields (orders.status, orders.tableId, ingredients.quantity) | **Indexes**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes all critical index definitions
-- [ ] T136 [P] Implement tRPC query batching in apps/web/src/utils/trpc.ts | **Pattern**: [research.md Section 8 tRPC Batching](./research.md#8-performance-optimization-strategies) - includes httpBatchLink configuration
-- [ ] T137 [P] Optimize WebSocket connection pooling in apps/server/src/websocket.ts | **Pattern**: [research.md Section 1 WebSocket](./research.md#1-real-time-notification-architecture)
-- [ ] T138 Add loading skeletons for all async data fetching in frontend components | **UX**: Loading states < 200ms requirement
+- [X] T135 [P] Add database indexes for frequently queried fields (orders.status, orders.tableId, ingredients.quantity) | **Indexes**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes all critical index definitions
+- [X] T136 [P] Implement tRPC query batching in apps/web/src/utils/trpc.ts | **Pattern**: [research.md Section 8 tRPC Batching](./research.md#8-performance-optimization-strategies) - includes httpBatchLink configuration
+- [X] T137 [P] Optimize WebSocket connection pooling in apps/server/src/websocket.ts | **Pattern**: [research.md Section 1 WebSocket](./research.md#1-real-time-notification-architecture)
+- [X] T138 Add loading skeletons for all async data fetching in frontend components | **UX**: Loading states < 200ms requirement
 
 ### Documentation & Developer Experience
 
