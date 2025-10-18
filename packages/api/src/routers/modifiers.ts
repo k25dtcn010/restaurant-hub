@@ -3,7 +3,7 @@ import { z } from "zod"
 import { eq, asc } from "@learn-bettert/db"
 
 import { managerOnlyProcedure, publicProcedure, router } from "../index"
-import { modifiers, dishModifiers } from "@learn-bettert/db"
+import { modifiers, modifierGroups, dishModifiers } from "@learn-bettert/db"
 
 /**
  * Modifiers Router
@@ -170,11 +170,13 @@ export const modifiersRouter = router({
    * modifiers.listGroups - List all modifier groups
    * Auth: Public
    * Contract: modifiers-router.md § modifiers.listGroups
+   * T025-GREEN: Implementation
    */
-  listGroups: publicProcedure.query(async () => {
-    throw new TRPCError({
-      code: "NOT_IMPLEMENTED",
-      message: "TODO: Implement modifiers.listGroups in Phase 3",
+  listGroups: publicProcedure.query(async ({ ctx }) => {
+    const { db } = ctx
+
+    return await db.query.modifierGroups.findMany({
+      orderBy: [asc(modifierGroups.displayOrder)],
     })
   }),
 
@@ -182,49 +184,105 @@ export const modifiersRouter = router({
    * modifiers.createGroup - Create a new modifier group
    * Auth: Manager only
    * Contract: modifiers-router.md § modifiers.createGroup
+   * T026-GREEN: Implementation
    */
   createGroup: managerOnlyProcedure
     .input(
-      z.object({
-        name: z.string().min(1).max(100),
-        minSelections: z.number().int().min(0).optional(),
-        maxSelections: z.number().int().min(1).optional(),
-        displayOrder: z.number().int().default(0),
-      })
+      z
+        .object({
+          name: z.string().min(1).max(100),
+          minSelections: z.number().int().min(0).optional(),
+          maxSelections: z.number().int().min(1).optional(),
+          displayOrder: z.number().int().default(0),
+        })
+        .refine(
+          (data) => {
+            if (data.minSelections != null && data.maxSelections != null) {
+              return data.minSelections <= data.maxSelections
+            }
+            return true
+          },
+          { message: "minSelections must be <= maxSelections" }
+        )
     )
-    .mutation(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "TODO: Implement modifiers.createGroup in Phase 3",
-      })
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+
+      const [newGroup] = await db
+        .insert(modifierGroups)
+        .values({
+          name: input.name,
+          minSelections: input.minSelections ?? null,
+          maxSelections: input.maxSelections ?? null,
+          displayOrder: input.displayOrder,
+        })
+        .returning()
+
+      return newGroup
     }),
 
   /**
    * modifiers.updateGroup - Update a modifier group
    * Auth: Manager only
    * Contract: modifiers-router.md § modifiers.updateGroup
+   * T027-GREEN: Implementation
    */
   updateGroup: managerOnlyProcedure
     .input(
-      z.object({
-        id: z.number(),
-        name: z.string().min(1).max(100).optional(),
-        minSelections: z.number().int().min(0).optional(),
-        maxSelections: z.number().int().min(1).optional(),
-        displayOrder: z.number().int().optional(),
-      })
+      z
+        .object({
+          id: z.number(),
+          name: z.string().min(1).max(100).optional(),
+          minSelections: z.number().int().min(0).optional(),
+          maxSelections: z.number().int().min(1).optional(),
+          displayOrder: z.number().int().optional(),
+        })
+        .refine(
+          (data) => {
+            if (data.minSelections != null && data.maxSelections != null) {
+              return data.minSelections <= data.maxSelections
+            }
+            return true
+          },
+          { message: "minSelections must be <= maxSelections" }
+        )
     )
-    .mutation(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "TODO: Implement modifiers.updateGroup in Phase 3",
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+
+      // Check if group exists
+      const existingGroup = await db.query.modifierGroups.findFirst({
+        where: eq(modifierGroups.id, input.id),
       })
+
+      if (!existingGroup) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Modifier group not found",
+        })
+      }
+
+      // Build update object with only provided fields
+      const updateData: any = {}
+      if (input.name !== undefined) updateData.name = input.name
+      if (input.minSelections !== undefined) updateData.minSelections = input.minSelections
+      if (input.maxSelections !== undefined) updateData.maxSelections = input.maxSelections
+      if (input.displayOrder !== undefined) updateData.displayOrder = input.displayOrder
+
+      const [updatedGroup] = await db
+        .update(modifierGroups)
+        .set(updateData)
+        .where(eq(modifierGroups.id, input.id))
+        .returning()
+
+      return updatedGroup
     }),
 
   /**
    * modifiers.deleteGroup - Delete a modifier group (only if not used)
    * Auth: Manager only
    * Contract: modifiers-router.md § modifiers.deleteGroup
+   * T028-GREEN: Implementation
    */
   deleteGroup: managerOnlyProcedure
     .input(
@@ -232,11 +290,37 @@ export const modifiersRouter = router({
         id: z.number(),
       })
     )
-    .mutation(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "TODO: Implement modifiers.deleteGroup in Phase 3",
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+
+      // Check if group exists
+      const existingGroup = await db.query.modifierGroups.findFirst({
+        where: eq(modifierGroups.id, input.id),
       })
+
+      if (!existingGroup) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Modifier group not found",
+        })
+      }
+
+      // Check if group is assigned to any dishes
+      const assignments = await db.query.dishModifiers.findMany({
+        where: eq(dishModifiers.modifierGroupId, input.id),
+      })
+
+      if (assignments.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot delete modifier group assigned to dishes",
+        })
+      }
+
+      // Delete the group
+      await db.delete(modifierGroups).where(eq(modifierGroups.id, input.id))
+
+      return { success: true }
     }),
 
   /**

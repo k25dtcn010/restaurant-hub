@@ -362,33 +362,33 @@
 
 #### T025-T028: Modifier Groups CRUD
 
-- [ ] T025-RED [P] [US1] Write FAILING tests for modifiers.listGroups
+- [X] T025-RED [P] [US1] Write FAILING tests for modifiers.listGroups
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.listGroups"
   - **Test**: Returns groups ordered by displayOrder ASC
 
-- [ ] T025-GREEN [US1] Implement modifiers.listGroups
+- [X] T025-GREEN [US1] Implement modifiers.listGroups
   - **Data Model**: Query `modifierGroups` table (see `data-model.md` § 1.2)
   - **Implementation**: Query all groups, order by displayOrder
 
-- [ ] T026-RED [P] [US1] Write FAILING tests for modifiers.createGroup
+- [X] T026-RED [P] [US1] Write FAILING tests for modifiers.createGroup
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.createGroup"
   - **Test Cases**: Manager can create, min/max validation works
 
-- [ ] T026-GREEN [US1] Implement modifiers.createGroup with validation
+- [X] T026-GREEN [US1] Implement modifiers.createGroup with validation
   - **Validation**: Ensure minSelections <= maxSelections (if both provided)
   - **Implementation**: Insert into `modifierGroups` table
 
-- [ ] T027-RED [P] [US1] Write FAILING tests for modifiers.updateGroup
+- [X] T027-RED [P] [US1] Write FAILING tests for modifiers.updateGroup
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.updateGroup"
 
-- [ ] T027-GREEN [US1] Implement modifiers.updateGroup
+- [X] T027-GREEN [US1] Implement modifiers.updateGroup
   - **Implementation**: Update provided fields in `modifierGroups`
 
-- [ ] T028-RED [P] [US1] Write FAILING tests for modifiers.deleteGroup
+- [X] T028-RED [P] [US1] Write FAILING tests for modifiers.deleteGroup
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.deleteGroup"
   - **Test**: Check if group assigned to dishes via dishModifiers
 
-- [ ] T028-GREEN [US1] Implement modifiers.deleteGroup with assignment check
+- [X] T028-GREEN [US1] Implement modifiers.deleteGroup with assignment check
   - **Implementation**: Similar to T024, check dishModifiers before deleting
 
 #### T029-T030: Dish-Modifier Assignment

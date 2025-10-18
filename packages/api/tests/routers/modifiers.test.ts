@@ -443,3 +443,223 @@ describe("Modifiers Router - T024: modifiers.delete", () => {
     }).toThrow()
   })
 })
+
+describe("Modifiers Router - T025-T028: Modifier Groups CRUD", () => {
+  let testGroupIds: number[] = []
+
+  afterAll(async () => {
+    // Clean up all test groups
+    for (const id of testGroupIds) {
+      try {
+        await db.delete(modifierGroups).where(eq(modifierGroups.id, id))
+      } catch (e) {
+        // May have been deleted in test
+      }
+    }
+  })
+
+  describe("T025: modifiers.listGroups", () => {
+    beforeAll(async () => {
+      // Create test groups with specific display orders
+      const group1 = await db
+        .insert(modifierGroups)
+        .values({
+          name: "Test Toppings",
+          minSelections: 0,
+          maxSelections: 3,
+          displayOrder: 1,
+        })
+        .returning()
+      testGroupIds.push(group1[0].id)
+
+      const group2 = await db
+        .insert(modifierGroups)
+        .values({
+          name: "Test Size",
+          minSelections: 1,
+          maxSelections: 1,
+          displayOrder: 0, // Should appear first
+        })
+        .returning()
+      testGroupIds.push(group2[0].id)
+    })
+
+    test("T025-1: Returns groups ordered by displayOrder ASC", async () => {
+      const caller = appRouter.createCaller(mockContext)
+
+      const result = await caller.modifiers.listGroups()
+
+      expect(result).toBeDefined()
+      expect(result).toBeArray()
+
+      // Find our test groups
+      const testGroups = result.filter((g) => testGroupIds.includes(g.id))
+      expect(testGroups.length).toBe(2)
+
+      // Verify order: "Test Size" (displayOrder=0) should come before "Test Toppings" (displayOrder=1)
+      const sizeGroup = testGroups.find((g) => g.name === "Test Size")
+      const toppingsGroup = testGroups.find((g) => g.name === "Test Toppings")
+
+      expect(sizeGroup).toBeDefined()
+      expect(toppingsGroup).toBeDefined()
+      expect(result.indexOf(sizeGroup!)).toBeLessThan(result.indexOf(toppingsGroup!))
+    })
+  })
+
+  describe("T026: modifiers.createGroup", () => {
+    test("T026-1: Manager can create group", async () => {
+      const caller = appRouter.createCaller(managerContext)
+
+      const result = await caller.modifiers.createGroup({
+        name: "Test Create Group",
+        minSelections: 0,
+        maxSelections: 5,
+        displayOrder: 10,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.id).toBeNumber()
+      expect(result.name).toBe("Test Create Group")
+      expect(result.minSelections).toBe(0)
+      expect(result.maxSelections).toBe(5)
+      expect(result.displayOrder).toBe(10)
+
+      testGroupIds.push(result.id)
+    })
+
+    test("T026-2: Min/max validation works - rejects min > max", async () => {
+      const caller = appRouter.createCaller(managerContext)
+
+      // This should fail Zod validation if properly configured
+      await expect(async () => {
+        await caller.modifiers.createGroup({
+          name: "Test Invalid Min Max",
+          minSelections: 5,
+          maxSelections: 2, // max < min
+          displayOrder: 0,
+        })
+      }).toThrow()
+    })
+  })
+
+  describe("T027: modifiers.updateGroup", () => {
+    let groupToUpdateId: number
+
+    beforeAll(async () => {
+      const [group] = await db
+        .insert(modifierGroups)
+        .values({
+          name: "Test Update Group",
+          minSelections: 1,
+          maxSelections: 3,
+          displayOrder: 5,
+        })
+        .returning()
+      groupToUpdateId = group.id
+      testGroupIds.push(groupToUpdateId)
+    })
+
+    test("T027-1: Manager can update group fields", async () => {
+      const caller = appRouter.createCaller(managerContext)
+
+      const result = await caller.modifiers.updateGroup({
+        id: groupToUpdateId,
+        name: "Test Updated Group Name",
+        maxSelections: 5,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.name).toBe("Test Updated Group Name")
+      expect(result.maxSelections).toBe(5)
+      expect(result.minSelections).toBe(1) // Unchanged
+    })
+
+    test("T027-2: Non-existent group returns NOT_FOUND", async () => {
+      const caller = appRouter.createCaller(managerContext)
+
+      await expect(async () => {
+        await caller.modifiers.updateGroup({
+          id: 999999,
+          name: "Non-existent",
+        })
+      }).toThrow()
+    })
+  })
+
+  describe("T028: modifiers.deleteGroup", () => {
+    let groupToDeleteId: number
+    let groupWithDishesId: number
+
+    beforeAll(async () => {
+      // Group not assigned to any dishes
+      const [group1] = await db
+        .insert(modifierGroups)
+        .values({
+          name: "Test Delete Unassigned Group",
+          displayOrder: 0,
+        })
+        .returning()
+      groupToDeleteId = group1.id
+      testGroupIds.push(groupToDeleteId)
+
+      // Group assigned to a dish
+      const [group2] = await db
+        .insert(modifierGroups)
+        .values({
+          name: "Test Delete Assigned Group",
+          displayOrder: 0,
+        })
+        .returning()
+      groupWithDishesId = group2.id
+      testGroupIds.push(groupWithDishesId)
+
+      // Create a modifier
+      const [modifier] = await db
+        .insert(modifiers)
+        .values({
+          name: "Test Modifier for Group Delete",
+          priceAdjustment: 100,
+          isAvailable: true,
+        })
+        .returning()
+
+      // Get a test dish
+      const dish = await db.query.dishes.findFirst()
+      if (dish) {
+        // Assign modifier to dish with the group
+        await db.insert(dishModifiers).values({
+          dishId: dish.id,
+          modifierId: modifier.id,
+          modifierGroupId: groupWithDishesId,
+        })
+      }
+    })
+
+    test("T028-1: Can delete group not assigned to dishes", async () => {
+      const caller = appRouter.createCaller(managerContext)
+
+      const result = await caller.modifiers.deleteGroup({
+        id: groupToDeleteId,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.success).toBe(true)
+
+      // Verify it's deleted
+      const deletedGroup = await db.query.modifierGroups.findFirst({
+        where: eq(modifierGroups.id, groupToDeleteId),
+      })
+      expect(deletedGroup).toBeUndefined()
+    })
+
+    test("T028-2: Returns error if group assigned to dishes", async () => {
+      const caller = appRouter.createCaller(managerContext)
+
+      await expect(async () => {
+        await caller.modifiers.deleteGroup({
+          id: groupWithDishesId,
+        })
+      }).toThrow(/assigned to dishes/)
+    })
+  })
+})
