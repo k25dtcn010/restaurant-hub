@@ -1,4 +1,5 @@
 import { publicProcedure, router } from "../index"
+import { categoriesRouter } from "./categories"
 import { dishesRouter } from "./dishes"
 import { inventoryRouter } from "./inventory"
 import { ordersRouter } from "./orders"
@@ -19,6 +20,9 @@ import { tablesRouter } from "./tables"
  *
  * Phase 8: User Story 6 (T119):
  * ✅ payments: Cash payment processing, payment history
+ *
+ * Phase 2: Foundational (T015):
+ * ✅ categories: Menu category management and dish organization
  */
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => {
@@ -32,6 +36,8 @@ export const appRouter = router({
   inventory: inventoryRouter,
   // Phase 8: User Story 6 router (T119)
   payments: paymentsRouter,
+  // Phase 2: Foundational (T015) - Advanced Operations Management
+  categories: categoriesRouter,
 })
 
 export type AppRouter = typeof appRouter

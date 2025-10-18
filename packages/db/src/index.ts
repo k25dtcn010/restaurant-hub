@@ -54,7 +54,7 @@ const schema = {
 export const db = drizzle({ client, schema })
 
 // Export drizzle helpers for queries
-export { eq, and, ne, inArray, sql, or, gt, lt, gte, lte, like } from "drizzle-orm"
+export { eq, and, ne, inArray, sql, or, gt, lt, gte, lte, like, asc, desc, count } from "drizzle-orm"
 
 // Export all schemas and types per data-model.md Type Exports Summary
 export * from "./schema/auth"

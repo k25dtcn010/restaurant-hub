@@ -155,7 +155,7 @@
   - **Temporary Implementation**: Each procedure should return `throw new TRPCError({ code: 'NOT_IMPLEMENTED', message: 'TODO: Implement in Phase 3' })` or empty array
   - **Validation**: TypeScript should compile without errors
 
-- [ ] T015 [P] Create tRPC router skeleton packages/api/src/routers/categories.ts
+- [X] T015 [P] Create tRPC router skeleton packages/api/src/routers/categories.ts
   - **Contract Reference**: See `contracts/categories-router.md` for all procedure signatures
   - **Procedures to Create** (empty implementations):
     - `list: publicProcedure.input(z.object({ visibleOnly: z.boolean().optional().default(false) })).query(...)`
