@@ -126,6 +126,10 @@ export const tablesRouter = router({
         })
         .returning()
 
+      if (!table) {
+        throw new Error("Failed to create table")
+      }
+
       return {
         tableId: table.id,
         number: table.number,

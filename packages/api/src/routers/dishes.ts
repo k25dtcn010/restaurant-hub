@@ -184,6 +184,10 @@ export const dishesRouter = router({
         })
         .returning()
 
+      if (!dish) {
+        throw new Error("Failed to create dish")
+      }
+
       // Create recipe entries
       for (const item of recipe) {
         await db.insert(recipes).values({

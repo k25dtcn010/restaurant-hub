@@ -23,6 +23,10 @@ async function createTestOrders() {
     })
     .returning()
 
+  if (!order1) {
+    throw new Error("Failed to create order 1")
+  }
+
   await db.insert(orderItems).values([
     {
       orderId: order1.id,
@@ -58,6 +62,10 @@ async function createTestOrders() {
       updatedAt: threeMinAgo,
     })
     .returning()
+
+  if (!order2) {
+    throw new Error("Failed to create order 2")
+  }
 
   await db.insert(orderItems).values([
     {
@@ -103,6 +111,10 @@ async function createTestOrders() {
       updatedAt: oneMinAgo,
     })
     .returning()
+
+  if (!order3) {
+    throw new Error("Failed to create order 3")
+  }
 
   await db.insert(orderItems).values([
     {

@@ -21,7 +21,8 @@ setInterval(
   () => {
     const now = Date.now()
     for (const key in store) {
-      if (store[key].resetTime < now) {
+      const record = store[key]
+      if (record && record.resetTime < now) {
         delete store[key]
       }
     }
@@ -66,8 +67,8 @@ export function rateLimit(max: number = 100, windowMs: number = 60000) {
 
     // Add rate limit headers
     c.header("X-RateLimit-Limit", max.toString())
-    c.header("X-RateLimit-Remaining", (max - store[key].count).toString())
-    c.header("X-RateLimit-Reset", Math.ceil(store[key].resetTime / 1000).toString())
+    c.header("X-RateLimit-Remaining", (max - record.count).toString())
+    c.header("X-RateLimit-Reset", Math.ceil(record.resetTime / 1000).toString())
 
     await next()
   }
