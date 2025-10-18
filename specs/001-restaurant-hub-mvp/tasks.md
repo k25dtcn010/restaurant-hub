@@ -361,17 +361,17 @@
 - [X] T139 [P] Create API documentation from tRPC schema in docs/api-reference.md | **Contracts**: Reference all contracts/*.md files
 - [X] T140 [P] Document WebSocket message types and flows in docs/websocket-protocol.md | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) and all contract WebSocket sections
 - [X] T141 [P] Update README.md with setup instructions and architecture overview | **Reference**: [quickstart.md](./quickstart.md) for setup steps
-- [ ] T142 Run quickstart.md validation (verify all setup steps work correctly) | **Validation**: [plan.md Checkpoint 1.3](./plan.md#checkpoint-13--foundation-complete)
+- [X] T142 Run quickstart.md validation (verify all setup steps work correctly) | **Validation**: [plan.md Checkpoint 1.3](./plan.md#checkpoint-13--foundation-complete)
 
 ### Security & Production Readiness
 
 **Reference**: [research.md Section 10](./research.md#10-deployment-and-environment-configuration)
 
-- [ ] T143 [P] Implement rate limiting for public endpoints (orders.create) | **Security**: Constitution security standards
-- [ ] T144 [P] Add CSRF protection for authenticated mutations | **Security**: Better-Auth provides CSRF tokens
-- [ ] T145 [P] Configure environment-specific CORS policies | **Config**: [research.md Section 10 Environment Config](./research.md#10-deployment-and-environment-configuration)
-- [ ] T146 Add security headers (HSTS, CSP, X-Frame-Options) in Hono middleware | **Best Practices**: Constitution security standards
-- [ ] T147 Create production environment configuration for Turso database | **Deployment**: [research.md Section 10 Deployment Checklist](./research.md#10-deployment-and-environment-configuration)
+- [X] T143 [P] Implement rate limiting for public endpoints (orders.create) | **Security**: Constitution security standards
+- [X] T144 [P] Add CSRF protection for authenticated mutations | **Security**: Better-Auth provides CSRF tokens
+- [X] T145 [P] Configure environment-specific CORS policies | **Config**: [research.md Section 10 Environment Config](./research.md#10-deployment-and-environment-configuration)
+- [X] T146 Add security headers (HSTS, CSP, X-Frame-Options) in Hono middleware | **Best Practices**: Constitution security standards
+- [X] T147 Create production environment configuration for Turso database | **Deployment**: [research.md Section 10 Deployment Checklist](./research.md#10-deployment-and-environment-configuration)
 
 ---
 
