@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll } from "bun:test";
 import { appRouter } from "../../src/routers/index";
 import { db, eq, ingredients, dishes, recipes } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
+import { mockWsNotifier } from "../setup";
 
 /**
  * T039: Contract test for dishes.getAll
@@ -15,6 +16,7 @@ const mockContext: Context = {
 	user: null,
 	role: null,
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 describe("Dishes Router - dishes.getAll", () => {

@@ -11,6 +11,8 @@ import {
 	createWebSocketHandler,
 	getConnectionStats,
 	websocket,
+	notifyKitchen,
+	notifyOrderStatusChanged,
 } from "./websocket";
 import { publicRateLimit } from "./rate-limit";
 
@@ -96,13 +98,19 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
  */
 app.use("/trpc/*", publicRateLimit);
 
-// tRPC server with context injection
+// tRPC server with context injection including WebSocket notifier
 app.use(
 	"/trpc/*",
 	trpcServer({
 		router: appRouter,
 		createContext: (_opts, context) => {
-			return createContext({ context });
+			return createContext({
+				context,
+				wsNotifier: {
+					notifyKitchen,
+					notifyOrderStatusChanged,
+				},
+			});
 		},
 	}),
 );

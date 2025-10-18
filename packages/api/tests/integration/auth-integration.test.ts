@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll, beforeEach, afterEach } from "bun:te
 import { appRouter } from "../../src/routers/index";
 import { db, eq, tables, dishes, ingredients, recipes, orders, payments, orderItems } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
+import { mockWsNotifier } from "../setup";
 
 /**
  * Better-Auth Integration Test with Improved Test Isolation
@@ -107,6 +108,7 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 		user: null,
 		role: null,
 		db,
+	wsNotifier: mockWsNotifier,
 	};
 
 	const kitchenStaffContext: Context = {

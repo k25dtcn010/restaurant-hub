@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
 import { db, eq, tables, ingredients, dishes, recipes, orders, orderItems } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
+import { mockWsNotifier } from "../setup";
 
 /**
  * T042: Integration test for complete customer ordering flow
@@ -23,6 +24,7 @@ session: null,
 user: null,
 role: null,
 db,
+	wsNotifier: mockWsNotifier,
 };
 
 describe("Integration: Complete Customer Ordering Flow", () => {

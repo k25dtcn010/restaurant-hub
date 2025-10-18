@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll } from "bun:test";
 import { appRouter } from "../../src/routers/index";
 import { db, eq, ingredients, dishes, recipes } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
+import { mockWsNotifier } from "../setup";
 
 /**
  * T126-T128: Contract tests for dishes CRUD operations

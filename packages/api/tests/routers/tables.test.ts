@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll } from "bun:test";
 import { appRouter } from "../../src/routers/index";
 import { db, tables } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
+import { mockWsNotifier } from "../setup";
 
 /**
  * T038: Contract test for tables.getById
@@ -15,6 +16,7 @@ const mockContext: Context = {
 	user: null,
 	role: null,
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 describe("Tables Router - tables.getById", () => {

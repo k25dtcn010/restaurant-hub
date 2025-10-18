@@ -8,32 +8,10 @@ import { TRPCError } from "@trpc/server";
  * WebSocket Notification Helper
  * T052: WebSocket notification broadcasting
  * 
- * Note: In production, WebSocket notifications are broadcasted via the server's WebSocket handler.
- * For now, we'll add notification calls that can be implemented when the router is deployed.
+ * WebSocket notifications are now injected via tRPC context from the server.
+ * This ensures real-time updates are sent to connected clients when orders change.
  * The actual WebSocket broadcasting happens in apps/server/src/websocket.ts
  */
-interface WebSocketNotifier {
-	notifyKitchen: (order: any) => void;
-	notifyOrderStatusChanged: (orderId: number, status: string) => void;
-}
-
-// Placeholder for WebSocket notifications (will be injected via context in production)
-const wsNotifier: WebSocketNotifier = {
-	notifyKitchen: (order: any) => {
-		// In production, this would call the actual WebSocket broadcast
-		// For tests, this is a no-op
-		if (process.env.NODE_ENV !== 'test') {
-			console.log('[WebSocket] NEW_ORDER notification for order:', order.id);
-		}
-	},
-	notifyOrderStatusChanged: (orderId: number, status: string) => {
-		// In production, this would call the actual WebSocket broadcast
-		// For tests, this is a no-op
-		if (process.env.NODE_ENV !== 'test') {
-			console.log('[WebSocket] ORDER_STATUS_CHANGED notification:', orderId, status);
-		}
-	},
-};
 
 /**
  * Orders Router
@@ -345,7 +323,7 @@ export const ordersRouter = router({
 			});
 
 			if (orderDetails) {
-				wsNotifier.notifyKitchen({
+				ctx.wsNotifier.notifyKitchen({
 					id: orderDetails.id,
 					tableNumber: orderDetails.table.number,
 					items: orderDetails.orderItems.map(item => ({
@@ -358,7 +336,7 @@ export const ordersRouter = router({
 				});
 				
 				// Also notify of status change to Pending
-				wsNotifier.notifyOrderStatusChanged(result.orderId, "Pending");
+				ctx.wsNotifier.notifyOrderStatusChanged(result.orderId, "Pending");
 			}
 
 			return result;
@@ -497,7 +475,7 @@ export const ordersRouter = router({
 
 				if (updatedOrder) {
 					// Notify kitchen of order update
-					wsNotifier.notifyKitchen({
+					ctx.wsNotifier.notifyKitchen({
 						id: updatedOrder.id,
 						tableNumber: updatedOrder.table.number,
 						items: updatedOrder.orderItems.map(item => ({
@@ -511,7 +489,7 @@ export const ordersRouter = router({
 					});
 
 					// Also notify of order modification
-					wsNotifier.notifyOrderStatusChanged(orderId, order.status);
+					ctx.wsNotifier.notifyOrderStatusChanged(orderId, order.status);
 				}
 			}
 
@@ -655,10 +633,10 @@ export const ordersRouter = router({
 			// T066: Broadcast WebSocket notifications based on new status
 			if (newStatus === "ReadyToServe") {
 				// Notify serving staff
-				wsNotifier.notifyOrderStatusChanged(orderId, "ORDER_READY");
+				ctx.wsNotifier.notifyOrderStatusChanged(orderId, "ORDER_READY");
 			} else if (newStatus === "Paid") {
 				// Notify managers
-				wsNotifier.notifyOrderStatusChanged(orderId, "ORDER_COMPLETED");
+				ctx.wsNotifier.notifyOrderStatusChanged(orderId, "ORDER_COMPLETED");
 			}
 
 			return {

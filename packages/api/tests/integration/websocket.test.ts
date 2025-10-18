@@ -2,6 +2,7 @@ import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
 import { db, eq, tables, ingredients, dishes, recipes, orders, orderItems, orderStatusHistory } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
+import { mockWsNotifier } from "../setup";
 
 /**
  * T063: WebSocket notification test for kitchen alerts
@@ -22,6 +23,7 @@ const customerContext: Context = {
 	user: null,
 	role: null,
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 const kitchenContext: Context = {
@@ -29,6 +31,7 @@ const kitchenContext: Context = {
 	user: null,
 	role: "KitchenStaff",
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 const waiterContext: Context = {
@@ -36,6 +39,7 @@ const waiterContext: Context = {
 	user: null,
 	role: "Waiter",
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 describe("Integration: WebSocket Notifications for Kitchen Alerts", () => {
