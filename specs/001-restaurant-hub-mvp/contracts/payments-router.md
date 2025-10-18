@@ -19,6 +19,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 **Description**: Processes a cash payment for a completed order (FR-028).
 
 **Input Schema**:
+
 ```typescript
 {
   orderId: number,
@@ -28,6 +29,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   paymentId: number,
@@ -40,6 +42,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 ```
 
 **Business Logic**:
+
 - Validate order exists and status is `'Completed'` or `'Served'`
 - Validate payment amount matches `orders.totalAmount`
 - Create payment record in `payments` table
@@ -49,12 +52,14 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 - Broadcast WebSocket notification to managers
 
 **Errors**:
+
 - `NOT_FOUND`: Order ID does not exist
 - `BAD_REQUEST`: Order not in completable state or amount mismatch
 - `BAD_REQUEST`: Payment already exists for this order
 - `FORBIDDEN`: User is not Waiter or Manager
 
 **WebSocket Notification**:
+
 ```typescript
 {
   type: 'PAYMENT_COMPLETED',
@@ -66,6 +71,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
   }
 }
 ```
+
 **Recipients**: All connected `manager` role users
 
 ---
@@ -77,6 +83,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 **Description**: Retrieves payment details for a specific order.
 
 **Input Schema**:
+
 ```typescript
 {
   paymentId: number
@@ -84,6 +91,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   id: number,
@@ -104,6 +112,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 ```
 
 **Errors**:
+
 - `NOT_FOUND`: Payment ID does not exist
 
 ---
@@ -115,6 +124,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 **Description**: Retrieves payment history with filters (FR-030).
 
 **Input Schema**:
+
 ```typescript
 {
   startDate?: Date,
@@ -126,6 +136,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   payments: Array<{
@@ -144,12 +155,14 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 ```
 
 **Business Logic**:
+
 - Query `payments` with date range and table filters
 - Join with `orders` and `tables` for table numbers
 - Calculate aggregate `totalRevenue` for filtered results
 - Paginate results
 
 **Errors**:
+
 - `FORBIDDEN`: User is not Manager
 
 ---
@@ -161,13 +174,15 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 **Description**: Retrieves revenue summary for a specific date.
 
 **Input Schema**:
+
 ```typescript
 {
-  date: Date                 // Target date (defaults to today)
+  date: Date // Target date (defaults to today)
 }
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   date: Date,
@@ -183,6 +198,7 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 ```
 
 **Business Logic**:
+
 - Filter payments by date (midnight to midnight)
 - Group by hour for breakdown
 - Calculate aggregate statistics
@@ -195,8 +211,8 @@ Manages cash payment processing and payment history (P2 priority - User Story 6)
 export type Payment = {
   id: number
   orderId: number
-  amount: number  // cents
-  method: 'Cash'
+  amount: number // cents
+  method: "Cash"
   paidAt: Date
 }
 

@@ -12,7 +12,8 @@ RestaurantHub is a lightweight restaurant management platform enabling customer 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.7+ with strict mode enabled, Bun 1.3+ runtime  
-**Primary Dependencies**: 
+**Primary Dependencies**:
+
 - Backend: Hono 4.8+ (web framework), tRPC 11.5+ (type-safe API layer)
 - Frontend: React 18+, TanStack Router (file-based routing), shadcn/ui + Tailwind CSS
 - Database: Drizzle ORM with SQLite (development) / Turso (production)
@@ -23,65 +24,76 @@ RestaurantHub is a lightweight restaurant management platform enabling customer 
 **Testing**: Bun test runner with minimum 80% coverage requirement; TDD-first workflow (Red-Green-Refactor)  
 **Target Platform**: Web application (responsive design for mobile/tablet/desktop); Backend API server  
 **Project Type**: Web application with separate frontend and backend in monorepo structure  
-**Performance Goals**: 
+**Performance Goals**:
+
 - API response time p95 < 200ms for standard operations
 - Real-time notifications delivered within 5 seconds
 - Support 20+ simultaneous table sessions
 - Database query optimization with indexed fields
 - Frontend bundle < 500KB gzipped, TTI < 3s on 3G
 
-**Constraints**: 
+**Constraints**:
+
 - 25-30 tables per restaurant
 - Real-time notification requirement (WebSocket/SSE mandatory)
 - Cash-only payment processing (no credit card integration)
 - Single-location restaurant scope
 - Type safety enforced end-to-end (database → API → UI)
 
-**Scale/Scope**: 
+**Scale/Scope**:
+
 - 25-30 tables, 3 staff roles, ~50-100 menu items
 - 6 user stories (3 P1, 2 P2, 1 P3)
 - 36 functional requirements across ordering, inventory, lifecycle, kitchen, serving, payment, and access control
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 ### I. Test-Driven Development (TDD-First) ✅
+
 - **Status**: PASS
 - **Compliance**: Implementation plan includes TDD-first workflow for all features. Tests will be written before implementation code following Red-Green-Refactor cycle.
 - **Evidence**: All user stories have defined acceptance scenarios that translate directly to test cases.
 
 ### II. Code Quality Standards ✅
+
 - **Status**: PASS
 - **Compliance**: TypeScript strict mode required, zero compilation errors tolerated, 80% test coverage minimum.
 - **Evidence**: Technical context specifies TypeScript 5.7+ with strict mode; Bun test runner with coverage requirements.
 
 ### III. User Experience Consistency ✅
+
 - **Status**: PASS
 - **Compliance**: All UI components use shadcn/ui library, theme switching supported, loading states < 200ms, type-safe routing via TanStack Router.
 - **Evidence**: Technical dependencies include shadcn/ui + Tailwind CSS, TanStack Router for type-safe navigation.
 
 ### IV. Performance Requirements ✅
+
 - **Status**: PASS
 - **Compliance**: API p95 < 200ms, bundle < 500KB gzipped, TTI < 3s on 3G, indexed database queries, tRPC batching.
 - **Evidence**: Performance goals explicitly defined in technical context; aligns with constitution requirements.
 
 ### V. Type Safety & Reliability ✅
+
 - **Status**: PASS
 - **Compliance**: tRPC procedures with Zod schemas, Drizzle ORM with TypeScript types, Better-Auth type-safe state, TanStack Router generated types.
 - **Evidence**: Stack selection (tRPC, Drizzle, Better-Auth, TanStack Router) provides end-to-end type safety from database to UI.
 
 ### Technical Standards ✅
+
 - **Status**: PASS
 - **Compliance**: Bun 1.3+, Hono 4.8+, React 18+, Drizzle ORM, tRPC 11.5+, Better-Auth 1.3+, shadcn/ui.
 - **Evidence**: All required technologies specified in Technical Context primary dependencies.
 
 ### Security Standards ✅
+
 - **Status**: PASS
 - **Compliance**: httpOnly cookies, Better-Auth permission validation, Zod input validation, .env secret management, explicit CORS.
 - **Evidence**: Better-Auth 1.3+ handles authentication; tRPC with Zod provides server-side validation; standard security practices will be applied.
 
 ### Development Workflow ✅
+
 - **Status**: PASS
 - **Compliance**: Feature spec created (spec.md exists), implementation plan being generated (this file), branch pattern followed (001-restaurant-hub-mvp).
 - **Evidence**: This plan follows .specify/templates/plan-template.md structure; spec.md exists with user stories prioritized P1/P2/P3.
@@ -96,12 +108,14 @@ RestaurantHub is a lightweight restaurant management platform enabling customer 
 **Status**: ✅ PASS - All gates remain compliant after design phase
 
 **Design Artifacts Verified**:
+
 - ✅ `research.md`: All technology decisions documented with rationale
 - ✅ `data-model.md`: Complete entity definitions with validation rules
 - ✅ `contracts/`: 5 tRPC routers specified (orders, dishes, inventory, tables, payments)
 - ✅ `quickstart.md`: TDD workflow guide with development setup
 
 **Constitution Alignment**:
+
 1. **TDD-First**: QuickStart guide demonstrates Red-Green-Refactor cycle with concrete examples
 2. **Type Safety**: All contracts use Zod schemas; Drizzle ORM exports TypeScript types
 3. **Performance**: Indexed database queries, tRPC batching, WebSocket for real-time (all documented in research.md)
@@ -217,6 +231,7 @@ tests/                           # Workspace-level integration tests
 ```
 
 **Structure Decision**: Web application structure (Option 2) with Bun monorepo organization. The Better-T-Stack naturally separates into:
+
 - **apps/server**: Backend API serving tRPC procedures and WebSocket connections
 - **apps/web**: Frontend React SPA with file-based routing
 - **packages/api**: Shared type-safe API contracts between frontend and backend
@@ -224,6 +239,7 @@ tests/                           # Workspace-level integration tests
 - **packages/db**: Single source of truth for database schema and types
 
 This structure enables:
+
 1. **Type safety flow**: Database types (Drizzle) → API types (tRPC) → UI types (React)
 2. **Independent deployment**: Server and web apps can be deployed separately
 3. **Code reuse**: Packages shared across apps without duplication
@@ -231,7 +247,7 @@ This structure enables:
 
 ## Complexity Tracking
 
-*No constitutional violations detected. All requirements align with Better-T-Stack principles and quality standards.*
+_No constitutional violations detected. All requirements align with Better-T-Stack principles and quality standards._
 
 ---
 
@@ -247,6 +263,7 @@ This roadmap provides a dependency-ordered sequence of tasks for implementing Re
 ```
 
 **Parallel Workstreams** (after Foundation complete):
+
 - **Stream A**: Backend API development (`packages/api/src/routers/`)
 - **Stream B**: Frontend customer UI (`apps/web/src/routes/`)
 - **Stream C**: Frontend staff dashboards (`apps/web/src/routes/kitchen.tsx`, `serving.tsx`)
@@ -262,7 +279,8 @@ This roadmap provides a dependency-ordered sequence of tasks for implementing Re
 #### Day 1-2: Database Schema
 
 **Task 1.1: Create Core Entities (Dependency Order)**
-- **Files**: 
+
+- **Files**:
   - `packages/db/src/schema/auth.ts` - User entity
   - `packages/db/src/schema/tables.ts` - Table entity
   - `packages/db/src/schema/inventory.ts` - Ingredient entity
@@ -270,27 +288,30 @@ This roadmap provides a dependency-ordered sequence of tasks for implementing Re
 - **Reference**: [data-model.md](./data-model.md) Sections 1, 2, 6, 5, 7
 - **Why This Order**: User needed for auth; Ingredient before Dish (Recipe has FK to both); Table has no dependencies
 - **Tests**: `packages/db/tests/schema.test.ts` - Validate constraints, foreign keys, indexes
-- **Commands**: 
+- **Commands**:
   ```bash
   bun --cwd packages/db db:generate  # Generate migrations
   bun --cwd packages/db db:migrate   # Apply migrations
   ```
 
 **Task 1.2: Create Transactional Entities**
+
 - **Files**: `packages/db/src/schema/orders.ts` - Order, OrderItem, OrderStatusHistory entities
 - **Reference**: [data-model.md](./data-model.md) Sections 3, 4, 8
 - **Dependencies**: Task 1.1 complete (needs Table, Dish, User FKs)
 - **Tests**: Verify cascade deletes, status enum validation
 
 **Task 1.3: Create Payment Entity**
+
 - **Files**: `packages/db/src/schema/payments.ts` - Payment entity
 - **Reference**: [data-model.md](./data-model.md) Section 9
 - **Dependencies**: Task 1.2 complete (needs Order FK)
 
 **Task 1.4: Seed Initial Data**
+
 - **Files**: `packages/db/src/seed.ts`
 - **Reference**: [data-model.md](./data-model.md#seed-data-requirements)
-- **Data**: 
+- **Data**:
   - 3 users (Manager, Kitchen, Waiter)
   - 30 tables with QR codes
   - 20 ingredients with stock
@@ -298,6 +319,7 @@ This roadmap provides a dependency-ordered sequence of tasks for implementing Re
 - **Command**: `bun --cwd packages/db db:seed`
 
 **Checkpoint 1.1**: ✅
+
 ```bash
 # Verify database state
 sqlite3 apps/server/local.db "SELECT COUNT(*) FROM users;"     # Should return 3
@@ -308,7 +330,8 @@ sqlite3 apps/server/local.db "SELECT COUNT(*) FROM dishes;"    # Should return 1
 #### Day 3-4: Authentication & API Foundation
 
 **Task 1.5: Setup Better-Auth**
-- **Files**: 
+
+- **Files**:
   - `packages/auth/src/index.ts` - Better-Auth configuration
   - `packages/api/src/context.ts` - tRPC context with auth session
 - **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth)
@@ -320,17 +343,19 @@ sqlite3 apps/server/local.db "SELECT COUNT(*) FROM dishes;"    # Should return 1
 - **Validation**: Login as `admin@restauranthub.com` / `password123`, verify Manager role returned
 
 **Task 1.6: Setup tRPC Infrastructure**
+
 - **Files**:
   - `packages/api/src/index.ts` - tRPC app router
   - `packages/api/src/trpc.ts` - Router factory, protected procedures
   - `apps/server/src/index.ts` - Hono server with tRPC handler
 - **Reference**: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth) (protected procedure example)
-- **Tests**: 
+- **Tests**:
   - Public procedure works without auth
   - Protected procedure returns 401 when not authenticated
   - Role-specific procedure returns 403 for wrong role
 
 **Checkpoint 1.2**: ✅
+
 ```bash
 # Test tRPC endpoint
 curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
@@ -339,7 +364,8 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
 #### Day 5: WebSocket Foundation
 
 **Task 1.7: Setup WebSocket Server**
-- **Files**: 
+
+- **Files**:
   - `apps/server/src/websocket.ts` - WebSocket connection management
   - `apps/server/src/index.ts` - Integrate WebSocket with Hono server
 - **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture)
@@ -351,6 +377,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
 - **Validation**: Connect via WebSocket client, verify `NEW_ORDER` event received
 
 **Task 1.8: Frontend tRPC Client Setup**
+
 - **Files**:
   - `apps/web/src/utils/trpc.ts` - tRPC React client with batching
   - `apps/web/src/main.tsx` - TanStack Query provider
@@ -358,6 +385,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
 - **Tests**: Component test - verify tRPC queries trigger network requests
 
 **Checkpoint 1.3**: ✅ Foundation Complete
+
 - [ ] All database migrations applied successfully
 - [ ] Can login as Manager/Kitchen/Waiter roles
 - [ ] tRPC health check returns 200
@@ -375,9 +403,10 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
 #### Week 2, Day 1-2: Menu Display (US1 Part 1)
 
 **Task 2.1: Implement dishes.getAll Procedure**
+
 - **Files**: `packages/api/src/routers/dishes.ts`
 - **Reference**: [contracts/dishes-router.md](./contracts/dishes-router.md#1-dishesgetall)
-- **Business Logic**: 
+- **Business Logic**:
   - Join Dish with Recipe and Ingredient
   - Compute `isAvailable` flag (dish enabled AND all ingredients in stock)
   - Filter by `isAvailable` if customer view
@@ -388,9 +417,10 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - Marks dish unavailable if ingredient stock = 0
 
 **Task 2.2: Build Customer Menu UI**
+
 - **Files**: `apps/web/src/routes/index.tsx` - QR landing page
 - **Reference**: [spec.md User Story 1, Acceptance Scenario 1](../spec.md#user-story-1---customer-self-service-ordering-priority-p1)
-- **UI Components**: 
+- **UI Components**:
   - `apps/web/src/components/dish-card.tsx` - Display dish with photo, price, description
   - `apps/web/src/components/menu-grid.tsx` - Grid layout for dishes
 - **Query**: `trpc.dishes.getAll.useQuery()` with loading skeleton
@@ -400,6 +430,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - Shows "Unavailable" badge for out-of-stock dishes
 
 **Checkpoint 2.1**: ✅
+
 - [ ] Navigate to `http://localhost:3001/?table=5`
 - [ ] See menu with 15 dishes
 - [ ] Dishes show name, description, price, photo
@@ -408,6 +439,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
 #### Week 2, Day 3-5: Order Creation & Submission (US1 Part 2)
 
 **Task 2.3: Implement orders.create Procedure (TDD)**
+
 - **Files**: `packages/api/src/routers/orders.ts`
 - **Reference**: [contracts/orders-router.md](./contracts/orders-router.md#1-orderscreate)
 - **Business Logic**:
@@ -423,8 +455,9 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - Returns error if dish does not exist
 
 **Task 2.4: Implement orders.submit Procedure with Stock Reduction**
+
 - **Files**: `packages/api/src/routers/orders.ts`
-- **Reference**: 
+- **Reference**:
   - [contracts/orders-router.md](./contracts/orders-router.md#2-orderssubmit)
   - [research.md Section 3](./research.md#3-inventory-management-and-stock-validation) (transaction pattern)
 - **Business Logic**: Use transaction pattern from research.md
@@ -444,6 +477,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - Broadcasts WebSocket notification
 
 **Task 2.5: Build Order Cart & Submission UI**
+
 - **Files**:
   - `apps/web/src/components/order-cart.tsx` - Cart sidebar
   - `apps/web/src/routes/index.tsx` - Add cart to menu page
@@ -458,6 +492,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - See confirmation message
 
 **Checkpoint 2.2**: ✅ User Story 1 Complete
+
 - [ ] Customer scans QR code (`?table=5`)
 - [ ] Can browse menu with photos/prices
 - [ ] Can add dishes to cart with quantities
@@ -469,6 +504,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
 #### Week 3, Day 1-3: Kitchen Dashboard (US2 Part 1)
 
 **Task 3.1: Implement orders.getKitchenOrders Query**
+
 - **Files**: `packages/api/src/routers/orders.ts`
 - **Reference**: [contracts/orders-router.md](./contracts/orders-router.md#8-ordersgetkitchenorders)
 - **Business Logic**:
@@ -478,19 +514,20 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - Sort by createdAt ASC (oldest first) within each status
   - Calculate waitTime (now - createdAt)
 - **Authorization**: Role must be 'KitchenStaff' or 'Manager'
-- **Tests**: 
+- **Tests**:
   - Returns orders in correct status categories
   - Grouped by table number
   - Oldest orders first
   - Unauthorized for Waiter role
 
 **Task 3.2: Build Kitchen Dashboard UI**
+
 - **Files**: `apps/web/src/routes/kitchen.tsx`
 - **Reference**: [spec.md User Story 2, Acceptance Scenarios](../spec.md#user-story-2---kitchen-order-management-priority-p1)
 - **UI Components**:
   - `apps/web/src/components/kitchen-order-card.tsx` - Display order with table, items, timestamp
   - `apps/web/src/components/kitchen-columns.tsx` - Kanban columns (Pending, InKitchen, Ready)
-- **Queries**: 
+- **Queries**:
   - `trpc.orders.getKitchenOrders.useQuery()` - Real-time query
   - WebSocket integration: `useOrderNotifications()` hook
 - **Tests**:
@@ -499,14 +536,15 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - Updates in real-time when new order arrives
 
 **Task 3.3: Implement WebSocket Integration for NEW_ORDER**
-- **Files**: 
+
+- **Files**:
   - `apps/web/src/hooks/useOrderNotifications.ts` - WebSocket React hook
   - `apps/server/src/websocket.ts` - Broadcast logic in orders.submit
 - **Reference**: [research.md Section 6](./research.md#6-frontend-state-management-and-real-time-updates)
 - **Pattern**: WebSocket message invalidates TanStack Query cache
   ```typescript
-  ws.on('NEW_ORDER', (order) => {
-    utils.orders.getKitchenOrders.invalidate()  // Trigger refetch
+  ws.on("NEW_ORDER", (order) => {
+    utils.orders.getKitchenOrders.invalidate() // Trigger refetch
     toast.success(`New order from Table ${order.tableId}`)
   })
   ```
@@ -515,6 +553,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - Kitchen dashboard updates without manual refresh
 
 **Checkpoint 3.1**: ✅
+
 - [ ] Login as Kitchen Staff (`chef@restauranthub.com`)
 - [ ] See kitchen dashboard with order columns
 - [ ] Submit customer order from QR page
@@ -524,6 +563,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
 #### Week 3, Day 4-5: Order Status Management (US2 Part 2)
 
 **Task 3.4: Implement orders.updateStatus Mutation**
+
 - **Files**: `packages/api/src/routers/orders.ts`
 - **Reference**: [contracts/orders-router.md](./contracts/orders-router.md#5-ordersupdatestatus)
 - **Business Logic**:
@@ -539,9 +579,10 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - WebSocket event sent to serving staff
 
 **Task 3.5: Add Status Update Buttons to Kitchen Dashboard**
+
 - **Files**: `apps/web/src/components/kitchen-order-card.tsx`
 - **Mutations**: `trpc.orders.updateStatus.useMutation()`
-- **UI**: 
+- **UI**:
   - "Start Cooking" button (Pending → InKitchen)
   - "Ready to Serve" button (InKitchen → ReadyToServe)
   - Optimistic updates (instant UI feedback, rollback on error)
@@ -552,6 +593,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
   - Order moves to "Ready" column
 
 **Checkpoint 3.2**: ✅ User Story 2 Complete
+
 - [ ] Kitchen staff can see incoming orders in Pending column
 - [ ] Can mark order as "In Kitchen"
 - [ ] Can mark order as "Ready to Serve"
@@ -560,6 +602,7 @@ curl http://localhost:3000/trpc/health  # Should return { status: "ok" }
 - [ ] Serving staff receive notification when order ready
 
 **P1 MVP Validation**: ✅
+
 ```bash
 # E2E Test Suite
 bun test tests/e2e/mvp.test.ts
@@ -582,6 +625,7 @@ bun test tests/e2e/mvp.test.ts
 #### Day 1-2: Staff-Assisted Ordering (US3)
 
 **Task 4.1: Build Staff Order Creation UI**
+
 - **Files**: `apps/web/src/routes/staff/orders/create.tsx`
 - **Reference**: [spec.md User Story 3](../spec.md#user-story-3---staff-assisted-ordering-priority-p2)
 - **Components**: Table selector, menu browser, order form
@@ -591,6 +635,7 @@ bun test tests/e2e/mvp.test.ts
 #### Day 3-4: Serving Dashboard (US4)
 
 **Task 4.2: Implement orders.getServingOrders Query**
+
 - **Files**: `packages/api/src/routers/orders.ts`
 - **Reference**: [contracts/orders-router.md](./contracts/orders-router.md#9-ordersgetservingorders)
 - **Build Serving Dashboard UI**:
@@ -599,6 +644,7 @@ bun test tests/e2e/mvp.test.ts
   - "Mark as Served" button (ReadyToServe → Served)
 
 **Checkpoint 4.1**: ✅
+
 - [ ] Waiter can create order for table via staff interface
 - [ ] Waiter sees orders ready to serve
 - [ ] Can mark order as served
@@ -607,6 +653,7 @@ bun test tests/e2e/mvp.test.ts
 #### Day 5: Cash Payment (US6)
 
 **Task 4.3: Implement payments.create Mutation**
+
 - **Files**: `packages/api/src/routers/payments.ts`
 - **Reference**: [contracts/payments-router.md](./contracts/payments-router.md#1-paymentscreate)
 - **Business Logic**:
@@ -617,11 +664,13 @@ bun test tests/e2e/mvp.test.ts
   - Clear table session (allow new orders for table)
 
 **Task 4.4: Build Payment UI**
+
 - **Files**: `apps/web/src/components/payment-modal.tsx`
 - **Mutation**: `trpc.payments.create.useMutation()`
 - **Tests**: Can process payment, table session clears
 
 **Checkpoint 4.2**: ✅ P2 Features Complete
+
 - [ ] Staff can create orders manually
 - [ ] Waiter can mark orders as served
 - [ ] Waiter can process cash payment
@@ -638,11 +687,13 @@ bun test tests/e2e/mvp.test.ts
 #### Day 1-3: Inventory CRUD
 
 **Task 5.1: Implement inventory Router Procedures**
+
 - **Files**: `packages/api/src/routers/inventory.ts`
 - **Reference**: [contracts/inventory-router.md](./contracts/inventory-router.md)
 - **Procedures**: getAll, adjustStock, setThreshold, getLowStockAlerts
 
 **Task 5.2: Build Inventory Dashboard**
+
 - **Files**: `apps/web/src/routes/inventory.tsx`
 - **Components**: Ingredient list, stock adjustment form, low-stock alerts
 - **Authorization**: Manager-only access
@@ -650,12 +701,14 @@ bun test tests/e2e/mvp.test.ts
 #### Day 4-5: Low-Stock Alerts
 
 **Task 5.3: Implement WebSocket LOW_STOCK_ALERT**
-- **Files**: 
+
+- **Files**:
   - `apps/server/src/websocket.ts` - Broadcast logic
   - `packages/api/src/routers/inventory.ts` - Trigger alert when stock < threshold
 - **Reference**: [contracts/inventory-router.md](./contracts/inventory-router.md#websocket-notifications)
 
 **Checkpoint 5.1**: ✅ P3 Complete
+
 - [ ] Manager can view all ingredients with stock levels
 - [ ] Can adjust stock quantities
 - [ ] See low-stock alerts highlighted
@@ -666,6 +719,7 @@ bun test tests/e2e/mvp.test.ts
 ## Validation Checkpoints Summary
 
 ### P1 MVP (End of Week 3)
+
 - [ ] Customer can scan QR, view menu, submit order
 - [ ] Ingredient stock reduces on order submission
 - [ ] Kitchen receives real-time notifications within 5 seconds
@@ -674,12 +728,14 @@ bun test tests/e2e/mvp.test.ts
 - [ ] E2E test suite passes: `bun test tests/e2e/mvp.test.ts`
 
 ### P2 Features (End of Week 4)
+
 - [ ] Staff can create orders manually
 - [ ] Serving staff can track and serve orders
 - [ ] Cash payment processing works
 - [ ] Table session clears after payment
 
 ### P3 Inventory (End of Week 5)
+
 - [ ] Inventory dashboard shows all ingredients
 - [ ] Stock adjustments work correctly
 - [ ] Low-stock alerts appear when threshold crossed
@@ -690,13 +746,15 @@ bun test tests/e2e/mvp.test.ts
 ## Implementation Resources
 
 **Cross-Reference Index**:
+
 - Database Schema: [data-model.md](./data-model.md)
-- API Contracts: [contracts/*.md](./contracts/)
+- API Contracts: [contracts/\*.md](./contracts/)
 - Technology Patterns: [research.md](./research.md)
 - Development Setup: [quickstart.md](./quickstart.md)
 - Functional Requirements: [spec.md](./spec.md)
 
 **Key Decision Points**:
+
 - Real-time Architecture: [research.md Section 1](./research.md#1-real-time-notification-architecture)
 - Database Transactions: [research.md Section 3](./research.md#3-inventory-management-and-stock-validation)
 - Authentication: [research.md Section 5](./research.md#5-role-based-access-control-with-better-auth)
@@ -712,4 +770,3 @@ bun test tests/e2e/mvp.test.ts
 | Customer Menu | `apps/web/src/routes/index.tsx` | [spec.md US1](./spec.md#user-story-1) |
 | Kitchen Dashboard | `apps/web/src/routes/kitchen.tsx` | [spec.md US2](./spec.md#user-story-2) |
 | WebSocket | `apps/server/src/websocket.ts` | [research.md Sec 1](./research.md#1-real-time-notification-architecture) |
-

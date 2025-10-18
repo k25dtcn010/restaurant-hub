@@ -1,2 +1,8 @@
 [install]
 linker = "isolated"
+
+[test]
+coverage = true
+coverageThreshold = 80
+coverageDir = "coverage"
+preload = ["./packages/api/tests/setup.ts"]

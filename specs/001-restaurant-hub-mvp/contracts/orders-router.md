@@ -19,6 +19,7 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Creates a new order for a specific table or adds items to an existing unpaid order.
 
 **Input Schema**:
+
 ```typescript
 {
   tableId: number,           // Table number (1-30)
@@ -31,6 +32,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   orderId: number,           // Created or updated order ID
@@ -41,6 +43,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Business Logic**:
+
 - Check if table has active unpaid order → add to existing order if yes, create new if no
 - Validate all dishes exist and are available (`isAvailable = true`)
 - Check ingredient stock for all items via recipe calculation
@@ -50,6 +53,7 @@ Manages the complete order lifecycle from creation through payment, including it
 - Status initially set to `'Draft'` or `'Pending'` based on submission
 
 **Errors**:
+
 - `NOT_FOUND`: Table ID does not exist
 - `BAD_REQUEST`: Invalid dishId, quantity <= 0, or insufficient stock
 - `BAD_REQUEST`: Special instructions exceed 255 characters
@@ -65,13 +69,15 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Submits an order to the kitchen, reducing inventory and triggering notifications.
 
 **Input Schema**:
+
 ```typescript
 {
-  orderId: number            // Order ID to submit
+  orderId: number // Order ID to submit
 }
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   orderId: number,
@@ -82,6 +88,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Business Logic**:
+
 - Validate order exists and is in submittable state (not already submitted)
 - Re-check ingredient stock (transaction-safe)
 - Calculate total ingredient requirements across all order items
@@ -92,12 +99,14 @@ Manages the complete order lifecycle from creation through payment, including it
 - Broadcast WebSocket notification to kitchen dashboard
 
 **Errors**:
+
 - `NOT_FOUND`: Order ID does not exist
 - `BAD_REQUEST`: Order already submitted or in later status
 - `BAD_REQUEST`: Insufficient stock (list unavailable dishes)
 - `CONFLICT`: Concurrent stock depletion (retry mechanism)
 
 **WebSocket Notification**:
+
 ```typescript
 {
   type: 'NEW_ORDER',
@@ -109,6 +118,7 @@ Manages the complete order lifecycle from creation through payment, including it
   }
 }
 ```
+
 **Recipients**: All connected `kitchen` role users
 
 ---
@@ -120,6 +130,7 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Adds additional items to an existing order (allowed at any stage before 'Paid').
 
 **Input Schema**:
+
 ```typescript
 {
   orderId: number,
@@ -132,6 +143,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   orderId: number,
@@ -142,6 +154,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Business Logic**:
+
 - Validate order exists and status is NOT `'Paid'` (FR-016b)
 - Check ingredient stock for new items
 - Add items to `order_items` table
@@ -151,11 +164,13 @@ Manages the complete order lifecycle from creation through payment, including it
 - Broadcast WebSocket notification to kitchen if order already in kitchen
 
 **Errors**:
+
 - `NOT_FOUND`: Order ID does not exist
 - `BAD_REQUEST`: Order status is `'Paid'` (cannot modify paid orders)
 - `BAD_REQUEST`: Insufficient stock for new items
 
 **WebSocket Notification** (if order status >= 'Pending'):
+
 ```typescript
 {
   type: 'ORDER_UPDATED',
@@ -167,6 +182,7 @@ Manages the complete order lifecycle from creation through payment, including it
   }
 }
 ```
+
 **Recipients**: Kitchen and serving staff
 
 ---
@@ -178,6 +194,7 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Removes items from an order (only allowed while status is 'Pending').
 
 **Input Schema**:
+
 ```typescript
 {
   orderId: number,
@@ -186,6 +203,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   orderId: number,
@@ -196,6 +214,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Business Logic**:
+
 - Validate order exists and status is `'Pending'` (FR-016a)
 - For each order item to remove:
   - Calculate ingredient refund via recipe
@@ -205,6 +224,7 @@ Manages the complete order lifecycle from creation through payment, including it
 - If all items removed, delete order entirely (optional business decision)
 
 **Errors**:
+
 - `NOT_FOUND`: Order ID or order item IDs do not exist
 - `FORBIDDEN`: Order status is not `'Pending'` (already in kitchen or later)
 
@@ -219,6 +239,7 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Transitions order to next status in lifecycle.
 
 **Input Schema**:
+
 ```typescript
 {
   orderId: number,
@@ -227,6 +248,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   orderId: number,
@@ -237,6 +259,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Business Logic**:
+
 - Validate order exists
 - Validate status transition is allowed (see state machine in data-model.md)
 - Check user role has permission for this transition:
@@ -250,13 +273,15 @@ Manages the complete order lifecycle from creation through payment, including it
   - `Paid`: Notify managers (for analytics)
 
 **Errors**:
+
 - `NOT_FOUND`: Order ID does not exist
 - `FORBIDDEN`: User role does not have permission for this transition
 - `BAD_REQUEST`: Invalid status transition (e.g., `Pending` → `Served`)
 
 **WebSocket Notifications**:
 
-*When status → `'ReadyToServe'`*:
+_When status → `'ReadyToServe'`_:
+
 ```typescript
 {
   type: 'ORDER_READY',
@@ -268,9 +293,11 @@ Manages the complete order lifecycle from creation through payment, including it
   }
 }
 ```
+
 **Recipients**: All connected `serving` role users (waiters, managers)
 
-*When status → `'Paid'`*:
+_When status → `'Paid'`_:
+
 ```typescript
 {
   type: 'ORDER_COMPLETED',
@@ -282,6 +309,7 @@ Manages the complete order lifecycle from creation through payment, including it
   }
 }
 ```
+
 **Recipients**: All connected `manager` role users
 
 ---
@@ -293,6 +321,7 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Retrieves detailed information for a specific order.
 
 **Input Schema**:
+
 ```typescript
 {
   orderId: number
@@ -300,6 +329,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   id: number,
@@ -326,11 +356,13 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Business Logic**:
+
 - Join with `tables`, `order_items`, `dishes`, `order_status_history`, `users`
 - If unauthenticated, validate request includes valid `tableId` matching order
 - Return full order details including status timeline
 
 **Errors**:
+
 - `NOT_FOUND`: Order ID does not exist
 - `FORBIDDEN`: Unauthenticated customer trying to access another table's order
 
@@ -345,6 +377,7 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Retrieves the active (unpaid) order for a specific table, if one exists.
 
 **Input Schema**:
+
 ```typescript
 {
   tableId: number
@@ -352,6 +385,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   orderId: number | null,    // Null if no active order
@@ -362,11 +396,13 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Business Logic**:
+
 - Query `orders` table for orders where `tableId` matches and `status != 'Paid'`
 - Should be only one active order per table (enforced in business logic)
 - If multiple found (edge case), return most recent by `createdAt`
 
 **Errors**:
+
 - `NOT_FOUND`: Table ID does not exist
 
 ---
@@ -378,6 +414,7 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Retrieves all orders currently in kitchen workflow (Pending, InKitchen, ReadyToServe).
 
 **Input Schema**:
+
 ```typescript
 {
   status?: OrderStatus[]     // Optional filter (default: ['Pending', 'InKitchen', 'ReadyToServe'])
@@ -385,31 +422,34 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   orders: Array<{
-    id: number,
-    tableNumber: number,
-    status: OrderStatus,
+    id: number
+    tableNumber: number
+    status: OrderStatus
     items: Array<{
-      dishName: string,
-      quantity: number,
+      dishName: string
+      quantity: number
       specialInstructions: string | null
-    }>,
-    createdAt: Date,
-    updatedAt: Date,
-    waitTime: number         // Minutes since order created
+    }>
+    createdAt: Date
+    updatedAt: Date
+    waitTime: number // Minutes since order created
   }>
 }
 ```
 
 **Business Logic**:
+
 - Query orders with status in [`'Pending'`, `'InKitchen'`, `'ReadyToServe'`]
 - Group by table number
 - Sort by `createdAt` ascending (oldest first) within each status
 - Calculate `waitTime` as difference between `now` and `createdAt`
 
 **Errors**:
+
 - `UNAUTHORIZED`: User not authenticated
 - `FORBIDDEN`: User role is not Kitchen Staff or Manager
 
@@ -422,6 +462,7 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Retrieves orders ready to be served or already served (for tracking).
 
 **Input Schema**:
+
 ```typescript
 {
   status?: OrderStatus[]     // Optional filter (default: ['ReadyToServe', 'Served'])
@@ -429,30 +470,33 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   orders: Array<{
-    id: number,
-    tableNumber: number,
-    status: OrderStatus,
+    id: number
+    tableNumber: number
+    status: OrderStatus
     items: Array<{
-      dishName: string,
+      dishName: string
       quantity: number
-    }>,
-    totalAmount: number,     // In cents
-    readySince: Date | null, // Timestamp when marked ReadyToServe
-    waitTime: number         // Minutes waiting for service
+    }>
+    totalAmount: number // In cents
+    readySince: Date | null // Timestamp when marked ReadyToServe
+    waitTime: number // Minutes waiting for service
   }>
 }
 ```
 
 **Business Logic**:
+
 - Query orders with status in [`'ReadyToServe'`, `'Served'`]
 - Join with `order_status_history` to get `readySince` timestamp
 - Calculate `waitTime` as difference between `now` and `readySince`
 - Sort by `waitTime` descending (longest waiting first)
 
 **Errors**:
+
 - `UNAUTHORIZED`: User not authenticated
 - `FORBIDDEN`: User role is not Waiter or Manager
 
@@ -465,6 +509,7 @@ Manages the complete order lifecycle from creation through payment, including it
 **Description**: Retrieves historical orders with filters (for analytics and payment history).
 
 **Input Schema**:
+
 ```typescript
 {
   startDate?: Date,          // Filter by created date range
@@ -477,6 +522,7 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   orders: Array<{
@@ -495,12 +541,14 @@ Manages the complete order lifecycle from creation through payment, including it
 ```
 
 **Business Logic**:
+
 - Query orders with optional filters
 - Default to showing `'Completed'` and `'Paid'` orders
 - Support date range filtering for reporting
 - Paginate results (default 50 per page)
 
 **Errors**:
+
 - `UNAUTHORIZED`: User not authenticated
 - `FORBIDDEN`: User role is not Manager
 
@@ -510,7 +558,7 @@ Manages the complete order lifecycle from creation through payment, including it
 
 ```typescript
 // Shared types exported from packages/api
-export type OrderStatus = 'Pending' | 'InKitchen' | 'ReadyToServe' | 'Served' | 'Completed' | 'Paid'
+export type OrderStatus = "Pending" | "InKitchen" | "ReadyToServe" | "Served" | "Completed" | "Paid"
 
 export type CreateOrderInput = {
   tableId: number
@@ -544,14 +592,14 @@ WebSocket events broadcasted by this router:
 
 ## Error Codes Reference
 
-| tRPC Error Code           | HTTP Status | Usage                                         |
-|---------------------------|-------------|-----------------------------------------------|
-| `BAD_REQUEST`             | 400         | Invalid input, business logic violation       |
-| `UNAUTHORIZED`            | 401         | User not authenticated                        |
-| `FORBIDDEN`               | 403         | User lacks permission for operation           |
-| `NOT_FOUND`               | 404         | Order, table, or dish not found               |
-| `CONFLICT`                | 409         | Concurrent modification (e.g., stock race)    |
-| `INTERNAL_SERVER_ERROR`   | 500         | Unexpected server error                       |
+| tRPC Error Code         | HTTP Status | Usage                                      |
+| ----------------------- | ----------- | ------------------------------------------ |
+| `BAD_REQUEST`           | 400         | Invalid input, business logic violation    |
+| `UNAUTHORIZED`          | 401         | User not authenticated                     |
+| `FORBIDDEN`             | 403         | User lacks permission for operation        |
+| `NOT_FOUND`             | 404         | Order, table, or dish not found            |
+| `CONFLICT`              | 409         | Concurrent modification (e.g., stock race) |
+| `INTERNAL_SERVER_ERROR` | 500         | Unexpected server error                    |
 
 ---
 

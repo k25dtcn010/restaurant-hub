@@ -19,6 +19,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 **Description**: Retrieves all ingredients with current stock levels and alerts (FR-007, FR-012).
 
 **Input Schema**:
+
 ```typescript
 {
   includeRecipes?: boolean   // Include which dishes use each ingredient
@@ -26,19 +27,21 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   ingredients: Array<{
-    id: number,
-    name: string,
-    quantity: number,
-    unit: string,
-    threshold: number,
-    isLowStock: boolean,     // Computed: quantity < threshold
-    updatedAt: Date,
-    usedInDishes?: Array<{  // If includeRecipes=true
-      dishId: number,
-      dishName: string,
+    id: number
+    name: string
+    quantity: number
+    unit: string
+    threshold: number
+    isLowStock: boolean // Computed: quantity < threshold
+    updatedAt: Date
+    usedInDishes?: Array<{
+      // If includeRecipes=true
+      dishId: number
+      dishName: string
       quantityRequired: number
     }>
   }>
@@ -46,6 +49,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Business Logic**:
+
 - Join with `recipe` and `dishes` if `includeRecipes = true`
 - Calculate `isLowStock` flag for each ingredient
 - Sort by `isLowStock DESC, name ASC` (low-stock items first)
@@ -59,6 +63,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 **Description**: Retrieves detailed information for a specific ingredient.
 
 **Input Schema**:
+
 ```typescript
 {
   ingredientId: number
@@ -66,6 +71,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   id: number,
@@ -84,6 +90,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Errors**:
+
 - `NOT_FOUND`: Ingredient ID does not exist
 
 ---
@@ -95,6 +102,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 **Description**: Manually adjusts ingredient stock (FR-010).
 
 **Input Schema**:
+
 ```typescript
 {
   ingredientId: number,
@@ -104,6 +112,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   ingredientId: number,
@@ -115,6 +124,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Business Logic**:
+
 - Validate new quantity will not be negative: `currentQuantity + adjustment >= 0`
 - Update `ingredients.quantity`
 - Log adjustment in audit trail (optional: create `inventory_audit_log` table)
@@ -122,6 +132,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 - Check if new quantity crosses threshold and trigger alert
 
 **Errors**:
+
 - `NOT_FOUND`: Ingredient ID does not exist
 - `BAD_REQUEST`: Adjustment would result in negative quantity
 
@@ -134,6 +145,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 **Description**: Sets low-stock alert threshold for an ingredient (FR-011).
 
 **Input Schema**:
+
 ```typescript
 {
   ingredientId: number,
@@ -142,6 +154,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   ingredientId: number,
@@ -152,11 +165,13 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Business Logic**:
+
 - Update `ingredients.threshold`
 - Recompute `isLowStock` status
 - If newly below threshold, trigger alert notification
 
 **Errors**:
+
 - `NOT_FOUND`: Ingredient ID does not exist
 - `BAD_REQUEST`: Threshold is negative
 
@@ -171,6 +186,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 **Input Schema**: None
 
 **Output Schema**:
+
 ```typescript
 {
   alerts: Array<{
@@ -187,6 +203,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Business Logic**:
+
 - Query ingredients where `quantity < threshold`
 - Join with `recipe` and `dishes` to show affected menu items
 - Sort by `deficit DESC` (most critical first)
@@ -200,6 +217,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 **Description**: Adds a new ingredient to inventory.
 
 **Input Schema**:
+
 ```typescript
 {
   name: string,              // Unique, max 100 chars
@@ -210,6 +228,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   ingredientId: number,
@@ -221,6 +240,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Errors**:
+
 - `BAD_REQUEST`: Ingredient name already exists, invalid input
 - `FORBIDDEN`: User is not Manager
 
@@ -233,6 +253,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 **Description**: Updates ingredient metadata (name, unit).
 
 **Input Schema**:
+
 ```typescript
 {
   ingredientId: number,
@@ -242,6 +263,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Output Schema**:
+
 ```typescript
 {
   ingredientId: number,
@@ -251,6 +273,7 @@ Manages ingredient inventory tracking, stock adjustments, and low-stock alerts (
 ```
 
 **Errors**:
+
 - `NOT_FOUND`: Ingredient ID does not exist
 - `BAD_REQUEST`: Name already exists (uniqueness violation)
 

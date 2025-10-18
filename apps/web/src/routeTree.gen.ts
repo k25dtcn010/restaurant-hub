@@ -8,77 +8,227 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as rootRouteImport } from "./routes/__root"
+import { Route as DashboardRouteImport } from "./routes/dashboard"
+import { Route as IndexRouteImport } from "./routes/index"
+import { Route as InventoryRouteImport } from "./routes/inventory"
+import { Route as KitchenRouteImport } from "./routes/kitchen"
+import { Route as LoginRouteImport } from "./routes/login"
+import { Route as MenuManagementRouteImport } from "./routes/menu-management"
+import { Route as PaymentRouteImport } from "./routes/payment"
+import { Route as PaymentHistoryRouteImport } from "./routes/payment-history"
+import { Route as ServingRouteImport } from "./routes/serving"
+import { Route as StaffOrderRouteImport } from "./routes/staff-order"
 
+const StaffOrderRoute = StaffOrderRouteImport.update({
+  id: "/staff-order",
+  path: "/staff-order",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServingRoute = ServingRouteImport.update({
+  id: "/serving",
+  path: "/serving",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentHistoryRoute = PaymentHistoryRouteImport.update({
+  id: "/payment-history",
+  path: "/payment-history",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentRoute = PaymentRouteImport.update({
+  id: "/payment",
+  path: "/payment",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MenuManagementRoute = MenuManagementRouteImport.update({
+  id: "/menu-management",
+  path: "/menu-management",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+  id: "/login",
+  path: "/login",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KitchenRoute = KitchenRouteImport.update({
+  id: "/kitchen",
+  path: "/kitchen",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryRoute = InventoryRouteImport.update({
+  id: "/inventory",
+  path: "/inventory",
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+  id: "/dashboard",
+  path: "/dashboard",
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
-  '/login': typeof LoginRoute
+  "/": typeof IndexRoute
+  "/dashboard": typeof DashboardRoute
+  "/inventory": typeof InventoryRoute
+  "/kitchen": typeof KitchenRoute
+  "/login": typeof LoginRoute
+  "/menu-management": typeof MenuManagementRoute
+  "/payment": typeof PaymentRoute
+  "/payment-history": typeof PaymentHistoryRoute
+  "/serving": typeof ServingRoute
+  "/staff-order": typeof StaffOrderRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
-  '/login': typeof LoginRoute
+  "/": typeof IndexRoute
+  "/dashboard": typeof DashboardRoute
+  "/inventory": typeof InventoryRoute
+  "/kitchen": typeof KitchenRoute
+  "/login": typeof LoginRoute
+  "/menu-management": typeof MenuManagementRoute
+  "/payment": typeof PaymentRoute
+  "/payment-history": typeof PaymentHistoryRoute
+  "/serving": typeof ServingRoute
+  "/staff-order": typeof StaffOrderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
-  '/login': typeof LoginRoute
+  "/": typeof IndexRoute
+  "/dashboard": typeof DashboardRoute
+  "/inventory": typeof InventoryRoute
+  "/kitchen": typeof KitchenRoute
+  "/login": typeof LoginRoute
+  "/menu-management": typeof MenuManagementRoute
+  "/payment": typeof PaymentRoute
+  "/payment-history": typeof PaymentHistoryRoute
+  "/serving": typeof ServingRoute
+  "/staff-order": typeof StaffOrderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login'
+  fullPaths:
+    | "/"
+    | "/dashboard"
+    | "/inventory"
+    | "/kitchen"
+    | "/login"
+    | "/menu-management"
+    | "/payment"
+    | "/payment-history"
+    | "/serving"
+    | "/staff-order"
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login'
-  id: '__root__' | '/' | '/dashboard' | '/login'
+  to:
+    | "/"
+    | "/dashboard"
+    | "/inventory"
+    | "/kitchen"
+    | "/login"
+    | "/menu-management"
+    | "/payment"
+    | "/payment-history"
+    | "/serving"
+    | "/staff-order"
+  id:
+    | "__root__"
+    | "/"
+    | "/dashboard"
+    | "/inventory"
+    | "/kitchen"
+    | "/login"
+    | "/menu-management"
+    | "/payment"
+    | "/payment-history"
+    | "/serving"
+    | "/staff-order"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  InventoryRoute: typeof InventoryRoute
+  KitchenRoute: typeof KitchenRoute
   LoginRoute: typeof LoginRoute
+  MenuManagementRoute: typeof MenuManagementRoute
+  PaymentRoute: typeof PaymentRoute
+  PaymentHistoryRoute: typeof PaymentHistoryRoute
+  ServingRoute: typeof ServingRoute
+  StaffOrderRoute: typeof StaffOrderRoute
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
+    "/staff-order": {
+      id: "/staff-order"
+      path: "/staff-order"
+      fullPath: "/staff-order"
+      preLoaderRoute: typeof StaffOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/serving": {
+      id: "/serving"
+      path: "/serving"
+      fullPath: "/serving"
+      preLoaderRoute: typeof ServingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/payment-history": {
+      id: "/payment-history"
+      path: "/payment-history"
+      fullPath: "/payment-history"
+      preLoaderRoute: typeof PaymentHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/payment": {
+      id: "/payment"
+      path: "/payment"
+      fullPath: "/payment"
+      preLoaderRoute: typeof PaymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/menu-management": {
+      id: "/menu-management"
+      path: "/menu-management"
+      fullPath: "/menu-management"
+      preLoaderRoute: typeof MenuManagementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/login": {
+      id: "/login"
+      path: "/login"
+      fullPath: "/login"
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
+    "/kitchen": {
+      id: "/kitchen"
+      path: "/kitchen"
+      fullPath: "/kitchen"
+      preLoaderRoute: typeof KitchenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/inventory": {
+      id: "/inventory"
+      path: "/inventory"
+      fullPath: "/inventory"
+      preLoaderRoute: typeof InventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/dashboard": {
+      id: "/dashboard"
+      path: "/dashboard"
+      fullPath: "/dashboard"
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
+    "/": {
+      id: "/"
+      path: "/"
+      fullPath: "/"
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -88,7 +238,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  InventoryRoute: InventoryRoute,
+  KitchenRoute: KitchenRoute,
   LoginRoute: LoginRoute,
+  MenuManagementRoute: MenuManagementRoute,
+  PaymentRoute: PaymentRoute,
+  PaymentHistoryRoute: PaymentHistoryRoute,
+  ServingRoute: ServingRoute,
+  StaffOrderRoute: StaffOrderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

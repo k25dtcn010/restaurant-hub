@@ -9,9 +9,7 @@
   "orm": "drizzle",
   "backend": "hono",
   "runtime": "bun",
-  "frontend": [
-    "tanstack-router"
-  ],
+  "frontend": ["tanstack-router"],
   "addons": [],
   "examples": [],
   "auth": "better-auth",
@@ -19,5 +17,5 @@
   "dbSetup": "none",
   "api": "trpc",
   "webDeploy": "none",
-  "serverDeploy": "none"
+  "serverDeploy": "none",
 }

@@ -1,0 +1,211 @@
+#!/usr/bin/env bun
+/**
+ * Full end-to-end WebSocket test with database setup
+ * 
+ * This script:
+ * 1. Sets up database with test data
+ * 2. Starts WebSocket listener
+ * 3. Creates and submits order via tRPC
+ * 4. Verifies WebSocket notification is received
+ */
+
+import { db, tables, dishes, ingredients, recipes } from "@learn-bettert/db";
+
+console.log('🧪 Full WebSocket Integration Test\n');
+
+async function setup() {
+  console.log('📦 Setting up test data...');
+  
+  // Create test table
+  let testTable;
+  try {
+    const existing = await db.query.tables.findFirst({
+      where: (t, { eq }) => eq(t.number, 999),
+    });
+    
+    if (existing) {
+      testTable = existing;
+      console.log('  ✓ Test table already exists');
+    } else {
+      [testTable] = await db.insert(tables).values({
+        number: 999,
+        qrCode: 'https://test.com/999',
+        capacity: 4,
+      }).returning();
+      console.log('  ✓ Created test table #999');
+    }
+  } catch (e) {
+    console.error('  ✗ Failed to setup table:', e);
+    return null;
+  }
+  
+  // Create test ingredient
+  let testIngredient;
+  try {
+    const existing = await db.query.ingredients.findFirst({
+      where: (i, { eq }) => eq(i.name, 'WS Test Ingredient'),
+    });
+    
+    if (existing) {
+      testIngredient = existing;
+      console.log('  ✓ Test ingredient already exists');
+    } else {
+      [testIngredient] = await db.insert(ingredients).values({
+        name: 'WS Test Ingredient',
+        quantity: 1000,
+        unit: 'g',
+        threshold: 10,
+      }).returning();
+      console.log('  ✓ Created test ingredient');
+    }
+  } catch (e) {
+    console.error('  ✗ Failed to setup ingredient:', e);
+    return null;
+  }
+  
+  // Create test dish
+  let testDish;
+  try {
+    const existing = await db.query.dishes.findFirst({
+      where: (d, { eq }) => eq(d.name, 'WS Test Dish'),
+    });
+    
+    if (existing) {
+      testDish = existing;
+      console.log('  ✓ Test dish already exists');
+    } else {
+      [testDish] = await db.insert(dishes).values({
+        name: 'WS Test Dish',
+        description: 'Test dish for WebSocket',
+        price: 1500,
+        isAvailable: true,
+      }).returning();
+      console.log('  ✓ Created test dish');
+      
+      // Create recipe
+      await db.insert(recipes).values({
+        dishId: testDish.id,
+        ingredientId: testIngredient.id,
+        quantityRequired: 50,
+      });
+      console.log('  ✓ Created recipe');
+    }
+  } catch (e) {
+    console.error('  ✗ Failed to setup dish:', e);
+    return null;
+  }
+  
+  return { testTable, testDish, testIngredient };
+}
+
+async function testWebSocket(tableId: number, dishId: number) {
+  console.log('\n🔌 Connecting to WebSocket...');
+  
+  const receivedMessages: any[] = [];
+  const ws = new WebSocket('ws://localhost:3000/ws?role=kitchen');
+  
+  // Promise that resolves when we get NEW_ORDER notification
+  const waitForNotification = new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('Timeout waiting for notification'));
+    }, 10000);
+    
+    ws.addEventListener('open', () => {
+      console.log('✅ Connected to WebSocket\n');
+      
+      // Create order after connection is established
+      setTimeout(async () => {
+        console.log('📝 Creating and submitting order...');
+        try {
+          const response = await fetch('http://localhost:3000/trpc/orders.create,orders.submit?batch=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              0: { tableId, items: [{ dishId, quantity: 1, specialInstructions: 'WebSocket test' }] },
+              1: {},
+            }),
+          });
+          
+          const results = await response.json();
+          console.log('  ✓ Order created and submitted');
+          
+          // Store order ID for status update
+          if (results[0]?.result?.data?.orderId) {
+            setTimeout(async () => {
+              const orderId = results[0].result.data.orderId;
+              console.log('\n📝 Updating order status...');
+              await fetch('http://localhost:3000/trpc/orders.updateStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId, newStatus: 'InKitchen' }),
+              });
+              console.log('  ✓ Status updated');
+            }, 2000);
+          }
+        } catch (e) {
+          console.error('  ✗ Failed to create order:', e);
+        }
+      }, 500);
+    });
+    
+    ws.addEventListener('message', (event) => {
+      const message = JSON.parse(event.data);
+      receivedMessages.push(message);
+      
+      console.log('\n📨 WebSocket message received:');
+      console.log('   Type:', message.type);
+      
+      if (message.type === 'NEW_ORDER') {
+        console.log('   Order ID:', message.order?.id);
+        console.log('   Table:', message.order?.tableNumber);
+        console.log('\n✅ NEW_ORDER notification received!');
+        clearTimeout(timeout);
+        resolve(message);
+      } else if (message.type === 'ORDER_STATUS_CHANGED') {
+        console.log('   Order ID:', message.orderId);
+        console.log('   Status:', message.status);
+        console.log('\n✅ ORDER_STATUS_CHANGED notification received!');
+      }
+    });
+    
+    ws.addEventListener('error', (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+  });
+  
+  try {
+    await waitForNotification;
+    console.log('\n✅ WebSocket notifications working correctly!');
+    ws.close();
+    return true;
+  } catch (error) {
+    console.error('\n❌ Test failed:', error);
+    ws.close();
+    return false;
+  }
+}
+
+async function main() {
+  const data = await setup();
+  if (!data) {
+    console.error('\n❌ Setup failed');
+    process.exit(1);
+  }
+  
+  const { testTable, testDish } = data;
+  const success = await testWebSocket(testTable.id, testDish.id);
+  
+  console.log('\n' + '='.repeat(50));
+  if (success) {
+    console.log('✅ ALL TESTS PASSED');
+    console.log('='.repeat(50));
+    process.exit(0);
+  } else {
+    console.log('❌ TESTS FAILED');
+    console.log('='.repeat(50));
+    process.exit(1);
+  }
+}
+
+main();

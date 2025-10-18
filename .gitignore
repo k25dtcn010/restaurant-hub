@@ -43,8 +43,15 @@ lerna-debug.log*
 coverage
 .nyc_output
 
+# Database
+*.db
+*.db-shm
+*.db-wal
+local.db
+
 # Misc
 *.tgz
 .cache
 tmp
 temp
+Thumbs.db

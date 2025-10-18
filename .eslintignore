@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Generated files
+*.min.js
+.turbo
+.cache
+*.tsbuildinfo
+
+# Config files
+*.config.js
+*.config.ts

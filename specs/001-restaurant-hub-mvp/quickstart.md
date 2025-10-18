@@ -46,6 +46,7 @@ bun install
 Create `.env` files in each app workspace:
 
 **apps/server/.env**:
+
 ```bash
 # Database (local development)
 DATABASE_URL=file:./local.db
@@ -60,6 +61,7 @@ BETTER_AUTH_URL=http://localhost:3000
 ```
 
 **apps/web/.env**:
+
 ```bash
 # API URL
 VITE_API_URL=http://localhost:3000
@@ -69,6 +71,7 @@ VITE_APP_URL=http://localhost:3001
 ```
 
 **Generate Better-Auth Secret**:
+
 ```bash
 # Use Bun to generate a secure random string
 bun -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -91,6 +94,7 @@ bun run db:seed
 ```
 
 **Seed Data Includes**:
+
 - 30 tables with QR codes
 - 3 test users:
   - Manager: `admin@restauranthub.com` / `password123`
@@ -104,6 +108,7 @@ bun run db:seed
 Open 2 terminal windows:
 
 **Terminal 1 - Backend Server**:
+
 ```bash
 cd apps/server
 bun run dev
@@ -111,6 +116,7 @@ bun run dev
 ```
 
 **Terminal 2 - Frontend App**:
+
 ```bash
 cd apps/web
 bun run dev
@@ -203,29 +209,30 @@ UI re-renders with new order
 
 ```typescript
 // packages/api/tests/routers/orders.test.ts
-import { describe, test, expect, beforeEach } from 'bun:test'
-import { appRouter } from '../../src/index'
-import { clearDatabase, seedTestData } from '../helpers/db'
+import { beforeEach, describe, expect, test } from "bun:test"
 
-describe('Orders Router - create', () => {
+import { appRouter } from "../../src/index"
+import { clearDatabase, seedTestData } from "../helpers/db"
+
+describe("Orders Router - create", () => {
   beforeEach(async () => {
     await clearDatabase()
     await seedTestData()
   })
 
-  test('should create new order for table with valid dishes', async () => {
+  test("should create new order for table with valid dishes", async () => {
     // Arrange
     const caller = appRouter.createCaller({ user: null, role: null })
-    
+
     // Act
     const result = await caller.orders.create({
       tableId: 5,
       items: [
         { dishId: 1, quantity: 2 },
-        { dishId: 2, quantity: 1 }
-      ]
+        { dishId: 2, quantity: 1 },
+      ],
     })
-    
+
     // Assert
     expect(result.orderId).toBeGreaterThan(0)
     expect(result.isNew).toBe(true)
@@ -233,30 +240,32 @@ describe('Orders Router - create', () => {
     expect(result.totalAmount).toBeGreaterThan(0)
   })
 
-  test('should return error if table does not exist', async () => {
+  test("should return error if table does not exist", async () => {
     const caller = appRouter.createCaller({ user: null, role: null })
-    
-    await expect(caller.orders.create({
-      tableId: 999,
-      items: [{ dishId: 1, quantity: 1 }]
-    })).rejects.toThrow('Table not found')
+
+    await expect(
+      caller.orders.create({
+        tableId: 999,
+        items: [{ dishId: 1, quantity: 1 }],
+      })
+    ).rejects.toThrow("Table not found")
   })
 
-  test('should add to existing order if table has unpaid order', async () => {
+  test("should add to existing order if table has unpaid order", async () => {
     const caller = appRouter.createCaller({ user: null, role: null })
-    
+
     // Create first order
     const firstOrder = await caller.orders.create({
       tableId: 5,
-      items: [{ dishId: 1, quantity: 1 }]
+      items: [{ dishId: 1, quantity: 1 }],
     })
-    
+
     // Create second order for same table
     const secondOrder = await caller.orders.create({
       tableId: 5,
-      items: [{ dishId: 2, quantity: 1 }]
+      items: [{ dishId: 2, quantity: 1 }],
     })
-    
+
     expect(secondOrder.orderId).toBe(firstOrder.orderId)
     expect(secondOrder.isNew).toBe(false)
     expect(secondOrder.itemCount).toBe(2)
@@ -265,6 +274,7 @@ describe('Orders Router - create', () => {
 ```
 
 **Run test (should fail)**:
+
 ```bash
 cd packages/api
 bun test routers/orders.test.ts
@@ -275,37 +285,42 @@ bun test routers/orders.test.ts
 
 ```typescript
 // packages/api/src/routers/orders.ts
-import { z } from 'zod'
-import { router, publicProcedure } from '../trpc'
-import { db } from '@repo/db'
-import { orders, orderItems, tables, dishes } from '@repo/db/schema'
-import { eq, and } from 'drizzle-orm'
-import { TRPCError } from '@trpc/server'
+import { db } from "@repo/db"
+import { dishes, orderItems, orders, tables } from "@repo/db/schema"
+import { TRPCError } from "@trpc/server"
+import { and, eq } from "drizzle-orm"
+import { z } from "zod"
+
+import { publicProcedure, router } from "../trpc"
 
 export const ordersRouter = router({
   create: publicProcedure
-    .input(z.object({
-      tableId: z.number().int().positive(),
-      items: z.array(z.object({
-        dishId: z.number().int().positive(),
-        quantity: z.number().int().min(1),
-        specialInstructions: z.string().max(255).optional()
-      })).min(1)
-    }))
+    .input(
+      z.object({
+        tableId: z.number().int().positive(),
+        items: z
+          .array(
+            z.object({
+              dishId: z.number().int().positive(),
+              quantity: z.number().int().min(1),
+              specialInstructions: z.string().max(255).optional(),
+            })
+          )
+          .min(1),
+      })
+    )
     .mutation(async ({ input }) => {
       // 1. Validate table exists
       const table = await db.select().from(tables).where(eq(tables.id, input.tableId)).get()
       if (!table) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Table not found' })
+        throw new TRPCError({ code: "NOT_FOUND", message: "Table not found" })
       }
 
       // 2. Check for existing unpaid order at this table
-      const existingOrder = await db.select()
+      const existingOrder = await db
+        .select()
         .from(orders)
-        .where(and(
-          eq(orders.tableId, input.tableId),
-          ne(orders.status, 'Paid')
-        ))
+        .where(and(eq(orders.tableId, input.tableId), ne(orders.status, "Paid")))
         .get()
 
       let orderId: number
@@ -316,11 +331,14 @@ export const ordersRouter = router({
         orderId = existingOrder.id
       } else {
         // Create new order
-        const newOrder = await db.insert(orders).values({
-          tableId: input.tableId,
-          status: 'Pending',
-          totalAmount: 0
-        }).returning()
+        const newOrder = await db
+          .insert(orders)
+          .values({
+            tableId: input.tableId,
+            status: "Pending",
+            totalAmount: 0,
+          })
+          .returning()
         orderId = newOrder[0].id
         isNew = true
       }
@@ -330,7 +348,7 @@ export const ordersRouter = router({
         // Validate dish exists
         const dish = await db.select().from(dishes).where(eq(dishes.id, item.dishId)).get()
         if (!dish) {
-          throw new TRPCError({ code: 'BAD_REQUEST', message: `Dish ${item.dishId} not found` })
+          throw new TRPCError({ code: "BAD_REQUEST", message: `Dish ${item.dishId} not found` })
         }
 
         await db.insert(orderItems).values({
@@ -338,15 +356,16 @@ export const ordersRouter = router({
           dishId: item.dishId,
           quantity: item.quantity,
           priceAtOrder: dish.price,
-          specialInstructions: item.specialInstructions
+          specialInstructions: item.specialInstructions,
         })
       }
 
       // 4. Recalculate total amount
       const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId))
-      const totalAmount = items.reduce((sum, item) => sum + (item.priceAtOrder * item.quantity), 0)
-      
-      await db.update(orders)
+      const totalAmount = items.reduce((sum, item) => sum + item.priceAtOrder * item.quantity, 0)
+
+      await db
+        .update(orders)
         .set({ totalAmount, updatedAt: new Date() })
         .where(eq(orders.id, orderId))
 
@@ -354,13 +373,14 @@ export const ordersRouter = router({
         orderId,
         isNew,
         totalAmount,
-        itemCount: items.length
+        itemCount: items.length,
       }
-    })
+    }),
 })
 ```
 
 **Run test (should pass)**:
+
 ```bash
 bun test routers/orders.test.ts
 # ✅ Tests pass
@@ -371,45 +391,42 @@ bun test routers/orders.test.ts
 ```typescript
 // Extract helper functions for reusability and clarity
 async function getActiveOrderForTable(tableId: number) {
-  return db.select()
+  return db
+    .select()
     .from(orders)
-    .where(and(
-      eq(orders.tableId, tableId),
-      ne(orders.status, 'Paid')
-    ))
+    .where(and(eq(orders.tableId, tableId), ne(orders.status, "Paid")))
     .get()
 }
 
 async function calculateOrderTotal(orderId: number): Promise<number> {
   const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId))
-  return items.reduce((sum, item) => sum + (item.priceAtOrder * item.quantity), 0)
+  return items.reduce((sum, item) => sum + item.priceAtOrder * item.quantity, 0)
 }
 
 // Refactor mutation to use helper functions
 export const ordersRouter = router({
-  create: publicProcedure
-    .input(createOrderSchema)
-    .mutation(async ({ input }) => {
-      const table = await validateTableExists(input.tableId)
-      const existingOrder = await getActiveOrderForTable(input.tableId)
-      
-      const orderId = existingOrder?.id ?? await createNewOrder(input.tableId)
-      await addItemsToOrder(orderId, input.items)
-      const totalAmount = await calculateOrderTotal(orderId)
-      
-      await updateOrderTotal(orderId, totalAmount)
-      
-      return {
-        orderId,
-        isNew: !existingOrder,
-        totalAmount,
-        itemCount: input.items.length
-      }
-    })
+  create: publicProcedure.input(createOrderSchema).mutation(async ({ input }) => {
+    const table = await validateTableExists(input.tableId)
+    const existingOrder = await getActiveOrderForTable(input.tableId)
+
+    const orderId = existingOrder?.id ?? (await createNewOrder(input.tableId))
+    await addItemsToOrder(orderId, input.items)
+    const totalAmount = await calculateOrderTotal(orderId)
+
+    await updateOrderTotal(orderId, totalAmount)
+
+    return {
+      orderId,
+      isNew: !existingOrder,
+      totalAmount,
+      itemCount: input.items.length,
+    }
+  }),
 })
 ```
 
 **Run tests again (ensure still passing)**:
+
 ```bash
 bun test routers/orders.test.ts
 # ✅ Tests still pass after refactor
@@ -479,18 +496,22 @@ bun test --watch
 ## Key Files to Start With
 
 ### 1. Database Schema
+
 - **File**: `packages/db/src/schema/orders.ts`
 - **Action**: Define `orders` and `orderItems` tables using Drizzle
 
 ### 2. tRPC Router
+
 - **File**: `packages/api/src/routers/orders.ts`
 - **Action**: Implement `orders.create` procedure with Zod validation
 
 ### 3. React Route
+
 - **File**: `apps/web/src/routes/index.tsx`
 - **Action**: Create customer ordering page (QR landing)
 
 ### 4. WebSocket Handler
+
 - **File**: `apps/server/src/websocket.ts`
 - **Action**: Set up connection management and broadcast functions
 
@@ -499,6 +520,7 @@ bun test --watch
 ## Useful Commands
 
 ### Development
+
 ```bash
 # Start backend
 bun --cwd apps/server dev
@@ -511,6 +533,7 @@ bun run dev
 ```
 
 ### Database
+
 ```bash
 # Generate migration from schema changes
 bun --cwd packages/db db:generate
@@ -523,6 +546,7 @@ bun --cwd packages/db db:reset
 ```
 
 ### Code Quality
+
 ```bash
 # Type checking
 bun run check-types
@@ -538,6 +562,7 @@ bun run ci
 ```
 
 ### Testing
+
 ```bash
 # Unit tests
 bun test
@@ -558,16 +583,19 @@ open coverage/index.html
 ## Debugging Tips
 
 ### Backend Debugging
+
 1. Add breakpoints in VS Code
 2. Run with Bun inspector: `bun --inspect apps/server/src/index.ts`
 3. Use VS Code "Attach to Process" debugger
 
 ### Frontend Debugging
+
 1. React DevTools browser extension
 2. TanStack Router DevTools (built-in)
 3. tRPC DevTools: `http://localhost:3000/trpc-panel`
 
 ### Database Inspection
+
 ```bash
 # Open SQLite database
 sqlite3 apps/server/local.db
@@ -584,15 +612,19 @@ sqlite> .schema orders
 ## Common Issues & Solutions
 
 ### Issue: `DATABASE_URL` not found
+
 **Solution**: Ensure `.env` file exists in `apps/server/` directory
 
 ### Issue: Port 3000 already in use
+
 **Solution**: Kill existing process or change `PORT` in `.env`
 
 ### Issue: TypeScript errors after schema changes
+
 **Solution**: Run `bun run db:generate` to regenerate types
 
 ### Issue: WebSocket not connecting
+
 **Solution**: Verify backend is running and WebSocket upgrade is enabled in Hono config
 
 ---
