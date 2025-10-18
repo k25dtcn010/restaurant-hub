@@ -21,6 +21,7 @@ const waiterContext: Context = {
 	user: { id: "waiter-test-001", email: "waiter@test.com", name: "Test Waiter" } as any,
 	role: "Waiter",
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 const managerContext: Context = {
@@ -28,6 +29,7 @@ const managerContext: Context = {
 	user: { id: "manager-test-001", email: "manager@test.com", name: "Test Manager" } as any,
 	role: "Manager",
 	db,
+	wsNotifier: mockWsNotifier,
 };
 
 const customerContext: Context = {

@@ -64,6 +64,7 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 		},
 		role: "Waiter",
 		db,
+		wsNotifier: mockWsNotifier,
 	};
 
 	const managerContext: Context = {
@@ -101,6 +102,7 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 		},
 		role: "Manager",
 		db,
+		wsNotifier: mockWsNotifier,
 	};
 
 	const customerContext: Context = {
@@ -146,6 +148,7 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 		},
 		role: "KitchenStaff",
 		db,
+		wsNotifier: mockWsNotifier,
 	};
 
 	beforeAll(async () => {
