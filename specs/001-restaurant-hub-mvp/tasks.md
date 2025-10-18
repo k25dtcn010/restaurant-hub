@@ -332,11 +332,11 @@
 
 **Reference**: [spec.md Functional Requirements](./spec.md#functional-requirements) - FR-001a, FR-001b, FR-001c
 
-- [ ] T126 [P] Implement dishes.create mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 3](./contracts/dishes-router.md#3-dishescreate) | **Auth**: Manager only
-- [ ] T127 [P] Implement dishes.update mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 4](./contracts/dishes-router.md#4-dishesupdate) | **Auth**: Manager only
-- [ ] T128 [P] Implement dishes.toggleAvailability mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 5](./contracts/dishes-router.md#5-dishestoggleavailability) | **Auth**: Manager only
-- [ ] T129 Create menu-management route in apps/web/src/routes/menu-management.tsx (Manager only) | **Auth Guard**: Manager-only access
-- [ ] T130 Create DishEditor component in apps/web/src/components/dish-editor.tsx for add/edit operations | **Data Model**: [data-model.md Dish](./data-model.md#5-dish)
+- [X] T126 [P] Implement dishes.create mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 3](./contracts/dishes-router.md#3-dishescreate) | **Auth**: Manager only
+- [X] T127 [P] Implement dishes.update mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 4](./contracts/dishes-router.md#4-dishesupdate) | **Auth**: Manager only
+- [X] T128 [P] Implement dishes.toggleAvailability mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 5](./contracts/dishes-router.md#5-dishestoggleavailability) | **Auth**: Manager only
+- [X] T129 Create menu-management route in apps/web/src/routes/menu-management.tsx (Manager only) | **Auth Guard**: Manager-only access
+- [X] T130 Create DishEditor component in apps/web/src/components/dish-editor.tsx for add/edit operations | **Data Model**: [data-model.md Dish](./data-model.md#5-dish)
 
 ### Error Handling & Validation
 
