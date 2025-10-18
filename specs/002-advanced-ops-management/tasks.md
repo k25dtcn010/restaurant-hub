@@ -261,7 +261,7 @@
 
 #### T021: modifiers.list - List all modifiers with availability filter
 
-- [ ] T021-RED [P] [US1] Write FAILING test for modifiers.list procedure
+- [X] T021-RED [P] [US1] Write FAILING test for modifiers.list procedure
   - **File**: `packages/api/tests/routers/modifiers.test.ts` (create if doesn't exist)
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.list" for input/output schemas
   - **Test Cases**:
@@ -271,7 +271,7 @@
   - **Setup**: Seed 5 modifiers (3 available, 2 unavailable)
   - **Expected**: Tests FAIL (procedure not fully implemented yet)
 
-- [ ] T021-GREEN [US1] Implement modifiers.list to make tests pass
+- [X] T021-GREEN [US1] Implement modifiers.list to make tests pass
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.list"
   - **Data Model**: Query `modifiers` table (see `data-model.md` § 1.1)
@@ -288,14 +288,14 @@
     ```
   - **Expected**: All tests PASS
 
-- [ ] T021-REFACTOR [US1] Review modifiers.list code quality
+- [X] T021-REFACTOR [US1] Review modifiers.list code quality
   - **Quality Checks**: Run `bun run lint`, `bun run check-types`
   - **Performance**: Should handle 1000+ modifiers in < 50ms
   - **Expected**: Tests still PASS, no lint errors
 
 #### T022: modifiers.create - Create new modifier (manager only)
 
-- [ ] T022-RED [P] [US1] Write FAILING test for modifiers.create
+- [X] T022-RED [P] [US1] Write FAILING test for modifiers.create
   - **File**: `packages/api/tests/routers/modifiers.test.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.create"
   - **Test Cases**:
@@ -305,20 +305,20 @@
     4. Negative price adjustment is allowed (e.g., discount)
   - **Expected**: Tests FAIL
 
-- [ ] T022-GREEN [US1] Implement modifiers.create with manager auth
+- [X] T022-GREEN [US1] Implement modifiers.create with manager auth
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.create"
   - **Auth**: Use `protectedProcedure` and check `ctx.user.role === 'manager'`
   - **Implementation**: Insert into `modifiers` table, catch unique constraint errors
   - **Expected**: All tests PASS
 
-- [ ] T022-REFACTOR [US1] Review error handling in modifiers.create
+- [X] T022-REFACTOR [US1] Review error handling in modifiers.create
   - **UX Check**: Error messages should be user-friendly (per Constitution § III)
   - **Expected**: Tests still PASS
 
 #### T023: modifiers.update - Update existing modifier (manager only)
 
-- [ ] T023-RED [P] [US1] Write FAILING test for modifiers.update
+- [X] T023-RED [P] [US1] Write FAILING test for modifiers.update
   - **File**: `packages/api/tests/routers/modifiers.test.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.update"
   - **Test Cases**:
@@ -328,18 +328,18 @@
     4. Partial updates work (only provided fields updated)
   - **Expected**: Tests FAIL
 
-- [ ] T023-GREEN [US1] Implement modifiers.update
+- [X] T023-GREEN [US1] Implement modifiers.update
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.update"
   - **Implementation**: Update only provided fields, return updated modifier
   - **Expected**: All tests PASS
 
-- [ ] T023-REFACTOR [US1] Optimize modifiers.update query
+- [X] T023-REFACTOR [US1] Optimize modifiers.update query
   - **Expected**: Tests still PASS
 
 #### T024: modifiers.delete - Delete modifier if not in use (manager only)
 
-- [ ] T024-RED [P] [US1] Write FAILING test for modifiers.delete
+- [X] T024-RED [P] [US1] Write FAILING test for modifiers.delete
   - **File**: `packages/api/tests/routers/modifiers.test.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.delete"
   - **Test Cases**:
@@ -349,7 +349,7 @@
   - **Data Model**: Check `dishModifiers` table (see `data-model.md` § 1.3)
   - **Expected**: Tests FAIL
 
-- [ ] T024-GREEN [US1] Implement modifiers.delete with assignment check
+- [X] T024-GREEN [US1] Implement modifiers.delete with assignment check
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Logic**: 
     1. Query `dishModifiers WHERE modifierId = input.id`
@@ -357,7 +357,7 @@
     3. Otherwise, delete from `modifiers` table
   - **Expected**: All tests PASS
 
-- [ ] T024-REFACTOR [US1] Review modifiers.delete error messages
+- [X] T024-REFACTOR [US1] Review modifiers.delete error messages
   - **Expected**: Tests still PASS
 
 #### T025-T028: Modifier Groups CRUD

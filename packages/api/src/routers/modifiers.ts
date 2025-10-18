@@ -1,7 +1,9 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
+import { eq, asc } from "@learn-bettert/db"
 
 import { managerOnlyProcedure, publicProcedure, router } from "../index"
+import { modifiers, dishModifiers } from "@learn-bettert/db"
 
 /**
  * Modifiers Router
@@ -16,6 +18,7 @@ export const modifiersRouter = router({
    * modifiers.list - List all modifiers with optional availability filtering
    * Auth: Public
    * Contract: modifiers-router.md § modifiers.list
+   * T021-GREEN: Implementation
    */
   list: publicProcedure
     .input(
@@ -23,10 +26,12 @@ export const modifiersRouter = router({
         availableOnly: z.boolean().optional().default(false),
       })
     )
-    .query(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "TODO: Implement modifiers.list in Phase 3",
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx
+
+      return await db.query.modifiers.findMany({
+        where: input.availableOnly ? eq(modifiers.isAvailable, true) : undefined,
+        orderBy: [asc(modifiers.id)],
       })
     }),
 
@@ -34,6 +39,7 @@ export const modifiersRouter = router({
    * modifiers.create - Create a new modifier
    * Auth: Manager only
    * Contract: modifiers-router.md § modifiers.create
+   * T022-GREEN: Implementation
    */
   create: managerOnlyProcedure
     .input(
@@ -43,17 +49,37 @@ export const modifiersRouter = router({
         isAvailable: z.boolean().default(true),
       })
     )
-    .mutation(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "TODO: Implement modifiers.create in Phase 3",
-      })
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+
+      try {
+        const [newModifier] = await db
+          .insert(modifiers)
+          .values({
+            name: input.name,
+            priceAdjustment: input.priceAdjustment,
+            isAvailable: input.isAvailable,
+          })
+          .returning()
+
+        return newModifier
+      } catch (error: any) {
+        // Check for unique constraint violation (duplicate name)
+        if (error?.message?.includes("UNIQUE constraint failed")) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Modifier with this name already exists",
+          })
+        }
+        throw error
+      }
     }),
 
   /**
    * modifiers.update - Update an existing modifier
    * Auth: Manager only
    * Contract: modifiers-router.md § modifiers.update
+   * T023-GREEN: Implementation
    */
   update: managerOnlyProcedure
     .input(
@@ -64,17 +90,42 @@ export const modifiersRouter = router({
         isAvailable: z.boolean().optional(),
       })
     )
-    .mutation(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "TODO: Implement modifiers.update in Phase 3",
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+
+      // First, check if modifier exists
+      const existingModifier = await db.query.modifiers.findFirst({
+        where: eq(modifiers.id, input.id),
       })
+
+      if (!existingModifier) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Modifier not found",
+        })
+      }
+
+      // Build update object with only provided fields
+      const updateData: any = {}
+      if (input.name !== undefined) updateData.name = input.name
+      if (input.priceAdjustment !== undefined)
+        updateData.priceAdjustment = input.priceAdjustment
+      if (input.isAvailable !== undefined) updateData.isAvailable = input.isAvailable
+
+      const [updatedModifier] = await db
+        .update(modifiers)
+        .set(updateData)
+        .where(eq(modifiers.id, input.id))
+        .returning()
+
+      return updatedModifier
     }),
 
   /**
    * modifiers.delete - Delete a modifier (only if not assigned to any dishes)
    * Auth: Manager only
    * Contract: modifiers-router.md § modifiers.delete
+   * T024-GREEN: Implementation
    */
   delete: managerOnlyProcedure
     .input(
@@ -82,11 +133,37 @@ export const modifiersRouter = router({
         id: z.number(),
       })
     )
-    .mutation(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "TODO: Implement modifiers.delete in Phase 3",
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+
+      // First, check if modifier exists
+      const existingModifier = await db.query.modifiers.findFirst({
+        where: eq(modifiers.id, input.id),
       })
+
+      if (!existingModifier) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Modifier not found",
+        })
+      }
+
+      // Check if modifier is assigned to any dishes
+      const assignments = await db.query.dishModifiers.findMany({
+        where: eq(dishModifiers.modifierId, input.id),
+      })
+
+      if (assignments.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot delete modifier assigned to dishes",
+        })
+      }
+
+      // Delete the modifier
+      await db.delete(modifiers).where(eq(modifiers.id, input.id))
+
+      return { success: true }
     }),
 
   /**
