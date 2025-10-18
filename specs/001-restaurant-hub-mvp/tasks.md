@@ -272,13 +272,13 @@
 
 #### Inventory Dashboard Frontend
 
-- [ ] T104 [P] [US5] Create inventory route in apps/web/src/routes/inventory.tsx with authentication guard (Manager only) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) - Manager only access | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3) | **Plan Reference**: [plan.md Task 5.2](./plan.md#task-52-build-inventory-dashboard)
-- [ ] T105 [P] [US5] Create InventoryTable component in apps/web/src/components/inventory-table.tsx showing all ingredients | **Contract**: [inventory-router.md Procedure 1 Output](./contracts/inventory-router.md#1-inventorygetall) | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [ ] T106 [P] [US5] Create IngredientRow component in apps/web/src/components/ingredient-row.tsx with low-stock highlighting | **Acceptance**: [spec.md US5 Scenario 2](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3) - red background or warning icon
-- [ ] T107 [US5] Create StockAdjustmentModal component in apps/web/src/components/stock-adjustment-modal.tsx for editing quantities | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [ ] T108 [US5] Create ThresholdEditor component in apps/web/src/components/threshold-editor.tsx for setting alert levels | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [ ] T109 [US5] Add visual alerts (red highlighting, warning icons) for low-stock ingredients | **Acceptance**: [spec.md US5 Scenario 2](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
-- [ ] T110 [US5] Display which dishes use each ingredient in inventory detail view | **Contract**: [inventory-router.md Procedure 1 with includeRecipes=true](./contracts/inventory-router.md#1-inventorygetall)
+- [X] T104 [P] [US5] Create inventory route in apps/web/src/routes/inventory.tsx with authentication guard (Manager only) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) - Manager only access | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3) | **Plan Reference**: [plan.md Task 5.2](./plan.md#task-52-build-inventory-dashboard)
+- [X] T105 [P] [US5] Create InventoryTable component in apps/web/src/components/inventory-table.tsx showing all ingredients | **Contract**: [inventory-router.md Procedure 1 Output](./contracts/inventory-router.md#1-inventorygetall) | **Acceptance**: [spec.md US5 Scenario 1](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T106 [P] [US5] Create IngredientRow component in apps/web/src/components/ingredient-row.tsx with low-stock highlighting | **Acceptance**: [spec.md US5 Scenario 2](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3) - red background or warning icon
+- [X] T107 [US5] Create StockAdjustmentModal component in apps/web/src/components/stock-adjustment-modal.tsx for editing quantities | **Acceptance**: [spec.md US5 Scenario 3](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T108 [US5] Create ThresholdEditor component in apps/web/src/components/threshold-editor.tsx for setting alert levels | **Acceptance**: [spec.md US5 Scenario 6](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T109 [US5] Add visual alerts (red highlighting, warning icons) for low-stock ingredients | **Acceptance**: [spec.md US5 Scenario 2](./spec.md#user-story-5---inventory-management-and-alerts-priority-p3)
+- [X] T110 [US5] Display which dishes use each ingredient in inventory detail view | **Contract**: [inventory-router.md Procedure 1 with includeRecipes=true](./contracts/inventory-router.md#1-inventorygetall)
 
 **Checkpoint**: User Story 5 complete - managers can monitor and manage inventory
 
