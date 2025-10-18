@@ -358,9 +358,9 @@
 
 ### Documentation & Developer Experience
 
-- [ ] T139 [P] Create API documentation from tRPC schema in docs/api-reference.md | **Contracts**: Reference all contracts/*.md files
-- [ ] T140 [P] Document WebSocket message types and flows in docs/websocket-protocol.md | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) and all contract WebSocket sections
-- [ ] T141 [P] Update README.md with setup instructions and architecture overview | **Reference**: [quickstart.md](./quickstart.md) for setup steps
+- [X] T139 [P] Create API documentation from tRPC schema in docs/api-reference.md | **Contracts**: Reference all contracts/*.md files
+- [X] T140 [P] Document WebSocket message types and flows in docs/websocket-protocol.md | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) and all contract WebSocket sections
+- [X] T141 [P] Update README.md with setup instructions and architecture overview | **Reference**: [quickstart.md](./quickstart.md) for setup steps
 - [ ] T142 Run quickstart.md validation (verify all setup steps work correctly) | **Validation**: [plan.md Checkpoint 1.3](./plan.md#checkpoint-13--foundation-complete)
 
 ### Security & Production Readiness
