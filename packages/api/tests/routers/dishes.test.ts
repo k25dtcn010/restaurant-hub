@@ -33,6 +33,24 @@ describe("Dishes Router - dishes.getAll", () => {
 		if (existingIngredient && existingDish) {
 			testIngredientId = existingIngredient.id;
 			testDishId = existingDish.id;
+			
+			// Ensure recipe exists
+			const existingRecipe = await db.query.recipes.findFirst({
+				where: (recipes, { and, eq }) =>
+					and(
+						eq(recipes.dishId, testDishId),
+						eq(recipes.ingredientId, testIngredientId)
+					),
+			});
+			
+			if (!existingRecipe) {
+				// Create recipe if it doesn't exist
+				await db.insert(recipes).values({
+					dishId: testDishId,
+					ingredientId: testIngredientId,
+					quantityRequired: 0.5,
+				});
+			}
 		} else {
 			// Create test ingredient
 			const [ingredient] = await db.insert(ingredients).values({

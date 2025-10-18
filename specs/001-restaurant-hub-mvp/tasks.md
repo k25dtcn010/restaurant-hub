@@ -332,46 +332,46 @@
 
 **Reference**: [spec.md Functional Requirements](./spec.md#functional-requirements) - FR-001a, FR-001b, FR-001c
 
-- [ ] T126 [P] Implement dishes.create mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 3](./contracts/dishes-router.md#3-dishescreate) | **Auth**: Manager only
-- [ ] T127 [P] Implement dishes.update mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 4](./contracts/dishes-router.md#4-dishesupdate) | **Auth**: Manager only
-- [ ] T128 [P] Implement dishes.toggleAvailability mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 5](./contracts/dishes-router.md#5-dishestoggleavailability) | **Auth**: Manager only
-- [ ] T129 Create menu-management route in apps/web/src/routes/menu-management.tsx (Manager only) | **Auth Guard**: Manager-only access
-- [ ] T130 Create DishEditor component in apps/web/src/components/dish-editor.tsx for add/edit operations | **Data Model**: [data-model.md Dish](./data-model.md#5-dish)
+- [X] T126 [P] Implement dishes.create mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 3](./contracts/dishes-router.md#3-dishescreate) | **Auth**: Manager only
+- [X] T127 [P] Implement dishes.update mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 4](./contracts/dishes-router.md#4-dishesupdate) | **Auth**: Manager only
+- [X] T128 [P] Implement dishes.toggleAvailability mutation in packages/api/src/routers/dishes.ts for managers | **Contract**: [dishes-router.md Procedure 5](./contracts/dishes-router.md#5-dishestoggleavailability) | **Auth**: Manager only
+- [X] T129 Create menu-management route in apps/web/src/routes/menu-management.tsx (Manager only) | **Auth Guard**: Manager-only access
+- [X] T130 Create DishEditor component in apps/web/src/components/dish-editor.tsx for add/edit operations | **Data Model**: [data-model.md Dish](./data-model.md#5-dish)
 
 ### Error Handling & Validation
 
 **Reference**: [research.md Section 9](./research.md#9-error-handling-and-validation)
 
-- [ ] T131 [P] Add comprehensive Zod validation schemas for all tRPC inputs | **Pattern**: [research.md Section 9 Error Handling Pattern](./research.md#9-error-handling-and-validation) - includes Zod schema examples
-- [ ] T132 [P] Implement global error handler in apps/server/src/index.ts | **Best Practices**: Never expose database errors to frontend
-- [ ] T133 [P] Add error boundaries in apps/web/src/routes/__root.tsx | **UX**: User-friendly error messages
-- [ ] T134 Add user-friendly error messages with toast notifications using Sonner | **Error Categories**: [research.md Section 9 Error Categories](./research.md#9-error-handling-and-validation)
+- [X] T131 [P] Add comprehensive Zod validation schemas for all tRPC inputs | **Pattern**: [research.md Section 9 Error Handling Pattern](./research.md#9-error-handling-and-validation) - includes Zod schema examples
+- [X] T132 [P] Implement global error handler in apps/server/src/index.ts | **Best Practices**: Never expose database errors to frontend
+- [X] T133 [P] Add error boundaries in apps/web/src/routes/__root.tsx | **UX**: User-friendly error messages
+- [X] T134 Add user-friendly error messages with toast notifications using Sonner | **Error Categories**: [research.md Section 9 Error Categories](./research.md#9-error-handling-and-validation)
 
 ### Performance Optimization
 
 **Reference**: [research.md Section 8](./research.md#8-performance-optimization-strategies)
 
-- [ ] T135 [P] Add database indexes for frequently queried fields (orders.status, orders.tableId, ingredients.quantity) | **Indexes**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes all critical index definitions
-- [ ] T136 [P] Implement tRPC query batching in apps/web/src/utils/trpc.ts | **Pattern**: [research.md Section 8 tRPC Batching](./research.md#8-performance-optimization-strategies) - includes httpBatchLink configuration
-- [ ] T137 [P] Optimize WebSocket connection pooling in apps/server/src/websocket.ts | **Pattern**: [research.md Section 1 WebSocket](./research.md#1-real-time-notification-architecture)
-- [ ] T138 Add loading skeletons for all async data fetching in frontend components | **UX**: Loading states < 200ms requirement
+- [X] T135 [P] Add database indexes for frequently queried fields (orders.status, orders.tableId, ingredients.quantity) | **Indexes**: [data-model.md Indexes and Performance](./data-model.md#indexes-and-performance) - includes all critical index definitions
+- [X] T136 [P] Implement tRPC query batching in apps/web/src/utils/trpc.ts | **Pattern**: [research.md Section 8 tRPC Batching](./research.md#8-performance-optimization-strategies) - includes httpBatchLink configuration
+- [X] T137 [P] Optimize WebSocket connection pooling in apps/server/src/websocket.ts | **Pattern**: [research.md Section 1 WebSocket](./research.md#1-real-time-notification-architecture)
+- [X] T138 Add loading skeletons for all async data fetching in frontend components | **UX**: Loading states < 200ms requirement
 
 ### Documentation & Developer Experience
 
-- [ ] T139 [P] Create API documentation from tRPC schema in docs/api-reference.md | **Contracts**: Reference all contracts/*.md files
-- [ ] T140 [P] Document WebSocket message types and flows in docs/websocket-protocol.md | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) and all contract WebSocket sections
-- [ ] T141 [P] Update README.md with setup instructions and architecture overview | **Reference**: [quickstart.md](./quickstart.md) for setup steps
-- [ ] T142 Run quickstart.md validation (verify all setup steps work correctly) | **Validation**: [plan.md Checkpoint 1.3](./plan.md#checkpoint-13--foundation-complete)
+- [X] T139 [P] Create API documentation from tRPC schema in docs/api-reference.md | **Contracts**: Reference all contracts/*.md files
+- [X] T140 [P] Document WebSocket message types and flows in docs/websocket-protocol.md | **Reference**: [research.md Section 1](./research.md#1-real-time-notification-architecture) and all contract WebSocket sections
+- [X] T141 [P] Update README.md with setup instructions and architecture overview | **Reference**: [quickstart.md](./quickstart.md) for setup steps
+- [X] T142 Run quickstart.md validation (verify all setup steps work correctly) | **Validation**: [plan.md Checkpoint 1.3](./plan.md#checkpoint-13--foundation-complete)
 
 ### Security & Production Readiness
 
 **Reference**: [research.md Section 10](./research.md#10-deployment-and-environment-configuration)
 
-- [ ] T143 [P] Implement rate limiting for public endpoints (orders.create) | **Security**: Constitution security standards
-- [ ] T144 [P] Add CSRF protection for authenticated mutations | **Security**: Better-Auth provides CSRF tokens
-- [ ] T145 [P] Configure environment-specific CORS policies | **Config**: [research.md Section 10 Environment Config](./research.md#10-deployment-and-environment-configuration)
-- [ ] T146 Add security headers (HSTS, CSP, X-Frame-Options) in Hono middleware | **Best Practices**: Constitution security standards
-- [ ] T147 Create production environment configuration for Turso database | **Deployment**: [research.md Section 10 Deployment Checklist](./research.md#10-deployment-and-environment-configuration)
+- [X] T143 [P] Implement rate limiting for public endpoints (orders.create) | **Security**: Constitution security standards
+- [X] T144 [P] Add CSRF protection for authenticated mutations | **Security**: Better-Auth provides CSRF tokens
+- [X] T145 [P] Configure environment-specific CORS policies | **Config**: [research.md Section 10 Environment Config](./research.md#10-deployment-and-environment-configuration)
+- [X] T146 Add security headers (HSTS, CSP, X-Frame-Options) in Hono middleware | **Best Practices**: Constitution security standards
+- [X] T147 Create production environment configuration for Turso database | **Deployment**: [research.md Section 10 Deployment Checklist](./research.md#10-deployment-and-environment-configuration)
 
 ---
 

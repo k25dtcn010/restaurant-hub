@@ -84,10 +84,11 @@ export const ordersRouter = router({
 				});
 			}
 
-			// Check for active unpaid order at table
+			// Check for active pending order at table
+			// Only add to orders that haven't been submitted yet
 			const activeOrder = await db.query.orders.findFirst({
-				where: (orders, { and, eq, ne }) =>
-					and(eq(orders.tableId, tableId), ne(orders.status, "Paid")),
+				where: (orders, { and, eq }) =>
+					and(eq(orders.tableId, tableId), eq(orders.status, "Pending")),
 			});
 
 			let orderId: number;

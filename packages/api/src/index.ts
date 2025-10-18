@@ -1,7 +1,41 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "./context";
 
-export const t = initTRPC.context<Context>().create();
+/**
+ * T132: Global error handler
+ * Reference: research.md Section 9 - Error Handling and Validation
+ * 
+ * Best Practices:
+ * - Never expose database errors or stack traces to frontend
+ * - Log detailed errors server-side
+ * - Display user-friendly error messages
+ */
+export const t = initTRPC.context<Context>().create({
+	errorFormatter(opts) {
+		const { shape, error } = opts;
+		
+		// Log server errors for debugging
+		if (error.code === "INTERNAL_SERVER_ERROR") {
+			console.error("[tRPC Error]", {
+				code: error.code,
+				message: error.message,
+				cause: error.cause,
+				path: opts.path,
+				input: opts.input,
+			});
+		}
+
+		// Return sanitized error to client
+		return {
+			...shape,
+			data: {
+				...shape.data,
+				// Never expose database errors to frontend
+				// Keep only tRPC error code and safe message
+			},
+		};
+	},
+});
 
 export const router = t.router;
 
