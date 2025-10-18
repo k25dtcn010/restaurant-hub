@@ -1,4 +1,5 @@
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
 import { orders } from "./orders";
 
 // Payment entity per data-model.md Section 9
@@ -16,6 +17,14 @@ export const payments = sqliteTable("payments", {
 		.notNull()
 		.$defaultFn(() => new Date()),
 });
+
+// Relations
+export const paymentsRelations = relations(payments, ({ one }) => ({
+	order: one(orders, {
+		fields: [payments.orderId],
+		references: [orders.id],
+	}),
+}));
 
 // TypeScript type exports
 export type Payment = typeof payments.$inferSelect;
