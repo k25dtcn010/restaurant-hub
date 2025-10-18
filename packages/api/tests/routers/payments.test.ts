@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, beforeEach } from "bun:test";
+import { describe, test, expect, beforeAll, beforeEach, afterEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
 import { db, eq, tables, ingredients, dishes, recipes, orders, orderItems, payments } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
@@ -7,7 +7,11 @@ import type { Context } from "../../src/context";
  * T111: Contract test for payments.create
  * T112: Contract test for payments.getHistory
  * Contract: payments-router.md Procedures 1 & 3
- * TDD Red Phase: These tests should FAIL before implementation
+ * 
+ * Test Isolation Strategy:
+ * - beforeEach: Replenish ingredient stock and create fresh test order
+ * - afterEach: Clean up created test data
+ * - Each test suite uses unique table numbers
  */
 
 // Mock contexts for different roles
@@ -233,8 +237,8 @@ describe("Payments Router - payments.create (T111)", () => {
 		const caller = appRouter.createCaller(waiterContext);
 		const customerCaller = appRouter.createCaller(customerContext);
 
-		// Use a different table to ensure we get a new order
-		const tempTable = await db.query.tables.findFirst({
+		// Find or create a different table to ensure we get a new order
+		let tempTable = await db.query.tables.findFirst({
 			where: (tables, { eq }) => eq(tables.number, 701),
 		});
 
@@ -242,14 +246,15 @@ describe("Payments Router - payments.create (T111)", () => {
 			// Create temp table if it doesn't exist
 			const [newTable] = await db.insert(tables).values({
 				number: 701,
-				qrCode: "https://app.restauranthub.com/?table=701",
+				qrCode: "https://app.restauranthub.com/?table=701-test",
 				capacity: 4,
 			}).returning();
+			tempTable = newTable;
 		}
 
 		// Create an order at a different table in Pending status
 		const createResult = await customerCaller.orders.create({
-			tableId: tempTable!.id,
+			tableId: tempTable.id,
 			items: [{ dishId: testDishId, quantity: 1 }],
 		});
 
@@ -270,7 +275,8 @@ describe("Payments Router - payments.create (T111)", () => {
 			expect(error.message).toContain("status");
 		}
 
-		// Clean up
+		// Clean up order items and order
+		await db.delete(orderItems).where(eq(orderItems.orderId, createResult.orderId));
 		await db.delete(orders).where(eq(orders.id, createResult.orderId));
 	});
 
@@ -389,12 +395,12 @@ describe("Payments Router - payments.getHistory (T112)", () => {
 			});
 		}
 
-		// Check if test data already exists
+		// Check if test data already exists  
 		const existingTable1 = await db.query.tables.findFirst({
-			where: (tables, { eq }) => eq(tables.number, 701),
+			where: (tables, { eq }) => eq(tables.number, 710),
 		});
 		const existingTable2 = await db.query.tables.findFirst({
-			where: (tables, { eq }) => eq(tables.number, 702),
+			where: (tables, { eq }) => eq(tables.number, 711),
 		});
 		const existingIngredient = await db.query.ingredients.findFirst({
 			where: (ingredients, { eq }) => eq(ingredients.name, "Payment History Test Ingredient"),
@@ -409,17 +415,17 @@ describe("Payments Router - payments.getHistory (T112)", () => {
 			testIngredientId = existingIngredient.id;
 			testDishId = existingDish.id;
 		} else {
-			// Create test tables
+			// Create test tables with unique numbers to avoid conflicts
 			const [table1] = await db.insert(tables).values({
-				number: 701,
-				qrCode: "https://app.restauranthub.com/?table=701",
+				number: 710,
+				qrCode: "https://app.restauranthub.com/?table=710",
 				capacity: 4,
 			}).returning();
 			testTableId1 = table1.id;
 
 			const [table2] = await db.insert(tables).values({
-				number: 702,
-				qrCode: "https://app.restauranthub.com/?table=702",
+				number: 711,
+				qrCode: "https://app.restauranthub.com/?table=711",
 				capacity: 6,
 			}).returning();
 			testTableId2 = table2.id;
@@ -474,7 +480,7 @@ describe("Payments Router - payments.getHistory (T112)", () => {
 		const waiterCaller = appRouter.createCaller(waiterContext);
 		const customerCaller = appRouter.createCaller(customerContext);
 
-		// Create 3 orders for table 701
+		// Create 3 orders for table 710
 		for (let i = 0; i < 3; i++) {
 			const createResult = await customerCaller.orders.create({
 				tableId: testTableId1,
@@ -493,7 +499,7 @@ describe("Payments Router - payments.getHistory (T112)", () => {
 			paymentIds.push(paymentResult.paymentId);
 		}
 
-		// Create 2 orders for table 702
+		// Create 2 orders for table 711
 		for (let i = 0; i < 2; i++) {
 			const createResult = await customerCaller.orders.create({
 				tableId: testTableId2,
@@ -543,7 +549,7 @@ describe("Payments Router - payments.getHistory (T112)", () => {
 
 		expect(result.payments).toBeDefined();
 		expect(result.payments.length).toBe(3);
-		expect(result.payments.every(p => p.tableNumber === 701)).toBe(true);
+		expect(result.payments.every(p => p.tableNumber === 710)).toBe(true);
 	});
 
 	test("should paginate payment history", async () => {
@@ -580,8 +586,8 @@ describe("Payments Router - payments.getHistory (T112)", () => {
 		const result = await caller.payments.getHistory({});
 
 		// Calculate expected revenue from our test payments
-		// Table 701: 1500 + 3000 + 4500 = 9000
-		// Table 702: 3000 + 3000 = 6000
+		// Table 710: 1500 + 3000 + 4500 = 9000
+		// Table 711: 3000 + 3000 = 6000
 		// Total: 15000
 		const expectedRevenue = 1500 + 3000 + 4500 + 3000 + 3000;
 		

@@ -1,10 +1,10 @@
-import { describe, test, expect, beforeAll } from "bun:test";
+import { describe, test, expect, beforeAll, beforeEach, afterEach } from "bun:test";
 import { appRouter } from "../../src/routers/index";
-import { db, tables, dishes, ingredients, recipes, orders } from "@learn-bettert/db";
+import { db, eq, tables, dishes, ingredients, recipes, orders, payments, orderItems } from "@learn-bettert/db";
 import type { Context } from "../../src/context";
 
 /**
- * Better-Auth Integration Test
+ * Better-Auth Integration Test with Improved Test Isolation
  * 
  * This test validates that Better-Auth integration is working correctly
  * with role-based access control for the payment processing workflow.
@@ -14,12 +14,18 @@ import type { Context } from "../../src/context";
  * 2. Role-based authorization for payment operations
  * 3. Payment processing with authenticated users
  * 4. Payment history access restricted to managers
+ * 
+ * Test Isolation Strategy:
+ * - Each test uses unique table numbers to prevent conflicts
+ * - beforeEach: Replenish ingredient stock
+ * - afterEach: Clean up orders and payments created during test
  */
 
 describe("Better-Auth Integration: Payment Processing with Role-Based Access", () => {
 	let testTableId: number;
 	let testDishId: number;
 	let testIngredientId: number;
+	let createdOrderIds: number[] = [];
 
 	// Mock contexts for different authenticated users with Better-Auth roles
 	const waiterContext: Context = {
@@ -241,6 +247,28 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 		}
 	});
 
+	beforeEach(async () => {
+		// Replenish ingredient stock before each test
+		await db.update(ingredients)
+			.set({ quantity: 100 })
+			.where(eq(ingredients.id, testIngredientId));
+		
+		// Reset order tracking
+		createdOrderIds = [];
+	});
+
+	afterEach(async () => {
+		// Clean up all orders and payments created during the test
+		for (const orderId of createdOrderIds) {
+			// Delete payments first (foreign key constraint)
+			await db.delete(payments).where(eq(payments.orderId, orderId));
+			// Delete order items
+			await db.delete(orderItems).where(eq(orderItems.orderId, orderId));
+			// Delete order
+			await db.delete(orders).where(eq(orders.id, orderId));
+		}
+	});
+
 	test("Waiter can process payment (Better-Auth role check)", async () => {
 		const waiterCaller = appRouter.createCaller(waiterContext);
 		const customerCaller = appRouter.createCaller(customerContext);
@@ -250,6 +278,8 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 			tableId: testTableId,
 			items: [{ dishId: testDishId, quantity: 1 }],
 		});
+		createdOrderIds.push(createResult.orderId);
+		
 		await customerCaller.orders.submit({ orderId: createResult.orderId });
 		await waiterCaller.orders.updateStatus({ orderId: createResult.orderId, newStatus: "InKitchen" });
 		await waiterCaller.orders.updateStatus({ orderId: createResult.orderId, newStatus: "ReadyToServe" });
@@ -277,6 +307,8 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 			tableId: testTableId,
 			items: [{ dishId: testDishId, quantity: 1 }],
 		});
+		createdOrderIds.push(createResult.orderId);
+		
 		await customerCaller.orders.submit({ orderId: createResult.orderId });
 		await managerCaller.orders.updateStatus({ orderId: createResult.orderId, newStatus: "InKitchen" });
 		await managerCaller.orders.updateStatus({ orderId: createResult.orderId, newStatus: "ReadyToServe" });
@@ -303,6 +335,8 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 			tableId: testTableId,
 			items: [{ dishId: testDishId, quantity: 1 }],
 		});
+		createdOrderIds.push(createResult.orderId);
+		
 		await customerCaller.orders.submit({ orderId: createResult.orderId });
 		await kitchenCaller.orders.updateStatus({ orderId: createResult.orderId, newStatus: "InKitchen" });
 		await kitchenCaller.orders.updateStatus({ orderId: createResult.orderId, newStatus: "ReadyToServe" });
@@ -329,6 +363,8 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 			tableId: testTableId,
 			items: [{ dishId: testDishId, quantity: 1 }],
 		});
+		createdOrderIds.push(createResult.orderId);
+		
 		await customerCaller.orders.submit({ orderId: createResult.orderId });
 		await waiterCaller.orders.updateStatus({ orderId: createResult.orderId, newStatus: "InKitchen" });
 		await waiterCaller.orders.updateStatus({ orderId: createResult.orderId, newStatus: "ReadyToServe" });
@@ -406,6 +442,8 @@ describe("Better-Auth Integration: Payment Processing with Role-Based Access", (
 			tableId: testTableId,
 			items: [{ dishId: testDishId, quantity: 2 }],
 		});
+		createdOrderIds.push(createResult.orderId);
+		
 		await customerCaller.orders.submit({ orderId: createResult.orderId });
 
 		// Complete order workflow with authenticated waiter
