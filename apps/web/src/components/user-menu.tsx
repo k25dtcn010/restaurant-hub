@@ -47,6 +47,7 @@ export default function UserMenu() {
 									onSuccess: () => {
 										navigate({
 											to: "/",
+											search: { table: undefined },
 										});
 									},
 								},

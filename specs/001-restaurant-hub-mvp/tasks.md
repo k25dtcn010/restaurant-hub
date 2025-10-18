@@ -313,12 +313,12 @@
 
 #### Payment Processing Frontend
 
-- [ ] T120 [P] [US6] Create payment route in apps/web/src/routes/payment.tsx with authentication guard (Waiter/Manager) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) - Waiter and Manager access | **Plan Reference**: [plan.md Task 4.4](./plan.md#task-44-build-payment-ui)
-- [ ] T121 [P] [US6] Create OrderBillView component in apps/web/src/components/order-bill-view.tsx showing itemized order | **Acceptance**: [spec.md US6 Scenario 1](./spec.md#user-story-6---cash-payment-processing-priority-p2) - display dishes, quantities, prices, total
-- [ ] T122 [P] [US6] Create PaymentConfirmation component in apps/web/src/components/payment-confirmation.tsx | **Acceptance**: [spec.md US6 Scenario 2](./spec.md#user-story-6---cash-payment-processing-priority-p2)
-- [ ] T123 [US6] Implement payment processing workflow in payment.tsx (calculate total, confirm payment, clear table) | **Contract**: [payments-router.md create](./contracts/payments-router.md#1-paymentscreate) | **Acceptance**: [spec.md US6 Scenario 2-3](./spec.md#user-story-6---cash-payment-processing-priority-p2)
-- [ ] T124 [US6] Create PaymentHistory component in apps/web/src/components/payment-history.tsx for viewing past transactions | **Contract**: [payments-router.md getHistory](./contracts/payments-router.md#3-paymentsgethistory) | **Acceptance**: [spec.md US6 Scenario 4](./spec.md#user-story-6---cash-payment-processing-priority-p2)
-- [ ] T125 [US6] Add payment history view to manager dashboard | **Auth**: Manager-only access
+- [X] T120 [P] [US6] Create payment route in apps/web/src/routes/payment.tsx with authentication guard (Waiter/Manager) | **Auth Guard**: [research.md Section 5 Access Control Matrix](./research.md#5-role-based-access-control-with-better-auth) - Waiter and Manager access | **Plan Reference**: [plan.md Task 4.4](./plan.md#task-44-build-payment-ui)
+- [X] T121 [P] [US6] Create OrderBillView component in apps/web/src/components/order-bill-view.tsx showing itemized order | **Acceptance**: [spec.md US6 Scenario 1](./spec.md#user-story-6---cash-payment-processing-priority-p2) - display dishes, quantities, prices, total
+- [X] T122 [P] [US6] Create PaymentConfirmation component in apps/web/src/components/payment-confirmation.tsx | **Acceptance**: [spec.md US6 Scenario 2](./spec.md#user-story-6---cash-payment-processing-priority-p2)
+- [X] T123 [US6] Implement payment processing workflow in payment.tsx (calculate total, confirm payment, clear table) | **Contract**: [payments-router.md create](./contracts/payments-router.md#1-paymentscreate) | **Acceptance**: [spec.md US6 Scenario 2-3](./spec.md#user-story-6---cash-payment-processing-priority-p2)
+- [X] T124 [US6] Create PaymentHistory component in apps/web/src/components/payment-history.tsx for viewing past transactions | **Contract**: [payments-router.md getHistory](./contracts/payments-router.md#3-paymentsgethistory) | **Acceptance**: [spec.md US6 Scenario 4](./spec.md#user-story-6---cash-payment-processing-priority-p2)
+- [X] T125 [US6] Add payment history view to manager dashboard | **Auth**: Manager-only access
 
 **Checkpoint**: User Story 6 complete - staff can process payments and clear table sessions
 
