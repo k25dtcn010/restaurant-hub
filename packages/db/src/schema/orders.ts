@@ -4,6 +4,7 @@ import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { orderItems } from "./order-items"
 import { orderStatusHistory } from "./order-status-history"
 import { tables } from "./tables"
+import { shifts } from "./shifts"
 
 // Order status enum per data-model.md Section 3
 export const orderStatuses = [
@@ -27,6 +28,8 @@ export const orders = sqliteTable(
       .references(() => tables.id),
     status: text("status", { enum: orderStatuses }).notNull().default("Pending"),
     totalAmount: integer("total_amount").notNull().default(0), // Stored in cents
+    // New column per data-model.md Section 7.3 (Orders Table Update)
+    shiftId: integer("shift_id").references(() => shifts.id),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
@@ -48,6 +51,10 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   table: one(tables, {
     fields: [orders.tableId],
     references: [tables.id],
+  }),
+  shift: one(shifts, {
+    fields: [orders.shiftId],
+    references: [shifts.id],
   }),
   orderItems: many(orderItems),
   statusHistory: many(orderStatusHistory),

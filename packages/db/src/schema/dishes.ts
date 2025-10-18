@@ -11,6 +11,11 @@ export const dishes = sqliteTable("dishes", {
   price: integer("price").notNull(), // Stored in cents
   photoUrl: text("photo_url"),
   isAvailable: integer("is_available", { mode: "boolean" }).notNull().default(true),
+  // New columns per data-model.md Section 4.1 (Dish Extensions)
+  isHidden: integer("is_hidden", { mode: "boolean" }).notNull().default(false),
+  isRecommended: integer("is_recommended", { mode: "boolean" }).notNull().default(false),
+  isChefSpecial: integer("is_chef_special", { mode: "boolean" }).notNull().default(false),
+  orderPriority: integer("order_priority").notNull().default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
