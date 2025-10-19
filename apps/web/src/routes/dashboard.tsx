@@ -1,6 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, redirect } from "@tanstack/react-router"
-import { ChefHat, ClipboardList, History, Package, TruckIcon, UtensilsCrossed } from "lucide-react"
+import {
+  ChefHat,
+  Clock,
+  ClipboardList,
+  History,
+  Package,
+  TruckIcon,
+  UtensilsCrossed,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -96,6 +104,22 @@ function RouteComponent() {
           <CardContent>
             <Button asChild className="w-full">
               <Link to="/serving">Go to Serving</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* T129: Shift Management Card */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Shifts
+            </CardTitle>
+            <CardDescription>Manage operational shifts and staff</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full">
+              <Link to="/shifts">Go to Shifts</Link>
             </Button>
           </CardContent>
         </Card>

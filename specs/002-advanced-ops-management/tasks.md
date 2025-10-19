@@ -1049,7 +1049,7 @@
   - **Testing**: Create `packages/api/tests/routers/shifts.test.ts`
   - **Data Model**: Uses `shifts` and `shiftStaff` tables (see `data-model.md` § 6.1, 6.2)
 
-- [ ] T120 [US6] Update orders.createOrder to auto-tag with active shift
+- [X] T120 [US6] Update orders.createOrder to auto-tag with active shift
   - **File**: `packages/api/src/routers/orders.ts`
   - **Logic**: Query `shifts WHERE endTime IS NULL LIMIT 1`, set order.shiftId
   - **Note**: shiftId column already added in T009
@@ -1060,64 +1060,64 @@
 
 **Frontend: Manager - Shift Controls** _(UI: `quickstart.md` § F)_
 
-- [ ] T122 [P] [US6] Create shift control component
+- [X] T122 [P] [US6] Create shift control component
   - **File**: `apps/web/src/components/shift-control.tsx`
   - **Features**: "Start Shift" button, "End Shift" button (disabled if no active shift)
   - **tRPC**: shifts.start, shifts.end
 
-- [ ] T123 [US6] Create shift management route
+- [X] T123 [US6] Create shift management route
   - **File**: `apps/web/src/routes/shifts.tsx`
   - **Auth**: Manager only
   - **Layout**: Active shifts at top, history below
 
-- [ ] T124 [US6] Add start shift dialog
+- [X] T124 [US6] Add start shift dialog
   - **UI**: Select shift type (dropdown), select staff (multi-select with checkboxes), optional notes
   - **Validation**: At least 1 staff member required
 
-- [ ] T125 [US6] Add end shift confirmation dialog
+- [X] T125 [US6] Add end shift confirmation dialog
   - **Display**: Shift summary (duration, order count, revenue, staff names)
   - **Warning**: Show alert if unpaid orders exist (from T121)
   - **Actions**: "End Shift" button, "Cancel" button
 
-- [ ] T126 [US6] Display warning for shifts > 12 hours duration
+- [X] T126 [US6] Display warning for shifts > 12 hours duration
   - **Logic**: `duration = endTime - startTime`, if > 12 hours, show ⚠️ warning
   - **Message**: "This shift has been active for 13 hours. Are you sure you want to end it now?"
 
 **Frontend: Manager - Active Shifts View**
 
-- [ ] T127 [P] [US6] Create active shifts list component
+- [X] T127 [P] [US6] Create active shifts list component
   - **File**: Component within `apps/web/src/routes/shifts.tsx`
   - **Display**: Running shifts with real-time duration counter, order count, staff names
   - **tRPC**: shifts.listActive, poll every 30s or use WebSocket
 
-- [ ] T128 [US6] Add edit shift UI for staff management
+- [X] T128 [US6] Add edit shift UI for staff management
   - **Features**: "+ Add Staff" button, staff list with remove icons
   - **tRPC**: shifts.addStaff, shifts.removeStaff
 
-- [ ] T129 [US6] Display active shift indicator in header/dashboard
+- [X] T129 [US6] Display active shift indicator in header/dashboard
   - **UI**: Badge in header showing "Shift: Lunch (3h 24m)" for staff awareness
   - **Click**: Navigate to shifts page
 
 **Frontend: Manager - Shift History**
 
-- [ ] T130 [P] [US6] Create shift history component
+- [X] T130 [P] [US6] Create shift history component
   - **File**: Component within `apps/web/src/routes/shifts.tsx`
   - **Filters**: Date range picker, shift type dropdown, staff member dropdown
   - **tRPC**: shifts.listHistory
 
-- [ ] T131 [US6] Add "History" tab to shifts management page
+- [X] T131 [US6] Add "History" tab to shifts management page
   - **Layout**: Tab navigation: Active | History
 
-- [ ] T132 [US6] Display shift summary cards in history
+- [X] T132 [US6] Display shift summary cards in history
   - **Info**: Shift type, date/time, duration, order count, revenue, staff names
   - **Sorting**: Most recent first
 
 **Validation Tasks for User Story 6:**
 
-- [ ] T132.1 [US6] Integration test: Shift lifecycle end-to-end
+- [X] T132.1 [US6] Integration test: Shift lifecycle end-to-end
   - **Test**: Start shift → orders auto-tagged → end shift → summary correct
-- [ ] T132.2 [US6] Test: Staff management mid-shift works correctly
-- [ ] T132.3 [US6] Test coverage: 80% for shifts router
+- [X] T132.2 [US6] Test: Staff management mid-shift works correctly
+- [X] T132.3 [US6] Test coverage: 80% for shifts router
 
 **Checkpoint**: Complete shift lifecycle - start → auto-tagging → end with summary
 
