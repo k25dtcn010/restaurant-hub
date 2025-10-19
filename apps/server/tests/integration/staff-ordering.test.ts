@@ -45,7 +45,7 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
         })
         .returning()
       waiterUser = newUser
-    }</parameter>
+    }
 
     waiterUserId = waiterUser.id
 

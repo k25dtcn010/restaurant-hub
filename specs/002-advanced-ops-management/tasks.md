@@ -873,9 +873,12 @@
   - **Input**: Add `isHidden: z.boolean().optional()` to update schema
   - **Auth**: Manager/Staff only
 
-- [ ] T082 Update dishes.list to filter hidden dishes for customers
+- [X] T082 Update dishes.list to filter hidden dishes for customers
   - **Logic**: `WHERE isHidden = false` when `includeHidden = false` (default for public)
   - **Manager View**: Pass `includeHidden = true` to see all dishes
+  - **Status**: ✅ COMPLETED - Implementation verified with 6 comprehensive tests
+  - **Tests**: `apps/server/tests/routers/dishes.test.ts` (T082 test suite)
+  - **Implementation**: `apps/server/src/api/routers/dishes.ts` lines 85-87
 
 - [ ] T083 Implement dishes.toggleVisibility procedure
   - **Quick Toggle**: `UPDATE dishes SET isHidden = NOT isHidden WHERE id = ?`

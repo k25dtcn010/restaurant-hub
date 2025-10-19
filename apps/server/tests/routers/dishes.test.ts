@@ -785,6 +785,146 @@ describe("Dishes Router - dishes.listVariants (T069)", () => {
 })
 
 /**
+ * T082-RED: Test for dishes.getAll filtering hidden dishes for customers
+ * TDD Red Phase: Write FAILING tests before implementation
+ * Contract: dishes.getAll should filter hidden dishes when includeHidden=false (default)
+ */
+describe("Dishes Router - dishes.getAll with hidden filter (T082)", () => {
+  let visibleDishId: number
+  let hiddenDishId: number
+
+  beforeAll(async () => {
+    // Create a visible dish
+    const [visibleDish] = await db
+      .insert(dishes)
+      .values({
+        name: "Visible Dish",
+        description: "This dish should be visible to customers",
+        price: 1000,
+        isAvailable: true,
+        isHidden: false,
+      })
+      .returning()
+    visibleDishId = visibleDish.id
+
+    // Create a hidden dish
+    const [hiddenDish] = await db
+      .insert(dishes)
+      .values({
+        name: "Hidden Dish",
+        description: "This dish should NOT be visible to customers",
+        price: 1500,
+        isAvailable: true,
+        isHidden: true,
+      })
+      .returning()
+    hiddenDishId = hiddenDish.id
+  })
+
+  test("should filter out hidden dishes by default (includeHidden=false)", async () => {
+    const caller = appRouter.createCaller(mockContext)
+    const result = await caller.dishes.getAll({})
+
+    expect(result.dishes).toBeDefined()
+    
+    // Should include visible dish
+    const foundVisible = result.dishes.find((d) => d.id === visibleDishId)
+    expect(foundVisible).toBeDefined()
+    expect(foundVisible?.isHidden).toBe(false)
+
+    // Should NOT include hidden dish
+    const foundHidden = result.dishes.find((d) => d.id === hiddenDishId)
+    expect(foundHidden).toBeUndefined()
+  })
+
+  test("should filter out hidden dishes when includeHidden=false explicitly", async () => {
+    const caller = appRouter.createCaller(mockContext)
+    const result = await caller.dishes.getAll({ includeHidden: false })
+
+    const foundHidden = result.dishes.find((d) => d.id === hiddenDishId)
+    expect(foundHidden).toBeUndefined()
+
+    const foundVisible = result.dishes.find((d) => d.id === visibleDishId)
+    expect(foundVisible).toBeDefined()
+  })
+
+  test("should include hidden dishes when includeHidden=true (manager view)", async () => {
+    const caller = appRouter.createCaller(mockContext)
+    const result = await caller.dishes.getAll({ includeHidden: true })
+
+    // Should include both visible and hidden dishes
+    const foundVisible = result.dishes.find((d) => d.id === visibleDishId)
+    expect(foundVisible).toBeDefined()
+
+    const foundHidden = result.dishes.find((d) => d.id === hiddenDishId)
+    expect(foundHidden).toBeDefined()
+    expect(foundHidden?.isHidden).toBe(true)
+  })
+
+  test("should return isHidden field for all dishes", async () => {
+    const caller = appRouter.createCaller(mockContext)
+    const result = await caller.dishes.getAll({ includeHidden: true })
+
+    // All dishes should have isHidden field
+    result.dishes.forEach((dish) => {
+      expect(dish.isHidden).toBeTypeOf("boolean")
+    })
+  })
+
+  test("should filter hidden dishes even if they are available", async () => {
+    // Create a hidden dish that is available
+    const [hiddenAvailableDish] = await db
+      .insert(dishes)
+      .values({
+        name: "Hidden But Available",
+        description: "Hidden but marked as available",
+        price: 2000,
+        isAvailable: true,
+        isHidden: true,
+      })
+      .returning()
+
+    const caller = appRouter.createCaller(mockContext)
+    const result = await caller.dishes.getAll({ includeHidden: false })
+
+    const foundHiddenAvailable = result.dishes.find((d) => d.id === hiddenAvailableDish.id)
+    expect(foundHiddenAvailable).toBeUndefined()
+  })
+
+  test("should combine includeHidden and includeDisabled filters correctly", async () => {
+    // Create a dish that is hidden AND unavailable
+    const [hiddenUnavailableDish] = await db
+      .insert(dishes)
+      .values({
+        name: "Hidden and Unavailable",
+        description: "Both hidden and unavailable",
+        price: 2500,
+        isAvailable: false,
+        isHidden: true,
+      })
+      .returning()
+
+    const caller = appRouter.createCaller(mockContext)
+
+    // Default: should filter out both hidden and unavailable
+    const result1 = await caller.dishes.getAll({})
+    expect(result1.dishes.find((d) => d.id === hiddenUnavailableDish.id)).toBeUndefined()
+
+    // includeDisabled=true but includeHidden=false: should still filter out hidden
+    const result2 = await caller.dishes.getAll({ includeDisabled: true, includeHidden: false })
+    expect(result2.dishes.find((d) => d.id === hiddenUnavailableDish.id)).toBeUndefined()
+
+    // includeHidden=true but includeDisabled=false: should still filter out unavailable
+    const result3 = await caller.dishes.getAll({ includeHidden: true, includeDisabled: false })
+    expect(result3.dishes.find((d) => d.id === hiddenUnavailableDish.id)).toBeUndefined()
+
+    // Both true: should include the dish
+    const result4 = await caller.dishes.getAll({ includeHidden: true, includeDisabled: true })
+    expect(result4.dishes.find((d) => d.id === hiddenUnavailableDish.id)).toBeDefined()
+  })
+})
+
+/**
  * T070-RED: Test extending dishes.getDishDetails with variants
  * Note: Implementation already done in T019, just verifying it works
  */
