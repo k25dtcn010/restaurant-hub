@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as StaffOrderRouteImport } from './routes/staff-order'
 import { Route as ShiftsRouteImport } from './routes/shifts'
 import { Route as ServingRouteImport } from './routes/serving'
+import { Route as ReservationsManagementRouteImport } from './routes/reservations-management'
 import { Route as PaymentHistoryRouteImport } from './routes/payment-history'
 import { Route as PaymentRouteImport } from './routes/payment'
 import { Route as MenuManagementRouteImport } from './routes/menu-management'
@@ -34,6 +35,11 @@ const ShiftsRoute = ShiftsRouteImport.update({
 const ServingRoute = ServingRouteImport.update({
   id: '/serving',
   path: '/serving',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReservationsManagementRoute = ReservationsManagementRouteImport.update({
+  id: '/reservations-management',
+  path: '/reservations-management',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PaymentHistoryRoute = PaymentHistoryRouteImport.update({
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/menu-management': typeof MenuManagementRoute
   '/payment': typeof PaymentRoute
   '/payment-history': typeof PaymentHistoryRoute
+  '/reservations-management': typeof ReservationsManagementRoute
   '/serving': typeof ServingRoute
   '/shifts': typeof ShiftsRoute
   '/staff-order': typeof StaffOrderRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/menu-management': typeof MenuManagementRoute
   '/payment': typeof PaymentRoute
   '/payment-history': typeof PaymentHistoryRoute
+  '/reservations-management': typeof ReservationsManagementRoute
   '/serving': typeof ServingRoute
   '/shifts': typeof ShiftsRoute
   '/staff-order': typeof StaffOrderRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/menu-management': typeof MenuManagementRoute
   '/payment': typeof PaymentRoute
   '/payment-history': typeof PaymentHistoryRoute
+  '/reservations-management': typeof ReservationsManagementRoute
   '/serving': typeof ServingRoute
   '/shifts': typeof ShiftsRoute
   '/staff-order': typeof StaffOrderRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/menu-management'
     | '/payment'
     | '/payment-history'
+    | '/reservations-management'
     | '/serving'
     | '/shifts'
     | '/staff-order'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/menu-management'
     | '/payment'
     | '/payment-history'
+    | '/reservations-management'
     | '/serving'
     | '/shifts'
     | '/staff-order'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/menu-management'
     | '/payment'
     | '/payment-history'
+    | '/reservations-management'
     | '/serving'
     | '/shifts'
     | '/staff-order'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   MenuManagementRoute: typeof MenuManagementRoute
   PaymentRoute: typeof PaymentRoute
   PaymentHistoryRoute: typeof PaymentHistoryRoute
+  ReservationsManagementRoute: typeof ReservationsManagementRoute
   ServingRoute: typeof ServingRoute
   ShiftsRoute: typeof ShiftsRoute
   StaffOrderRoute: typeof StaffOrderRoute
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/serving'
       fullPath: '/serving'
       preLoaderRoute: typeof ServingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reservations-management': {
+      id: '/reservations-management'
+      path: '/reservations-management'
+      fullPath: '/reservations-management'
+      preLoaderRoute: typeof ReservationsManagementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/payment-history': {
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   MenuManagementRoute: MenuManagementRoute,
   PaymentRoute: PaymentRoute,
   PaymentHistoryRoute: PaymentHistoryRoute,
+  ReservationsManagementRoute: ReservationsManagementRoute,
   ServingRoute: ServingRoute,
   ShiftsRoute: ShiftsRoute,
   StaffOrderRoute: StaffOrderRoute,

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, redirect } from "@tanstack/react-router"
 import {
+  Calendar,
   ChefHat,
   ClipboardList,
   Clock,
@@ -152,6 +153,22 @@ function RouteComponent() {
           <CardContent>
             <Button asChild className="w-full" variant="outline">
               <Link to="/payment-history">View History</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Reservations Management */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Reservations
+            </CardTitle>
+            <CardDescription>Manage table reservations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full">
+              <Link to="/reservations-management">Go to Reservations</Link>
             </Button>
           </CardContent>
         </Card>

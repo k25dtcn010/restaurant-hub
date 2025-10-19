@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 
-import { and, eq, gte, lte, operatingHours, reservations } from "@/db"
+import { and, eq, gte, lte, operatingHours, reservations, tables } from "@/db"
 
 import { managerOnlyProcedure, publicProcedure, router, staffOrManagerProcedure } from "../index"
 
@@ -43,11 +43,43 @@ async function isWithinOperatingHours(
 }
 
 /**
+ * T102: Helper - Calculate reservation duration (default 90 minutes)
+ */
+function getReservationEndTime(timeStr: string, durationMinutes: number = 90): string {
+  const [hours, minutes] = timeStr.split(":").map(Number)
+  if (hours === undefined || minutes === undefined) return timeStr
+
+  const totalMinutes = hours * 60 + minutes + durationMinutes
+  const endHours = Math.floor(totalMinutes / 60) % 24
+  const endMinutes = totalMinutes % 60
+
+  return `${endHours.toString().padStart(2, "0")}:${endMinutes.toString().padStart(2, "0")}`
+}
+
+/**
+ * T102: Helper - Check if time ranges overlap (includes buffer)
+ */
+function timeRangesOverlap(start1: string, end1: string, start2: string, end2: string): boolean {
+  const timeToMinutes = (time: string) => {
+    const [h, m] = time.split(":").map(Number)
+    return h! * 60 + m!
+  }
+
+  const s1 = timeToMinutes(start1)
+  const e1 = timeToMinutes(end1)
+  const s2 = timeToMinutes(start2)
+  const e2 = timeToMinutes(end2)
+
+  return s1 < e2 && s2 < e1
+}
+
+/**
  * Reservations Router
  * Contract: specs/002-advanced-ops-management/contracts/reservations-router.md
+ * Addendum: specs/002-advanced-ops-management/addendum/table-and-reservation-crud.md
  *
- * T016: Reservations router skeleton (temporary implementations)
- * Handles table reservations and operating hours configuration
+ * T016: Reservations router with complete CRUD operations
+ * Handles table reservations, operating hours, and table availability
  */
 
 export const reservationsRouter = router({
@@ -547,5 +579,420 @@ export const reservationsRouter = router({
       }
 
       return suggestions
+    }),
+
+  /**
+   * T103: reservations.getById - Get a single reservation by ID
+   * Auth: Public
+   * Addendum: table-and-reservation-crud.md § reservations.getById
+   */
+  getById: publicProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx
+      const { id } = input
+
+      const reservation = await db.query.reservations.findFirst({
+        where: (reservations, { eq }) => eq(reservations.id, id),
+      })
+
+      if (!reservation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Reservation not found",
+        })
+      }
+
+      // Parse assigned table IDs from JSON string
+      return {
+        ...reservation,
+        assignedTableIds: reservation.assignedTableIds
+          ? JSON.parse(reservation.assignedTableIds)
+          : null,
+      }
+    }),
+
+  /**
+   * T104: reservations.checkAvailability - Check table availability and get suggestions
+   * Auth: Public
+   * Addendum: table-and-reservation-crud.md § reservations.checkAvailability
+   */
+  checkAvailability: publicProcedure
+    .input(
+      z
+        .object({
+          date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          time: z.string().regex(/^([01]\d|2[0-3]):(00|30)$/),
+          partySize: z.number().int().min(1).max(20),
+          excludeReservationId: z.number().optional(),
+        })
+        .refine(
+          (data) => {
+            const reservationDate = new Date(data.date)
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            return reservationDate >= today
+          },
+          { message: "Reservation date cannot be in the past" }
+        )
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx
+      const { date, time, partySize, excludeReservationId } = input
+
+      // Check if time is within operating hours
+      const validation = await isWithinOperatingHours(db, date, time)
+      if (!validation.isValid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: validation.reason,
+        })
+      }
+
+      // Get reservation duration end time
+      const reservationEndTime = getReservationEndTime(time)
+
+      // Query confirmed/seated reservations for this date
+      const existingReservations = await db.query.reservations.findMany({
+        where: (reservations, { eq, and, or, ne }) =>
+          and(
+            eq(reservations.date, date),
+            or(eq(reservations.status, "Confirmed"), eq(reservations.status, "Seated")),
+            excludeReservationId ? ne(reservations.id, excludeReservationId) : undefined
+          ),
+      })
+
+      // Get all tables
+      const allTables = await db.query.tables.findMany()
+
+      // Calculate reserved table IDs for this time slot
+      const reservedTableIds = new Set<number>()
+      for (const reservation of existingReservations) {
+        if (
+          reservation.assignedTableIds &&
+          timeRangesOverlap(
+            time,
+            reservationEndTime,
+            reservation.time,
+            getReservationEndTime(reservation.time)
+          )
+        ) {
+          const tableIds = JSON.parse(reservation.assignedTableIds)
+          tableIds.forEach((id: number) => reservedTableIds.add(id))
+        }
+      }
+
+      // Filter available tables by capacity and reservation status
+      const availableTables = allTables.filter(
+        (table) => !reservedTableIds.has(table.id) && table.capacity >= partySize
+      )
+
+      if (availableTables.length > 0) {
+        // Available! Return single tables that fit
+        return {
+          available: true,
+          availableTables: availableTables.map((t) => ({
+            id: t.id,
+            tableNumber: t.number,
+            capacity: t.capacity,
+            isAvailable: true,
+          })),
+        }
+      }
+
+      // Not available at this time - suggest alternatives
+      const suggestedTables: Array<Array<{ id: number; tableNumber: number; capacity: number }>> =
+        []
+      const suggestedTimes: string[] = []
+
+      // Suggest table combinations if no single table fits
+      if (allTables.length > 1) {
+        // Simple combination: try 2-table combos that fit party size
+        for (let i = 0; i < allTables.length; i++) {
+          for (let j = i + 1; j < allTables.length; j++) {
+            const table1 = allTables[i]!
+            const table2 = allTables[j]!
+
+            if (
+              !reservedTableIds.has(table1.id) &&
+              !reservedTableIds.has(table2.id) &&
+              table1.capacity + table2.capacity >= partySize
+            ) {
+              suggestedTables.push([
+                { id: table1.id, tableNumber: table1.number, capacity: table1.capacity },
+                { id: table2.id, tableNumber: table2.number, capacity: table2.capacity },
+              ])
+            }
+          }
+        }
+      }
+
+      // Suggest alternative times (±30 min, ±60 min)
+      const dateObj = new Date(date)
+      const dayOfWeek = dateObj.getDay()
+      const hours = await db.query.operatingHours.findFirst({
+        where: (operatingHours: any, { eq }: any) => eq(operatingHours.dayOfWeek, dayOfWeek),
+      })
+
+      if (hours && !hours.isClosed) {
+        const timeParts = time.split(":").map(Number)
+        const requestedTotalMin = timeParts[0]! * 60 + timeParts[1]!
+
+        const offsets = [-60, -30, 30, 60]
+        for (const offset of offsets) {
+          const totalMin = requestedTotalMin + offset
+          const hour = Math.floor(totalMin / 60)
+          const min = totalMin % 60
+          const suggestedTime = `${hour.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`
+
+          // Check if within operating hours
+          if (suggestedTime >= hours.openTime && suggestedTime <= hours.closeTime) {
+            suggestedTimes.push(suggestedTime)
+          }
+        }
+      }
+
+      return {
+        available: false,
+        availableTables: [],
+        suggestedTableCombinations: suggestedTables.length > 0 ? suggestedTables : undefined,
+        suggestedTimes: suggestedTimes.length > 0 ? suggestedTimes : undefined,
+        reason: "No single table available at this time. Suggested alternatives listed above.",
+      }
+    }),
+
+  /**
+   * T105: reservations.update - Update pending reservation details
+   * Auth: Staff/Manager only
+   * Addendum: table-and-reservation-crud.md § reservations.update
+   */
+  update: staffOrManagerProcedure
+    .input(
+      z
+        .object({
+          id: z.number().int().positive(),
+          date: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/)
+            .optional(),
+          time: z
+            .string()
+            .regex(/^([01]\d|2[0-3]):(00|30)$/)
+            .optional(),
+          partySize: z.number().int().min(1).max(20).optional(),
+          customerName: z.string().min(1).max(100).optional(),
+          customerPhone: z.string().min(10).max(20).optional(),
+          notes: z.string().max(500).optional(),
+        })
+        .refine(
+          (data) => {
+            if (!data.date) return true
+            const reservationDate = new Date(data.date)
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            return reservationDate >= today
+          },
+          { message: "Reservation date cannot be in the past" }
+        )
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+      const { id, date, time, partySize, customerName, customerPhone, notes } = input
+
+      // Find reservation
+      const reservation = await db.query.reservations.findFirst({
+        where: (reservations, { eq }) => eq(reservations.id, id),
+      })
+
+      if (!reservation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Reservation not found",
+        })
+      }
+
+      if (reservation.status !== "Pending") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Can only update pending reservations",
+        })
+      }
+
+      // Validate new date/time if provided
+      if (date && time) {
+        const validation = await isWithinOperatingHours(db, date, time)
+        if (!validation.isValid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: validation.reason,
+          })
+        }
+      }
+
+      // Build update object with only provided fields
+      const updates: any = {}
+      if (date !== undefined) updates.date = date
+      if (time !== undefined) updates.time = time
+      if (partySize !== undefined) updates.partySize = partySize
+      if (customerName !== undefined) updates.customerName = customerName
+      if (customerPhone !== undefined) updates.customerPhone = customerPhone
+      if (notes !== undefined) updates.notes = notes || null
+      updates.updatedAt = new Date()
+
+      const [updated] = await db
+        .update(reservations)
+        .set(updates)
+        .where(eq(reservations.id, id))
+        .returning()
+
+      if (!updated) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update reservation",
+        })
+      }
+
+      return updated
+    }),
+
+  /**
+   * T106: reservations.delete - Delete a pending reservation
+   * Auth: Staff/Manager only
+   * Addendum: table-and-reservation-crud.md § reservations.delete
+   */
+  delete: staffOrManagerProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+      const { id } = input
+
+      // Find reservation
+      const reservation = await db.query.reservations.findFirst({
+        where: (reservations, { eq }) => eq(reservations.id, id),
+      })
+
+      if (!reservation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Reservation not found",
+        })
+      }
+
+      if (reservation.status !== "Pending") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Can only delete pending reservations",
+        })
+      }
+
+      // Hard delete the reservation
+      await db.delete(reservations).where(eq(reservations.id, id))
+
+      return {
+        id,
+        deleted: true,
+        deletedAt: new Date(),
+      }
+    }),
+
+  /**
+   * T107: reservations.reassignTables - Reassign tables for a confirmed reservation
+   * Auth: Staff/Manager only
+   * Addendum: table-and-reservation-crud.md § reservations.reassignTables
+   */
+  reassignTables: staffOrManagerProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        assignedTableIds: z.array(z.number()).min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx
+      const { id, assignedTableIds } = input
+
+      // Find reservation
+      const reservation = await db.query.reservations.findFirst({
+        where: (reservations, { eq }) => eq(reservations.id, id),
+      })
+
+      if (!reservation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Reservation not found",
+        })
+      }
+
+      if (reservation.status !== "Confirmed") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Can only reassign tables for confirmed reservations",
+        })
+      }
+
+      // Check if new tables are available (not booked by other reservations at same time)
+      const reservationEndTime = getReservationEndTime(reservation.time)
+
+      const conflictingReservations = await db.query.reservations.findMany({
+        where: (reservations, { eq, and, or, ne }) =>
+          and(
+            eq(reservations.date, reservation.date),
+            or(eq(reservations.status, "Confirmed"), eq(reservations.status, "Seated")),
+            ne(reservations.id, id)
+          ),
+      })
+
+      // Check if any requested tables conflict with existing reservations
+      for (const otherRes of conflictingReservations) {
+        if (
+          otherRes.assignedTableIds &&
+          timeRangesOverlap(
+            reservation.time,
+            reservationEndTime,
+            otherRes.time,
+            getReservationEndTime(otherRes.time)
+          )
+        ) {
+          const otherTableIds = JSON.parse(otherRes.assignedTableIds)
+          const conflict = assignedTableIds.some((id) => otherTableIds.includes(id))
+          if (conflict) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: `Tables are already booked by another reservation (ID: ${otherRes.id})`,
+            })
+          }
+        }
+      }
+
+      // Update reservation with new table IDs
+      const [updated] = await db
+        .update(reservations)
+        .set({
+          assignedTableIds: JSON.stringify(assignedTableIds),
+          updatedAt: new Date(),
+        })
+        .where(eq(reservations.id, id))
+        .returning()
+
+      if (!updated) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to reassign tables",
+        })
+      }
+
+      return {
+        id: updated.id,
+        assignedTableIds: JSON.parse(updated.assignedTableIds || "[]"),
+        updatedAt: updated.updatedAt,
+      }
     }),
 })

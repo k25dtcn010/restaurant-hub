@@ -901,3 +901,355 @@ describe("T091: Validation Helper - isWithinOperatingHours", () => {
     expect(true).toBe(true)
   })
 })
+
+describe("T103: reservations.getById - Get single reservation", () => {
+  test("should get reservation by ID with all fields", async () => {
+    const caller = appRouter.createCaller(mockPublicContext)
+    const tomorrow = getTomorrowDate()
+
+    // Create a reservation first
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "12:00",
+      partySize: 4,
+      customerName: "John Doe",
+      customerPhone: "5551234567",
+      notes: "Window seat please",
+    })
+
+    // Get by ID
+    const result = await caller.reservations.getById({
+      id: created.id,
+    })
+
+    expect(result).toBeDefined()
+    expect(result.id).toBe(created.id)
+    expect(result.customerName).toBe("John Doe")
+    expect(result.partySize).toBe(4)
+    expect(result.status).toBe("Pending")
+  })
+
+  test("should throw error for non-existent reservation", async () => {
+    const caller = appRouter.createCaller(mockPublicContext)
+
+    await expect(
+      caller.reservations.getById({
+        id: 999999,
+      })
+    ).rejects.toThrow("Reservation not found")
+  })
+
+  test("should parse assignedTableIds from JSON", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+    const tomorrow = getTomorrowDate()
+
+    // Create and confirm a reservation
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "19:00",
+      partySize: 2,
+      customerName: "Jane Smith",
+      customerPhone: "5559876543",
+    })
+
+    // Confirm with table assignment
+    await caller.reservations.confirm({
+      id: created.id,
+      assignedTableIds: [1, 2],
+    })
+
+    // Get by ID
+    const result = await caller.reservations.getById({
+      id: created.id,
+    })
+
+    expect(result.assignedTableIds).toEqual([1, 2])
+    expect(Array.isArray(result.assignedTableIds)).toBe(true)
+  })
+})
+
+describe("T104: reservations.checkAvailability - Check table availability", () => {
+  test("should return available if tables have capacity", async () => {
+    const caller = appRouter.createCaller(mockPublicContext)
+    const tomorrow = getTomorrowDate()
+
+    // Check availability at a fresh time slot
+    const result = await caller.reservations.checkAvailability({
+      date: tomorrow,
+      time: "14:00",
+      partySize: 2,
+    })
+
+    expect(result.available).toBe(true)
+    expect(result.availableTables).toBeDefined()
+    expect(Array.isArray(result.availableTables)).toBe(true)
+  })
+
+  test("should suggest tables that fit party size", async () => {
+    const caller = appRouter.createCaller(mockPublicContext)
+    const tomorrow = getTomorrowDate()
+
+    const result = await caller.reservations.checkAvailability({
+      date: tomorrow,
+      time: "15:00",
+      partySize: 4,
+    })
+
+    expect(result.available).toBe(true)
+    expect(result.availableTables!.length).toBeGreaterThan(0)
+    result.availableTables!.forEach((table) => {
+      expect(table.capacity).toBeGreaterThanOrEqual(4)
+    })
+  })
+
+  test("should reject past date", async () => {
+    const caller = appRouter.createCaller(mockPublicContext)
+    const yesterday = getYesterdayDate()
+
+    await expect(
+      caller.reservations.checkAvailability({
+        date: yesterday,
+        time: "12:00",
+        partySize: 2,
+      })
+    ).rejects.toThrow("Reservation date cannot be in the past")
+  })
+
+  test("should be accessible by public", async () => {
+    const caller = appRouter.createCaller(mockPublicContext)
+    const tomorrow = getTomorrowDate()
+
+    const result = await caller.reservations.checkAvailability({
+      date: tomorrow,
+      time: "13:00",
+      partySize: 2,
+    })
+
+    expect(result).toBeDefined()
+  })
+})
+
+describe("T105: reservations.update - Update pending reservation", () => {
+  test("should update pending reservation time", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+    const tomorrow = getTomorrowDate()
+
+    // Create a pending reservation
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "12:00",
+      partySize: 2,
+      customerName: "Test User",
+      customerPhone: "5551111111",
+    })
+
+    // Update it
+    const updated = await caller.reservations.update({
+      id: created.id,
+      time: "13:00",
+    })
+
+    expect(updated.time).toBe("13:00")
+  })
+
+  test("should update pending reservation party size", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+    const tomorrow = getTomorrowDate()
+
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "17:00",
+      partySize: 2,
+      customerName: "Party Test",
+      customerPhone: "5552222222",
+    })
+
+    const updated = await caller.reservations.update({
+      id: created.id,
+      partySize: 6,
+    })
+
+    expect(updated.partySize).toBe(6)
+  })
+
+  test("should reject update for confirmed reservation", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+    const tomorrow = getTomorrowDate()
+
+    // Create and confirm
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "18:00",
+      partySize: 3,
+      customerName: "Confirmed User",
+      customerPhone: "5553333333",
+    })
+
+    await caller.reservations.confirm({
+      id: created.id,
+    })
+
+    // Try to update confirmed
+    await expect(
+      caller.reservations.update({
+        id: created.id,
+        partySize: 4,
+      })
+    ).rejects.toThrow("Can only update pending reservations")
+  })
+
+  test("should require staff/manager role", async () => {
+    const caller = appRouter.createCaller(mockPublicContext)
+
+    await expect(
+      caller.reservations.update({
+        id: 1,
+        partySize: 4,
+      })
+    ).rejects.toThrow("Authentication required")
+  })
+})
+
+describe("T106: reservations.delete - Delete pending reservation", () => {
+  test("should delete pending reservation", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+    const tomorrow = getTomorrowDate()
+
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "12:00",
+      partySize: 2,
+      customerName: "Delete Test",
+      customerPhone: "5555555555",
+    })
+
+    const result = await caller.reservations.delete({
+      id: created.id,
+    })
+
+    expect(result.deleted).toBe(true)
+    expect(result.id).toBe(created.id)
+
+    // Verify it's deleted
+    await expect(caller.reservations.getById({ id: created.id })).rejects.toThrow(
+      "Reservation not found"
+    )
+  })
+
+  test("should reject delete for confirmed reservation", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+    const tomorrow = getTomorrowDate()
+
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "13:00",
+      partySize: 2,
+      customerName: "Confirm Delete Test",
+      customerPhone: "5556666666",
+    })
+
+    await caller.reservations.confirm({
+      id: created.id,
+    })
+
+    await expect(
+      caller.reservations.delete({
+        id: created.id,
+      })
+    ).rejects.toThrow("Can only delete pending reservations")
+  })
+
+  test("should require staff/manager role", async () => {
+    const caller = appRouter.createCaller(mockPublicContext)
+
+    await expect(
+      caller.reservations.delete({
+        id: 1,
+      })
+    ).rejects.toThrow("Authentication required")
+  })
+})
+
+describe("T107: reservations.reassignTables - Reassign tables", () => {
+  test("should reassign tables for confirmed reservation", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+    const tomorrow = getTomorrowDate()
+
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "14:00",
+      partySize: 2,
+      customerName: "Reassign Test",
+      customerPhone: "5557777777",
+    })
+
+    await caller.reservations.confirm({
+      id: created.id,
+      assignedTableIds: [1],
+    })
+
+    // Reassign to different table
+    const updated = await caller.reservations.reassignTables({
+      id: created.id,
+      assignedTableIds: [2],
+    })
+
+    expect(updated.assignedTableIds).toEqual([2])
+  })
+
+  test("should support multiple table assignment", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+    const tomorrow = getTomorrowDate()
+
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "20:00",
+      partySize: 6,
+      customerName: "Multi Table Test",
+      customerPhone: "5558888888",
+    })
+
+    await caller.reservations.confirm({
+      id: created.id,
+      assignedTableIds: [4, 5],
+    })
+
+    const updated = await caller.reservations.reassignTables({
+      id: created.id,
+      assignedTableIds: [6, 7],
+    })
+
+    expect(updated.assignedTableIds).toEqual([6, 7])
+  })
+
+  test("should reject reassign for pending reservation", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+    const tomorrow = getTomorrowDate()
+
+    const created = await caller.reservations.create({
+      date: tomorrow,
+      time: "16:00",
+      partySize: 2,
+      customerName: "Pending Reassign Test",
+      customerPhone: "5559999999",
+    })
+
+    await expect(
+      caller.reservations.reassignTables({
+        id: created.id,
+        assignedTableIds: [1],
+      })
+    ).rejects.toThrow("Can only reassign tables for confirmed reservations")
+  })
+
+  test("should require staff/manager role", async () => {
+    const caller = appRouter.createCaller(mockPublicContext)
+
+    await expect(
+      caller.reservations.reassignTables({
+        id: 1,
+        assignedTableIds: [1],
+      })
+    ).rejects.toThrow("Authentication required")
+  })
+})
