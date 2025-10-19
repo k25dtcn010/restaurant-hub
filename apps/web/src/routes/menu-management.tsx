@@ -5,8 +5,11 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { DishEditor } from "@/components/dish-editor"
+import { ModifierGroupEditor } from "@/components/modifier-group-editor"
+import { ModifierManager } from "@/components/modifier-manager"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { authClient } from "@/lib/auth-client"
 import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
@@ -127,24 +130,32 @@ function RouteComponent() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Menu Management</h1>
-          <p className="text-muted-foreground mt-2">Manage dishes, recipes, and availability</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-          </Button>
-          <Button onClick={handleCreateNew}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Dish
-          </Button>
+          <p className="text-muted-foreground mt-2">Manage dishes, recipes, modifiers, and categories</p>
         </div>
       </div>
 
       {/* Dish Editor Modal */}
       {isEditorOpen && <DishEditor dish={editingDish} onClose={handleEditorClose} />}
 
-      {/* Dishes Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Tabs defaultValue="dishes" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="dishes">Dishes</TabsTrigger>
+          <TabsTrigger value="modifiers">Modifiers</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="dishes">
+          <div className="flex justify-end gap-2 mb-4">
+            <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            </Button>
+            <Button onClick={handleCreateNew}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Dish
+            </Button>
+          </div>
+
+          {/* Dishes Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {dishes.map((dish: any) => (
           <Card key={dish.id} className={!dish.isAvailable ? "opacity-60" : ""}>
             <CardHeader>
@@ -182,19 +193,28 @@ function RouteComponent() {
             </CardContent>
           </Card>
         ))}
-      </div>
 
-      {dishes.length === 0 && (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground mb-4">No dishes found</p>
-            <Button onClick={handleCreateNew}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Your First Dish
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+          {dishes.length === 0 && (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <p className="text-muted-foreground mb-4">No dishes found</p>
+                <Button onClick={handleCreateNew}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Dish
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="modifiers">
+          <div className="grid gap-6">
+            <ModifierManager />
+            <ModifierGroupEditor />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

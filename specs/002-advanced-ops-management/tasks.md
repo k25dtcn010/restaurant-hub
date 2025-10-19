@@ -474,7 +474,7 @@
 
 **Frontend: Manager - Modifier Management**
 
-- [ ] T035 [P] [US1] Create modifier management UI component
+- [X] T035 [P] [US1] Create modifier management UI component
   - **File**: `apps/web/src/components/modifier-manager.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Manager: Create Modifiers" for expected workflow
   - **DEPENDS ON**: T021-GREEN, T022-GREEN (needs list and create procedures)
@@ -492,7 +492,7 @@
   - **Validation**: Show inline errors for invalid inputs (name required, price must be integer)
   - **Test**: Manager can create modifier "Extra Cheese +$2.00", see it in list, edit to +$2.50, toggle availability
 
-- [ ] T036 [P] [US1] Create modifier group editor component
+- [X] T036 [P] [US1] Create modifier group editor component
   - **File**: `apps/web/src/components/modifier-group-editor.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Manager: Create Modifier Groups"
   - **DEPENDS ON**: T025-GREEN, T026-GREEN
@@ -508,7 +508,7 @@
     - `api.modifiers.updateGroup.useMutation()`
   - **Test**: Manager creates "Toppings" group with min=0 max=3, reorders groups
 
-- [ ] T037 [US1] Add "Modifiers" tab to menu management page
+- [X] T037 [US1] Add "Modifiers" tab to menu management page
   - **File**: `apps/web/src/routes/menu-management.tsx`
   - **DEPENDS ON**: T035, T036 (components must exist)
   - **Implementation**: 
