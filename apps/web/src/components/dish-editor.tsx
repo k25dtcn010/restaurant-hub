@@ -63,6 +63,9 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
   const [orderPriority, setOrderPriority] = useState(
     dish?.orderPriority !== undefined ? dish.orderPriority.toString() : "0"
   )
+  
+  // T058: Category assignment
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([])
 
   // Query ingredients for dropdown
   const { data: inventoryData } = useQuery({
@@ -78,6 +81,17 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
   const { data: allModifiers } = useQuery({
     ...trpc.modifiers.list.queryOptions({ availableOnly: false }),
+  })
+  
+  // T058: Query all categories for assignment
+  const { data: allCategories } = useQuery({
+    ...trpc.categories.list.queryOptions({ visibleOnly: false }),
+  })
+  
+  // T058: Query current dish's categories when editing
+  const { data: dishCategories } = useQuery({
+    ...trpc.categories.listDishes.queryOptions({ categoryId: 0 }), // Will be filtered client-side
+    enabled: false, // We'll use a different approach
   })
 
   // Load existing modifiers for editing
@@ -129,6 +143,25 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
       recipe: RecipeItem[]
     }) => trpcClient.dishes.create.mutate(variables),
     onSuccess: async (data) => {
+      // T058: Assign categories after dish creation
+      if (selectedCategories.length > 0) {
+        try {
+          await trpcClient.categories.assignDishes.mutate({
+            categoryId: selectedCategories[0], // Note: API takes one category at a time
+            dishIds: [data.dishId],
+          })
+          // Assign to additional categories
+          for (let i = 1; i < selectedCategories.length; i++) {
+            await trpcClient.categories.assignDishes.mutate({
+              categoryId: selectedCategories[i],
+              dishIds: [data.dishId],
+            })
+          }
+        } catch (error) {
+          console.error("Error assigning categories:", error)
+        }
+      }
+      
       // Assign modifiers after dish creation
       if (selectedModifiers.length > 0) {
         for (const modifier of selectedModifiers) {
@@ -157,6 +190,20 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
       recipe?: RecipeItem[]
     }) => trpcClient.dishes.update.mutate(variables),
     onSuccess: async () => {
+      // T058: Assign categories after dish update
+      if (dish && selectedCategories.length > 0) {
+        for (const categoryId of selectedCategories) {
+          try {
+            await trpcClient.categories.assignDishes.mutate({
+              categoryId,
+              dishIds: [dish.id],
+            })
+          } catch (error) {
+            // Ignore errors for already assigned categories
+          }
+        }
+      }
+      
       // Note: Modifier assignments are updated separately for now
       // In a full implementation, we would diff and update assignments
       if (dish && selectedModifiers.length > 0) {
@@ -483,6 +530,45 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                   )
                 })}
               </div>
+            </div>
+
+            {/* T058: Category Assignment */}
+            <div className="space-y-2">
+              <Label>Categories</Label>
+              {!allCategories || allCategories.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No categories available. Create categories in the Categories tab first.
+                </p>
+              ) : (
+                <div className="border rounded-md p-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    {allCategories.map((category: any) => (
+                      <div key={category.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`category-${category.id}`}
+                          checked={selectedCategories.includes(category.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedCategories([...selectedCategories, category.id])
+                            } else {
+                              setSelectedCategories(
+                                selectedCategories.filter((id) => id !== category.id)
+                              )
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`category-${category.id}`}
+                          className="text-sm cursor-pointer flex items-center gap-1"
+                        >
+                          {category.iconUrl && <span>{category.iconUrl}</span>}
+                          {category.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Modifier Assignment */}

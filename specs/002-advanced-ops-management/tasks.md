@@ -714,7 +714,7 @@
   - **Library**: react-beautiful-dnd or @dnd-kit
   - **Updates**: displayOrder field on drop
 
-- [ ] T058 Add category assignment to dish editor
+- [X] T058 Add category assignment to dish editor
   - **File**: `apps/web/src/components/dish-editor.tsx`
   - **UI**: Multi-select checkboxes for categories
   - **tRPC**: categories.assignDishes
