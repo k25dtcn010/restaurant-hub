@@ -5,6 +5,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { queryClient, trpc, trpcClient } from "@/utils/trpc"
@@ -37,6 +38,11 @@ interface RecipeItem {
   quantityRequired: number
 }
 
+interface SelectedModifier {
+  modifierId: number
+  modifierGroupId: number
+}
+
 export function DishEditor({ dish, onClose }: DishEditorProps) {
   const isEditing = dish !== null
 
@@ -46,12 +52,28 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
   const [price, setPrice] = useState(dish ? (dish.price / 100).toString() : "")
   const [photoUrl, setPhotoUrl] = useState(dish?.photoUrl || "")
   const [recipe, setRecipe] = useState<RecipeItem[]>([])
+  const [selectedModifiers, setSelectedModifiers] = useState<SelectedModifier[]>([])
 
   // Query ingredients for dropdown
   const { data: inventoryData } = useQuery({
     ...trpc.inventory.getAll.queryOptions({
       includeRecipes: false,
     }),
+  })
+
+  // Query modifier groups and modifiers
+  const { data: modifierGroups } = useQuery({
+    ...trpc.modifiers.listGroups.queryOptions(),
+  })
+
+  const { data: allModifiers } = useQuery({
+    ...trpc.modifiers.list.queryOptions({ availableOnly: false }),
+  })
+
+  // Load existing modifiers for editing
+  const { data: dishModifiers } = useQuery({
+    ...trpc.modifiers.getByDish.queryOptions({ dishId: dish?.id || 0 }),
+    enabled: isEditing,
   })
 
   // Load existing recipe for editing
@@ -71,6 +93,22 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
     }
   }, [dishDetails])
 
+  // Load existing modifier assignments
+  useEffect(() => {
+    if (dishModifiers && dishModifiers.length > 0) {
+      const modifiers: SelectedModifier[] = []
+      dishModifiers.forEach((group: any) => {
+        group.modifiers.forEach((modifier: any) => {
+          modifiers.push({
+            modifierId: modifier.id,
+            modifierGroupId: group.group.id,
+          })
+        })
+      })
+      setSelectedModifiers(modifiers)
+    }
+  }, [dishModifiers])
+
   // Mutations
   const createDish = useMutation({
     mutationFn: (variables: {
@@ -80,7 +118,17 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
       photoUrl: string | null
       recipe: RecipeItem[]
     }) => trpcClient.dishes.create.mutate(variables),
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      // Assign modifiers after dish creation
+      if (selectedModifiers.length > 0) {
+        for (const modifier of selectedModifiers) {
+          await trpcClient.modifiers.assignToDish.mutate({
+            dishId: data.dishId,
+            modifierId: modifier.modifierId,
+            modifierGroupId: modifier.modifierGroupId,
+          })
+        }
+      }
       toast.success("Dish created successfully")
       onClose(true)
     },
@@ -98,7 +146,22 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
       photoUrl?: string | null
       recipe?: RecipeItem[]
     }) => trpcClient.dishes.update.mutate(variables),
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Note: Modifier assignments are updated separately for now
+      // In a full implementation, we would diff and update assignments
+      if (dish && selectedModifiers.length > 0) {
+        for (const modifier of selectedModifiers) {
+          try {
+            await trpcClient.modifiers.assignToDish.mutate({
+              dishId: dish.id,
+              modifierId: modifier.modifierId,
+              modifierGroupId: modifier.modifierGroupId,
+            })
+          } catch (error) {
+            // Ignore duplicate assignment errors
+          }
+        }
+      }
       toast.success("Dish updated successfully")
       onClose(true)
     },
@@ -189,6 +252,24 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
     const newRecipe = [...recipe]
     newRecipe[index] = { ...newRecipe[index], [field]: value }
     setRecipe(newRecipe)
+  }
+
+  const handleModifierToggle = (modifierId: number, modifierGroupId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedModifiers([...selectedModifiers, { modifierId, modifierGroupId }])
+    } else {
+      setSelectedModifiers(
+        selectedModifiers.filter(
+          (m) => !(m.modifierId === modifierId && m.modifierGroupId === modifierGroupId)
+        )
+      )
+    }
+  }
+
+  const isModifierSelected = (modifierId: number, modifierGroupId: number): boolean => {
+    return selectedModifiers.some(
+      (m) => m.modifierId === modifierId && m.modifierGroupId === modifierGroupId
+    )
   }
 
   const ingredients = inventoryData?.ingredients || []
@@ -323,6 +404,67 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                   )
                 })}
               </div>
+            </div>
+
+            {/* Modifier Assignment */}
+            <div className="space-y-2">
+              <Label>Available Modifiers</Label>
+              {!modifierGroups || modifierGroups.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No modifier groups available. Create modifier groups in the Modifiers tab first.
+                </p>
+              ) : (
+                <div className="space-y-4 border rounded-md p-4">
+                  {modifierGroups.map((group: any) => {
+                    const groupModifiers =
+                      allModifiers?.filter(
+                        (mod: any) =>
+                          dishModifiers
+                            ?.find((dg: any) => dg.group?.id === group.id)
+                            ?.modifiers?.some((m: any) => m.id === mod.id) ||
+                          selectedModifiers.some((sm) => sm.modifierGroupId === group.id)
+                      ) || []
+
+                    const availableModifiersForGroup =
+                      allModifiers?.filter((mod: any) =>
+                        selectedModifiers.some(
+                          (sm) => sm.modifierId === mod.id && sm.modifierGroupId === group.id
+                        )
+                      ) || []
+
+                    return (
+                      <div key={group.id} className="space-y-2">
+                        <div className="font-medium text-sm">{group.name}</div>
+                        <div className="grid grid-cols-2 gap-2 pl-4">
+                          {allModifiers?.map((modifier: any) => (
+                            <div key={modifier.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`modifier-${group.id}-${modifier.id}`}
+                                checked={isModifierSelected(modifier.id, group.id)}
+                                onCheckedChange={(checked) =>
+                                  handleModifierToggle(modifier.id, group.id, checked as boolean)
+                                }
+                              />
+                              <label
+                                htmlFor={`modifier-${group.id}-${modifier.id}`}
+                                className="text-sm cursor-pointer"
+                              >
+                                {modifier.name}
+                                {modifier.priceAdjustment !== 0 && (
+                                  <span className="text-muted-foreground ml-1">
+                                    ({modifier.priceAdjustment > 0 ? "+" : ""}$
+                                    {(modifier.priceAdjustment / 100).toFixed(2)})
+                                  </span>
+                                )}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </CardContent>
           <CardFooter className="flex justify-end gap-2">

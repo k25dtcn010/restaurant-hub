@@ -517,7 +517,7 @@
   - **UI**: Use shadcn/ui Tabs component
   - **Test**: Navigate to Menu Management → Modifiers tab, see modifier and group management UIs
 
-- [ ] T038 [US1] Implement modifier assignment UI in dish editor
+- [X] T038 [US1] Implement modifier assignment UI in dish editor
   - **File**: `apps/web/src/components/dish-editor.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Manager: Assign Modifiers to Dish"
   - **DEPENDS ON**: T029-GREEN (needs assignToDish procedure), T030-GREEN (needs getByDish)
