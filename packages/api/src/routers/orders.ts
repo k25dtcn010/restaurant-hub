@@ -600,7 +600,7 @@ export const ordersRouter = router({
    *
    * Business Logic:
    * - Query orders with kitchen workflow statuses
-   * - Sort by createdAt ascending (oldest first)
+   * - T054: Sort by dishes.orderPriority DESC (high priority first), then createdAt ASC
    * - Calculate wait time for each order
    */
   getKitchenOrders: publicProcedure
@@ -629,9 +629,30 @@ export const ordersRouter = router({
         orderBy: (orders, { asc }) => [asc(orders.createdAt)],
       })
 
+      // T054: Calculate max priority for each order based on its dishes
+      const ordersWithPriority = ordersData.map((order) => {
+        // Find the highest orderPriority among all dishes in this order
+        const maxPriority = Math.max(
+          ...order.orderItems.map((item) => item.dish.orderPriority || 0),
+          0
+        )
+        return {
+          ...order,
+          maxPriority,
+        }
+      })
+
+      // T054: Sort by maxPriority DESC (high priority first), then by createdAt ASC (oldest first)
+      ordersWithPriority.sort((a, b) => {
+        if (a.maxPriority !== b.maxPriority) {
+          return b.maxPriority - a.maxPriority // DESC
+        }
+        return Number(a.createdAt) - Number(b.createdAt) // ASC
+      })
+
       // Transform to match contract output schema
       const now = Date.now()
-      const transformedOrders = ordersData.map((order) => ({
+      const transformedOrders = ordersWithPriority.map((order) => ({
         id: order.id,
         tableNumber: order.table.number,
         status: order.status as "Pending" | "InKitchen" | "ReadyToServe",

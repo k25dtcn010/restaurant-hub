@@ -147,3 +147,137 @@ describe("Dishes Router - dishes.getAll", () => {
     expect(hasDisabledDish).toBe(false)
   })
 })
+
+/**
+ * T052: Test for dishes.update with flag fields
+ * Testing: isRecommended, isChefSpecial, orderPriority flags
+ * TDD Red Phase: These tests should FAIL before implementation
+ */
+
+// Mock manager context for testing
+const mockManagerContext: Context = {
+  session: { id: "test-session", userId: "manager-user-id" } as any,
+  user: { id: "manager-user-id", email: "manager@test.com", name: "Test Manager" } as any,
+  role: "Manager",
+  db,
+  wsNotifier: mockWsNotifier,
+}
+
+describe("Dishes Router - dishes.update with flag fields (T052)", () => {
+  let testDishId: number
+
+  beforeAll(async () => {
+    // Create a test dish for flag updates
+    const [dish] = await db
+      .insert(dishes)
+      .values({
+        name: "Test Burger for Flags",
+        description: "A burger to test flag updates",
+        price: 1500,
+        isAvailable: true,
+        isRecommended: false,
+        isChefSpecial: false,
+        orderPriority: 0,
+      })
+      .returning()
+    testDishId = dish.id
+  })
+
+  test("should update isRecommended flag", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+
+    const result = await caller.dishes.update({
+      dishId: testDishId,
+      isRecommended: true,
+    })
+
+    expect(result).toBeDefined()
+    expect(result.updatedFields).toContain("isRecommended")
+
+    // Verify in database
+    const updatedDish = await db.query.dishes.findFirst({
+      where: (dishes, { eq }) => eq(dishes.id, testDishId),
+    })
+    expect(updatedDish?.isRecommended).toBe(true)
+  })
+
+  test("should update isChefSpecial flag", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+
+    const result = await caller.dishes.update({
+      dishId: testDishId,
+      isChefSpecial: true,
+    })
+
+    expect(result).toBeDefined()
+    expect(result.updatedFields).toContain("isChefSpecial")
+
+    // Verify in database
+    const updatedDish = await db.query.dishes.findFirst({
+      where: (dishes, { eq }) => eq(dishes.id, testDishId),
+    })
+    expect(updatedDish?.isChefSpecial).toBe(true)
+  })
+
+  test("should update orderPriority within valid range (0-100)", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+
+    const result = await caller.dishes.update({
+      dishId: testDishId,
+      orderPriority: 90,
+    })
+
+    expect(result).toBeDefined()
+    expect(result.updatedFields).toContain("orderPriority")
+
+    // Verify in database
+    const updatedDish = await db.query.dishes.findFirst({
+      where: (dishes, { eq }) => eq(dishes.id, testDishId),
+    })
+    expect(updatedDish?.orderPriority).toBe(90)
+  })
+
+  test("should reject orderPriority outside valid range (0-100)", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+
+    // Test value > 100
+    await expect(
+      caller.dishes.update({
+        dishId: testDishId,
+        orderPriority: 150,
+      })
+    ).rejects.toThrow()
+
+    // Test negative value
+    await expect(
+      caller.dishes.update({
+        dishId: testDishId,
+        orderPriority: -10,
+      })
+    ).rejects.toThrow()
+  })
+
+  test("should update multiple flags at once", async () => {
+    const caller = appRouter.createCaller(mockManagerContext)
+
+    const result = await caller.dishes.update({
+      dishId: testDishId,
+      isRecommended: true,
+      isChefSpecial: true,
+      orderPriority: 80,
+    })
+
+    expect(result).toBeDefined()
+    expect(result.updatedFields).toContain("isRecommended")
+    expect(result.updatedFields).toContain("isChefSpecial")
+    expect(result.updatedFields).toContain("orderPriority")
+
+    // Verify in database
+    const updatedDish = await db.query.dishes.findFirst({
+      where: (dishes, { eq }) => eq(dishes.id, testDishId),
+    })
+    expect(updatedDish?.isRecommended).toBe(true)
+    expect(updatedDish?.isChefSpecial).toBe(true)
+    expect(updatedDish?.orderPriority).toBe(80)
+  })
+})

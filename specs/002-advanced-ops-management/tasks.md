@@ -672,7 +672,7 @@
 
 **Backend: Category Management** _(Contract: `contracts/categories-router.md` | Data: `data-model.md` § 2)_
 
-- [ ] T046-T051: Categories CRUD procedures (TDD: RED-GREEN-REFACTOR for each)
+- [X] T046-T051: Categories CRUD procedures (TDD: RED-GREEN-REFACTOR for each)
   - **T046**: `categories.list` - List categories with dishCount, filter by visibleOnly
   - **T047**: `categories.create` - Manager creates category with name, displayOrder, iconUrl
   - **T048**: `categories.update` - Update category fields
@@ -684,16 +684,16 @@
 
 **Backend: Dish Flags** _(Data: `data-model.md` § 4.1)_
 
-- [ ] T052 Update dishes.update procedure to accept flag fields
+- [X] T052 Update dishes.update procedure to accept flag fields
   - **File**: `packages/api/src/routers/dishes.ts`
   - **New Fields**: `isRecommended: boolean`, `isChefSpecial: boolean`, `orderPriority: integer`
   - **Validation**: orderPriority should be 0-100 range
 
-- [ ] T053 Update dishes.list procedure to include flags in response
+- [X] T053 Update dishes.list procedure to include flags in response
   - **Implementation**: Add flag fields to output schema
   - **Default Sorting**: Order by orderPriority DESC when querying for kitchen view
 
-- [ ] T054 Update orders.getKitchenQueue to sort by orderPriority
+- [X] T054 Update orders.getKitchenQueue to sort by orderPriority
   - **File**: `packages/api/src/routers/orders.ts`
   - **Logic**: JOIN orders → orderItems → dishes, sort by dishes.orderPriority DESC within each status
   - **Effect**: High-priority dishes (Chef's Specials) appear at top of kitchen queue

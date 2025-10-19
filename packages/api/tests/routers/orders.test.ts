@@ -1183,3 +1183,224 @@ describe("Orders Router - status transitions to Served/Completed (T086)", () => 
     ).rejects.toThrow()
   })
 })
+
+/**
+ * T054: Test for orders.getKitchenOrders with orderPriority sorting
+ * Testing: Kitchen queue should sort by orderPriority DESC within each status
+ * TDD Red Phase: This test should FAIL before implementation
+ */
+
+describe("Orders Router - orders.getKitchenOrders with priority sorting (T054)", () => {
+  let highPriorityDishId: number
+  let lowPriorityDishId: number
+  let normalPriorityDishId: number
+  let testTableId: number
+  let testIngredientId: number
+
+  beforeAll(async () => {
+    // Create test ingredient
+    const existingIngredient = await db.query.ingredients.findFirst({
+      where: (ingredients, { eq }) => eq(ingredients.name, "Test Priority Ingredient"),
+    })
+    if (existingIngredient) {
+      testIngredientId = existingIngredient.id
+    } else {
+      const [ingredient] = await db
+        .insert(ingredients)
+        .values({
+          name: "Test Priority Ingredient",
+          quantity: 1000,
+          unit: "kg",
+          threshold: 10,
+        })
+        .returning()
+      testIngredientId = ingredient.id
+    }
+
+    // Create dishes with different priorities
+    const existingHighPriority = await db.query.dishes.findFirst({
+      where: (dishes, { eq }) => eq(dishes.name, "High Priority Dish"),
+    })
+    if (existingHighPriority) {
+      highPriorityDishId = existingHighPriority.id
+    } else {
+      const [dish] = await db
+        .insert(dishes)
+        .values({
+          name: "High Priority Dish",
+          description: "Chef's Special",
+          price: 2000,
+          isAvailable: true,
+          isChefSpecial: true,
+          orderPriority: 90,
+        })
+        .returning()
+      highPriorityDishId = dish.id
+      
+      // Create recipe
+      await db.insert(recipes).values({
+        dishId: dish.id,
+        ingredientId: testIngredientId,
+        quantityRequired: 1,
+      })
+    }
+
+    const existingNormalPriority = await db.query.dishes.findFirst({
+      where: (dishes, { eq }) => eq(dishes.name, "Normal Priority Dish"),
+    })
+    if (existingNormalPriority) {
+      normalPriorityDishId = existingNormalPriority.id
+    } else {
+      const [dish] = await db
+        .insert(dishes)
+        .values({
+          name: "Normal Priority Dish",
+          description: "Regular item",
+          price: 1500,
+          isAvailable: true,
+          orderPriority: 0,
+        })
+        .returning()
+      normalPriorityDishId = dish.id
+      
+      // Create recipe
+      await db.insert(recipes).values({
+        dishId: dish.id,
+        ingredientId: testIngredientId,
+        quantityRequired: 1,
+      })
+    }
+
+    const existingLowPriority = await db.query.dishes.findFirst({
+      where: (dishes, { eq }) => eq(dishes.name, "Low Priority Dish"),
+    })
+    if (existingLowPriority) {
+      lowPriorityDishId = existingLowPriority.id
+    } else {
+      const [dish] = await db
+        .insert(dishes)
+        .values({
+          name: "Low Priority Dish",
+          description: "Low priority item",
+          price: 1000,
+          isAvailable: true,
+          orderPriority: 0,
+        })
+        .returning()
+      lowPriorityDishId = dish.id
+      
+      // Create recipe
+      await db.insert(recipes).values({
+        dishId: dish.id,
+        ingredientId: testIngredientId,
+        quantityRequired: 1,
+      })
+    }
+
+    // Create test table
+    const existingTable = await db.query.tables.findFirst({
+      where: (tables, { eq }) => eq(tables.number, 101),
+    })
+    if (existingTable) {
+      testTableId = existingTable.id
+    } else {
+      const [table] = await db
+        .insert(tables)
+        .values({
+          number: 101,
+          capacity: 4,
+          status: "Available",
+          qrCode: "QR-TABLE-101-PRIORITY-TEST",
+        })
+        .returning()
+      testTableId = table.id
+    }
+  })
+
+  test("should sort kitchen orders by orderPriority DESC within same status", async () => {
+    const caller = appRouter.createCaller(mockContext)
+
+    // Create 3 orders with different priority dishes, all in Pending status
+    // Order 1: Low priority dish (created first)
+    const [order1] = await db
+      .insert(orders)
+      .values({
+        tableId: testTableId,
+        status: "Pending",
+        totalAmount: 1000,
+        createdAt: new Date(Date.now() - 3000), // 3 seconds ago
+      })
+      .returning()
+
+    await db.insert(orderItems).values({
+      orderId: order1.id,
+      dishId: lowPriorityDishId,
+      quantity: 1,
+      priceAtOrder: 1000,
+    })
+
+    // Order 2: High priority dish (created second, but should appear first)
+    const [order2] = await db
+      .insert(orders)
+      .values({
+        tableId: testTableId,
+        status: "Pending",
+        totalAmount: 2000,
+        createdAt: new Date(Date.now() - 2000), // 2 seconds ago
+      })
+      .returning()
+
+    await db.insert(orderItems).values({
+      orderId: order2.id,
+      dishId: highPriorityDishId,
+      quantity: 1,
+      priceAtOrder: 2000,
+    })
+
+    // Order 3: Normal priority dish (created third)
+    const [order3] = await db
+      .insert(orders)
+      .values({
+        tableId: testTableId,
+        status: "Pending",
+        totalAmount: 1500,
+        createdAt: new Date(Date.now() - 1000), // 1 second ago
+      })
+      .returning()
+
+    await db.insert(orderItems).values({
+      orderId: order3.id,
+      dishId: normalPriorityDishId,
+      quantity: 1,
+      priceAtOrder: 1500,
+    })
+
+    // Fetch kitchen orders
+    const result = await caller.orders.getKitchenOrders({
+      status: ["Pending"],
+    })
+
+    expect(result).toBeDefined()
+    expect(result.orders).toBeArray()
+    expect(result.orders.length).toBeGreaterThanOrEqual(3)
+
+    // Find our test orders
+    const testOrders = result.orders.filter((o) => 
+      o.items.some(item => 
+        ["High Priority Dish", "Normal Priority Dish", "Low Priority Dish"].includes(item.dishName)
+      )
+    )
+
+    expect(testOrders.length).toBeGreaterThanOrEqual(3)
+
+    // The first order should have the high priority dish
+    const firstOrder = testOrders.find(o => o.items.some(item => item.dishName === "High Priority Dish"))
+    const firstOrderIndex = testOrders.indexOf(firstOrder!)
+    
+    const lowPriorityOrder = testOrders.find(o => o.items.some(item => item.dishName === "Low Priority Dish"))
+    const lowPriorityIndex = testOrders.indexOf(lowPriorityOrder!)
+
+    // High priority should come before low priority
+    expect(firstOrderIndex).toBeLessThan(lowPriorityIndex)
+  })
+})
