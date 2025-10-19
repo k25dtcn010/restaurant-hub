@@ -785,7 +785,7 @@
 
 **Backend: Variant Management** _(Contract: dishes router extensions | Data: `data-model.md` § 3)_
 
-- [ ] T066-T070: Dish Variants CRUD (TDD: RED-GREEN-REFACTOR)
+- [X] T066-T070: Dish Variants CRUD (TDD: RED-GREEN-REFACTOR)
   - **T066**: `dishes.createVariant` - Add variant to dish (name, price, displayOrder)
   - **T067**: `dishes.updateVariant` - Update variant fields
   - **T068**: `dishes.deleteVariant` - Delete if not used in orders (check orderItems.variantId)
@@ -795,49 +795,49 @@
 
 **Backend: Orders with Variants** _(Already accepts variantId in T020, now process it)_
 
-- [ ] T071 Update orders.createOrder to use variant price if variantId provided
+- [X] T071 Update orders.createOrder to use variant price if variantId provided
   - **Logic**: `const itemPrice = variant ? variant.price : dish.price` (before adding modifiers)
   - **DEPENDS ON**: T070 (needs variant data)
 
-- [ ] T072 Implement variant price override logic
+- [X] T072 Implement variant price override logic
   - **Note**: Merged with T071 - same task
 
-- [ ] T073 Update orders.getOrderDetails to include variant name in response
+- [X] T073 Update orders.getOrderDetails to include variant name in response
   - **Join**: orderItems LEFT JOIN dishVariants ON variantId
   - **Output**: Include `variantName: string | null` in order item
 
 **Frontend: Manager - Variant Editor** _(UI: `quickstart.md` § C)_
 
-- [ ] T074 [P] Create variant editor component
+- [X] T074 [P] Create variant editor component
   - **File**: `apps/web/src/components/variant-editor.tsx`
   - **Features**: Add/edit/delete variants, reorder by drag-and-drop, set price per variant
   - **tRPC**: dishes.createVariant, updateVariant, deleteVariant, listVariants
 
-- [ ] T075 Add "Has Variants" toggle to dish editor
+- [X] T075 Add "Has Variants" toggle to dish editor
   - **File**: `apps/web/src/components/dish-editor.tsx`
   - **Logic**: Show/hide variant editor based on toggle
 
-- [ ] T076 Integrate variant editor into dish editor
+- [X] T076 Integrate variant editor into dish editor
   - **DEPENDS ON**: T074, T075
 
 **Frontend: Customer - Variant Selection**
 
-- [ ] T077 [P] Create variant selector component
+- [X] T077 [P] Create variant selector component
   - **File**: `apps/web/src/components/variant-selector.tsx`
   - **UI**: Radio buttons for variants (only one selection allowed)
   - **Display**: "Small ($3.00) | Medium ($4.00) | Large ($5.00)"
   - **Props**: `variants: Variant[]`, `onSelect: (variantId) => void`
 
-- [ ] T078 Add variant selection requirement to order flow
+- [X] T078 Add variant selection requirement to order flow
   - **Validation**: If dish has variants, customer MUST select one before adding to cart
   - **Error**: "Please select a size" if variants exist but none selected
 
-- [ ] T079 Update order total to use variant price + modifiers
+- [X] T079 Update order total to use variant price + modifiers
   - **Calculation**: `(variant.price + modifierTotal) * quantity`
 
 **Frontend: Kitchen - Variant Display**
 
-- [ ] T080 Update kitchen order card to show variant name
+- [X] T080 Update kitchen order card to show variant name
   - **Format**: "Coffee (Medium) x2" instead of just "Coffee x2"
   - **File**: `apps/web/src/components/order-card.tsx`
 

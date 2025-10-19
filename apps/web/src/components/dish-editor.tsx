@@ -8,6 +8,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { VariantEditor } from "@/components/variant-editor"
 import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
 /**
@@ -66,6 +68,9 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
   
   // T058: Category assignment
   const [selectedCategories, setSelectedCategories] = useState<number[]>([])
+  
+  // T075: Variant toggle
+  const [hasVariants, setHasVariants] = useState(false)
 
   // Query ingredients for dropdown
   const { data: inventoryData } = useQuery({
@@ -105,6 +110,12 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
     ...trpc.dishes.getById.queryOptions({ dishId: dish?.id || 0 }),
     enabled: isEditing,
   })
+  
+  // T076: Load existing variants for editing
+  const { data: variantsData, refetch: refetchVariants } = useQuery({
+    ...trpc.dishes.listVariants.queryOptions({ dishId: dish?.id || 0 }),
+    enabled: isEditing,
+  })
 
   useEffect(() => {
     if (dishDetails?.recipe) {
@@ -114,6 +125,10 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
           quantityRequired: r.quantityRequired,
         }))
       )
+    }
+    // T075: Set hasVariants based on existing variants
+    if (dishDetails?.variants && Array.isArray(dishDetails.variants) && dishDetails.variants.length > 0) {
+      setHasVariants(true)
     }
   }, [dishDetails])
 
@@ -629,6 +644,43 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                     )
                   })}
                 </div>
+              )}
+            </div>
+
+            {/* T075 & T076: Variant Management */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="has-variants">Has Variants</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enable size/option variants (e.g., Small, Medium, Large)
+                  </p>
+                </div>
+                <Switch
+                  id="has-variants"
+                  checked={hasVariants}
+                  onCheckedChange={setHasVariants}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              {/* T076: Show variant editor if enabled and dish is saved */}
+              {hasVariants && isEditing && dish && (
+                <VariantEditor
+                  dishId={dish.id}
+                  variants={variantsData?.variants || []}
+                  onVariantsChange={() => {
+                    refetchVariants()
+                    queryClient.invalidateQueries({ queryKey: ["dishes", "getById"] })
+                  }}
+                />
+              )}
+
+              {hasVariants && !isEditing && (
+                <p className="text-sm text-muted-foreground border rounded-md p-4">
+                  Save this dish first to manage variants. Variants can only be added to existing
+                  dishes.
+                </p>
               )}
             </div>
           </CardContent>
