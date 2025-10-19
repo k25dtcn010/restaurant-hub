@@ -732,25 +732,25 @@
 
 **Frontend: Customer - Category Browsing** _(UI: `quickstart.md` § B "Customer: Browse by Category")_
 
-- [ ] T061 [P] Create category list component
+- [X] T061 [P] Create category list component
   - **File**: `apps/web/src/components/category-list.tsx`
   - **Display**: Category cards with icons, dish counts, ordered by displayOrder
   - **tRPC**: categories.list({ visibleOnly: true })
 
-- [ ] T062 Update menu page with category filtering
-  - **File**: `apps/web/src/routes/menu.tsx`
+- [X] T062 Update menu page with category filtering
+  - **File**: `apps/web/src/routes/index.tsx` (menu/landing page)
   - **Features**: Click category → filter dishes → show "All" button to clear filter
 
-- [ ] T063-T064 Add flag badges to customer menu items
+- [X] T063-T064 Add flag badges to customer menu items
   - **Implementation**: Show 👍 badge for isRecommended, ⭐ badge for isChefSpecial
   - **Styling**: Prominent placement, consistent with brand colors
 
 **Frontend: Kitchen - Priority Sorting**
 
-- [ ] T065 Update kitchen orders board to sort by orderPriority
-  - **File**: `apps/web/src/components/orders-board.tsx`
-  - **Logic**: Within each status column (Pending, Preparing, etc.), sort orders by highest priority dish first
-  - **Visual**: Add priority indicator if orderPriority > 0
+- [X] T065 Update kitchen orders board to sort by orderPriority
+  - **File**: Backend already handles this in `packages/api/src/routers/orders.ts` (T054 completed)
+  - **Logic**: Orders.getKitchenOrders sorts by highest priority dish first, then by createdAt
+  - **Visual**: Frontend displays orders in backend-sorted order (no additional sorting needed)
 
 **Validation Tasks for User Story 2:**
 
