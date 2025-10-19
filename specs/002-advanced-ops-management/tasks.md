@@ -426,14 +426,14 @@
 
 **Backend: Order Item Modifiers**
 
-- [ ] T031 [US1] Update orders.createOrder to accept modifiers array per item
+- [X] T031 [US1] Update orders.createOrder to accept modifiers array per item
   - **File**: `packages/api/src/routers/orders.ts`
   - **Note**: Input schema already extended in T020, now process the data
   - **DEPENDS ON**: T030 (needs getByDish to validate modifier selections)
   - **Implementation**: Accept modifiers in input, validate they belong to dish
   - **Don't Implement Yet**: Price calculation (done in T032)
 
-- [ ] T032 [US1] Implement modifier price calculation in orders.createOrder
+- [X] T032 [US1] Implement modifier price calculation in orders.createOrder
   - **File**: `packages/api/src/routers/orders.ts`
   - **DEPENDS ON**: T031
   - **Logic**:
@@ -446,7 +446,7 @@
   - **Data Model**: Use `priceAdjustment` from modifiers table (see `data-model.md` § 1.1)
   - **Test**: Order with modifiers has correct total price
 
-- [ ] T033 [US1] Insert selected modifiers into orderItemModifiers table
+- [X] T033 [US1] Insert selected modifiers into orderItemModifiers table
   - **File**: `packages/api/src/routers/orders.ts`
   - **DEPENDS ON**: T032
   - **Data Model**: Insert into `orderItemModifiers` join table (see `data-model.md` § 1.4)
@@ -463,7 +463,7 @@
     ```
   - **Test**: Query orderItemModifiers table, verify modifiers stored with historical prices
 
-- [ ] T034 [US1] Update orders.getOrderDetails to include modifiers in response
+- [X] T034 [US1] Update orders.getOrderDetails to include modifiers in response
   - **File**: `packages/api/src/routers/orders.ts`
   - **DEPENDS ON**: T033
   - **Implementation**: 
