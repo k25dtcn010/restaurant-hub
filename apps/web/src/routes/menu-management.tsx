@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { Plus, RefreshCw } from "lucide-react"
+import { Eye, EyeOff, Plus, RefreshCw } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -55,6 +55,10 @@ interface Dish {
   price: number
   photoUrl: string | null
   isAvailable: boolean
+  isHidden?: boolean
+  isRecommended?: boolean
+  isChefSpecial?: boolean
+  orderPriority?: number
   createdAt: Date
 }
 
@@ -62,7 +66,7 @@ function RouteComponent() {
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [editingDish, setEditingDish] = useState<any | null>(null)
 
-  // Query all dishes including disabled ones
+  // Query all dishes including disabled ones and hidden ones
   const {
     data: dishesData,
     isLoading,
@@ -70,6 +74,7 @@ function RouteComponent() {
   } = useQuery({
     ...trpc.dishes.getAll.queryOptions({
       includeDisabled: true,
+      includeHidden: true,
     }),
   })
 
@@ -83,6 +88,19 @@ function RouteComponent() {
     },
     onError: (error: Error) => {
       toast.error(`Failed to update availability: ${error.message}`)
+    },
+  })
+
+  // T084: Mutation for toggling visibility (hide/show)
+  const toggleVisibility = useMutation({
+    mutationFn: (variables: { dishId: number }) =>
+      trpcClient.dishes.toggleVisibility.mutate(variables),
+    onSuccess: () => {
+      toast.success("Dish visibility updated")
+      refetch()
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update visibility: ${error.message}`)
     },
   })
 
@@ -115,6 +133,17 @@ function RouteComponent() {
     }
   }
 
+  // T084: Handle visibility toggle (hide/show)
+  const handleToggleVisibility = async (dishId: number) => {
+    try {
+      await toggleVisibility.mutateAsync({
+        dishId,
+      })
+    } catch (error) {
+      // Error handled by mutation
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-6">
@@ -126,6 +155,10 @@ function RouteComponent() {
   }
 
   const dishes = dishesData?.dishes || []
+
+  // T086: Separate visible and hidden dishes
+  const visibleDishes = dishes.filter((d: any) => !d.isHidden)
+  const hiddenDishes = dishes.filter((d: any) => d.isHidden)
 
   return (
     <div className="container mx-auto p-6">
@@ -159,35 +192,115 @@ function RouteComponent() {
             </Button>
           </div>
 
-          {/* Dishes Grid */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {dishes.map((dish: any) => (
-              <Card key={dish.id} className={!dish.isAvailable ? "opacity-60" : ""}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg">{dish.name}</CardTitle>
-                        {/* T060: Flag Badges */}
-                        {dish.isRecommended && (
-                          <span className="text-lg" title="Recommended">
-                            👍
-                          </span>
-                        )}
-                        {dish.isChefSpecial && (
-                          <span className="text-lg" title="Chef's Special">
-                            ⭐
-                          </span>
-                        )}
-                        {dish.orderPriority > 0 && (
-                          <Badge variant="outline" title="Kitchen Priority">
-                            P{dish.orderPriority}
-                          </Badge>
-                        )}
+          {/* T086: Hidden Items Quick-Access Section */}
+          {hiddenDishes.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">Hidden Items</h2>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {hiddenDishes.map((dish: any) => (
+                  <Card key={dish.id} className="opacity-50 border-dashed">
+                    <CardHeader>
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <CardTitle className="text-lg">{dish.name}</CardTitle>
+                            {/* T085: Hidden badge */}
+                            <Badge variant="secondary" className="bg-gray-500 text-white">
+                              Hidden
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4">{dish.description}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-semibold">
+                          ${(dish.price / 100).toFixed(2)}
+                        </span>
+                        <Button
+                          size="sm"
+                          onClick={() => handleToggleVisibility(dish.id)}
+                          disabled={toggleVisibility.isPending}
+                          title="Show to customers"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Show
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Visible Dishes Grid */}
+          <div className="mb-6">
+            {visibleDishes.length > 0 && <h2 className="text-xl font-semibold mb-4">Menu Items</h2>}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {visibleDishes.map((dish: any) => (
+                <Card key={dish.id} className={!dish.isAvailable ? "opacity-60" : ""}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-lg">{dish.name}</CardTitle>
+                          {/* T060: Flag Badges */}
+                          {dish.isRecommended && (
+                            <span className="text-lg" title="Recommended">
+                              👍
+                            </span>
+                          )}
+                          {dish.isChefSpecial && (
+                            <span className="text-lg" title="Chef's Special">
+                              ⭐
+                            </span>
+                          )}
+                          {dish.orderPriority > 0 && (
+                            <Badge variant="outline" title="Kitchen Priority">
+                              P{dish.orderPriority}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      {/* T084: Hide/Show visibility toggle button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleToggleVisibility(dish.id)}
+                        disabled={toggleVisibility.isPending}
+                        title={dish.isHidden ? "Show to customers" : "Hide from customers"}
+                      >
+                        {dish.isHidden ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">{dish.description}</p>
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-lg font-semibold">${(dish.price / 100).toFixed(2)}</span>
+                      <span
+                        className={`text-sm px-2 py-1 rounded ${
+                          dish.isAvailable
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                        }`}
+                      >
+                        {dish.isAvailable ? "Available" : "Disabled"}
+                      </span>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(dish)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(dish)}
+                        className="flex-1"
+                      >
                         Edit
                       </Button>
                       <Button
@@ -195,41 +308,27 @@ function RouteComponent() {
                         size="sm"
                         onClick={() => handleToggleAvailability(dish.id, dish.isAvailable)}
                         disabled={toggleAvailability.isPending}
+                        className="flex-1"
                       >
                         {dish.isAvailable ? "Disable" : "Enable"}
                       </Button>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">{dish.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">${(dish.price / 100).toFixed(2)}</span>
-                    <span
-                      className={`text-sm px-2 py-1 rounded ${
-                        dish.isAvailable
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-                      }`}
-                    >
-                      {dish.isAvailable ? "Available" : "Disabled"}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
 
-            {dishes.length === 0 && (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <p className="text-muted-foreground mb-4">No dishes found</p>
-                  <Button onClick={handleCreateNew}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Your First Dish
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
+              {visibleDishes.length === 0 && (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <p className="text-muted-foreground mb-4">No dishes found</p>
+                    <Button onClick={handleCreateNew}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Your First Dish
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
         </TabsContent>
 

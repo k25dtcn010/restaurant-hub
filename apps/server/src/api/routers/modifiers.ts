@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
-import { eq, asc } from "@/db"
+
+import { asc, dishModifiers, eq, inArray, modifierGroups, modifiers } from "@/db"
 
 import { managerOnlyProcedure, publicProcedure, router } from "../index"
-import { modifiers, modifierGroups, dishModifiers } from "@/db"
 
 /**
  * Modifiers Router
@@ -108,8 +108,7 @@ export const modifiersRouter = router({
       // Build update object with only provided fields
       const updateData: any = {}
       if (input.name !== undefined) updateData.name = input.name
-      if (input.priceAdjustment !== undefined)
-        updateData.priceAdjustment = input.priceAdjustment
+      if (input.priceAdjustment !== undefined) updateData.priceAdjustment = input.priceAdjustment
       if (input.isAvailable !== undefined) updateData.isAvailable = input.isAvailable
 
       const [updatedModifier] = await db
@@ -379,14 +378,31 @@ export const modifiersRouter = router({
     .query(async ({ ctx, input }) => {
       const { db } = ctx
 
-      // Get all dish modifiers for this dish with full details
+      // Get all dish modifiers for this dish (join table only)
       const assignments = await db.query.dishModifiers.findMany({
         where: eq(dishModifiers.dishId, input.dishId),
-        with: {
-          modifier: true,
-          modifierGroup: true,
-        },
       })
+
+      if (assignments.length === 0) {
+        return []
+      }
+
+      // Get unique modifier and modifier group IDs
+      const modifierIds = [...new Set(assignments.map((a) => a.modifierId))]
+      const modifierGroupIds = [...new Set(assignments.map((a) => a.modifierGroupId))]
+
+      // Fetch all modifiers and modifier groups separately using inArray
+      const modifiersData = await db.query.modifiers.findMany({
+        where: inArray(modifiers.id, modifierIds),
+      })
+
+      const modifierGroupsData = await db.query.modifierGroups.findMany({
+        where: inArray(modifierGroups.id, modifierGroupIds),
+      })
+
+      // Create lookup maps
+      const modifiersMap = new Map(modifiersData.map((m) => [m.id, m]))
+      const groupsMap = new Map(modifierGroupsData.map((g) => [g.id, g]))
 
       // Group by modifier group
       const groupedMap = new Map<
@@ -409,16 +425,24 @@ export const modifiersRouter = router({
       >()
 
       for (const assignment of assignments) {
-        const groupId = assignment.modifierGroup.id
+        const groupId = assignment.modifierGroupId
+        const modifierId = assignment.modifierId
+
+        const modifierData = modifiersMap.get(modifierId)
+        const groupData = groupsMap.get(groupId)
+
+        if (!modifierData || !groupData) {
+          continue
+        }
 
         if (!groupedMap.has(groupId)) {
           groupedMap.set(groupId, {
             group: {
-              id: assignment.modifierGroup.id,
-              name: assignment.modifierGroup.name,
-              minSelections: assignment.modifierGroup.minSelections,
-              maxSelections: assignment.modifierGroup.maxSelections,
-              displayOrder: assignment.modifierGroup.displayOrder,
+              id: groupData.id,
+              name: groupData.name,
+              minSelections: groupData.minSelections,
+              maxSelections: groupData.maxSelections,
+              displayOrder: groupData.displayOrder,
             },
             modifiers: [],
           })
@@ -426,10 +450,10 @@ export const modifiersRouter = router({
 
         const group = groupedMap.get(groupId)!
         group.modifiers.push({
-          id: assignment.modifier.id,
-          name: assignment.modifier.name,
-          priceAdjustment: assignment.modifier.priceAdjustment,
-          isAvailable: assignment.modifier.isAvailable,
+          id: modifierData.id,
+          name: modifierData.name,
+          priceAdjustment: modifierData.priceAdjustment,
+          isAvailable: modifierData.isAvailable,
         })
       }
 

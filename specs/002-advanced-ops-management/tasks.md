@@ -868,52 +868,52 @@
 
 **Backend: Dish Hiding** _(Note: isHidden column already added in T007)_
 
-- [ ] T081 Update dishes.update to accept isHidden field
+- [x] T081 Update dishes.update to accept isHidden field
   - **File**: `packages/api/src/routers/dishes.ts`
   - **Input**: Add `isHidden: z.boolean().optional()` to update schema
   - **Auth**: Manager/Staff only
 
-- [ ] T082 Update dishes.list to filter hidden dishes for customers
+- [x] T082 Update dishes.list to filter hidden dishes for customers
   - **Logic**: `WHERE isHidden = false` when `includeHidden = false` (default for public)
   - **Manager View**: Pass `includeHidden = true` to see all dishes
 
-- [ ] T083 Implement dishes.toggleVisibility procedure
+- [x] T083 Implement dishes.toggleVisibility procedure
   - **Quick Toggle**: `UPDATE dishes SET isHidden = NOT isHidden WHERE id = ?`
   - **Auth**: Manager/Staff only
   - **Returns**: Updated dish with new isHidden value
 
 **Frontend: Manager - Hide/Show Dishes** _(UI: `quickstart.md` § D)_
 
-- [ ] T084 [P] Add "Hide"/"Show" toggle button to dish list
+- [x] T084 [P] Add "Hide"/"Show" toggle button to dish list
   - **File**: `apps/web/src/routes/menu-management.tsx`
   - **UI**: Eye icon button, tooltip shows "Hide from customers" / "Show to customers"
   - **tRPC**: dishes.toggleVisibility
 
-- [ ] T085 Add "Hidden" badge to hidden dishes in manager view
+- [x] T085 Add "Hidden" badge to hidden dishes in manager view
   - **Styling**: Gray badge with "Hidden" text, dish appears dimmed/muted
 
-- [ ] T086 Create "Hidden Items" quick-access section
+- [x] T086 Create "Hidden Items" quick-access section
   - **Location**: Menu management dashboard
   - **Display**: List of currently hidden dishes with one-click "Show" buttons
   - **Filter**: `dishes.list({ includeHidden: true }).filter(d => d.isHidden)`
 
 **Frontend: Customer - Hidden Dish Filter**
 
-- [ ] T087 Update menu query to exclude hidden dishes
+- [x] T087 Update menu query to exclude hidden dishes
   - **File**: `apps/web/src/routes/menu.tsx`
   - **tRPC**: `api.dishes.list.useQuery({ includeHidden: false })`
 
 **Frontend: Staff - Manual Add Hidden Dish**
 
-- [ ] T088 Add hidden dish warning in manual order creation
+- [x] T088 Add hidden dish warning in manual order creation
   - **Scenario**: Staff creating order for phone/walk-in customer
   - **UI**: Hidden dishes show with ⚠️ warning badge in search results
   - **Confirmation**: "This item is currently hidden. Add anyway?" dialog
 
 **Validation Tasks for User Story 4:**
 
-- [ ] T088.1 [US4] Test: Hide dish → customer can't see → manager can re-enable
-- [ ] T088.2 [US4] Test: Historical orders with now-hidden dishes still display correctly
+- [x] T088.1 [US4] Test: Hide dish → customer can't see → manager can re-enable
+- [x] T088.2 [US4] Test: Historical orders with now-hidden dishes still display correctly
 
 **Checkpoint**: Hiding workflow complete - dishes can be temporarily removed from customer view
 

@@ -1,6 +1,13 @@
 import "dotenv/config"
 
-import type { DishInsert, IngredientInsert, RecipeInsert, TableInsert, UserInsert } from "./index"
+import type {
+  AccountInsert,
+  DishInsert,
+  IngredientInsert,
+  RecipeInsert,
+  TableInsert,
+  UserInsert,
+} from "./index"
 
 /**
  * Database seed script per data-model.md Seed Data Requirements
@@ -11,7 +18,7 @@ async function seed() {
   console.log(`📁 Database URL: ${process.env.DATABASE_URL}`)
 
   // Dynamic import after env is loaded
-  const { db, user, tables, ingredients, dishes, recipes } = await import("./index")
+  const { db, user, tables, ingredients, dishes, recipes, account } = await import("./index")
 
   // 1. Create 3 test users (one per role)
   console.log("Creating test users...")
@@ -47,6 +54,21 @@ async function seed() {
 
   await db.insert(user).values(users)
   console.log("✓ Created 3 test users")
+
+  const accounts: AccountInsert[] = [
+    {
+      id: "account-001",
+      userId: "manager-001",
+      providerId: "credential",
+      accountId: "account-001",
+      password:
+        "50ef41130efb991be6150e43f0995b14:6bfa995a9c1febe9d39280b66d2f796e294e6ebd15c1264e099f13572169f167f754e492ac2d3c730631a66c91fbc8d43e90ecc44680adc3c1855c24d69b6a81",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ]
+  await db.insert(account).values(accounts)
+  console.log("✓ Created 1 account ")
 
   // 2. Create 30 tables with QR codes
   console.log("Creating tables...")

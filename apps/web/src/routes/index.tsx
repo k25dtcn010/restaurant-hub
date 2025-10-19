@@ -51,10 +51,11 @@ function HomeComponent() {
   // T062: Category filtering state
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
 
-  // Fetch dishes
+  // T087: Fetch dishes - exclude hidden dishes from customer view
   const { data: dishesData, isLoading: dishesLoading } = useQuery(
     trpc.dishes.getAll.queryOptions({
       includeDisabled: false,
+      includeHidden: false,
     })
   )
 

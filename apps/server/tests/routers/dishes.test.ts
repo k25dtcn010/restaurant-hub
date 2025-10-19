@@ -1,8 +1,19 @@
 import { beforeAll, describe, expect, test } from "bun:test"
-import { db, dishes, dishVariants, eq, ingredients, orderItems, orders, recipes, tables } from "@/db"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
+import {
+  db,
+  dishes,
+  dishVariants,
+  eq,
+  ingredients,
+  orderItems,
+  orders,
+  recipes,
+  tables,
+} from "@/db"
+
 import { mockWsNotifier } from "../setup"
 
 /**
@@ -862,5 +873,210 @@ describe("Dishes Router - dishes.getDishDetails with variants (T070)", () => {
     // Verify ordering by displayOrder
     expect(result.variants[0]?.displayOrder).toBe(0)
     expect(result.variants[1]?.displayOrder).toBe(1)
+  })
+})
+
+/**
+ * T081-T083: Backend tests for User Story 4 - Temporary Item Hiding
+ * Contract: Phase 6 implementation
+ */
+describe("Dishes Router - Item Hiding (T081-T083)", () => {
+  let testDishId: number
+  let hiddenTestDishId: number
+
+  beforeAll(async () => {
+    // Create test dishes for hiding feature
+    const visibleDish = await db
+      .insert(dishes)
+      .values({
+        name: "Visible Test Dish",
+        description: "This dish should be visible",
+        price: 2000,
+        isAvailable: true,
+        isHidden: false,
+      })
+      .returning()
+    testDishId = visibleDish[0]!.id
+
+    const hiddenDish = await db
+      .insert(dishes)
+      .values({
+        name: "Hidden Test Dish",
+        description: "This dish should be hidden",
+        price: 2500,
+        isAvailable: true,
+        isHidden: true,
+      })
+      .returning()
+    hiddenTestDishId = hiddenDish[0]!.id
+  })
+
+  describe("T082: dishes.getAll with hidden dish filtering", () => {
+    test("should exclude hidden dishes by default", async () => {
+      const caller = appRouter.createCaller(mockContext)
+
+      const result = await caller.dishes.getAll({})
+
+      expect(result).toBeDefined()
+      expect(result.dishes).toBeDefined()
+
+      const visibleDish = result.dishes.find((d) => d.id === testDishId)
+      const hiddenDish = result.dishes.find((d) => d.id === hiddenTestDishId)
+
+      expect(visibleDish).toBeDefined()
+      expect(hiddenDish).toBeUndefined()
+    })
+
+    test("should include hidden dishes when includeHidden=true", async () => {
+      const caller = appRouter.createCaller(mockContext)
+
+      const result = await caller.dishes.getAll({ includeHidden: true })
+
+      expect(result).toBeDefined()
+      expect(result.dishes).toBeDefined()
+
+      const visibleDish = result.dishes.find((d) => d.id === testDishId)
+      const hiddenDish = result.dishes.find((d) => d.id === hiddenTestDishId)
+
+      expect(visibleDish).toBeDefined()
+      expect(hiddenDish).toBeDefined()
+    })
+
+    test("should return isHidden flag in dish data", async () => {
+      const caller = appRouter.createCaller(mockContext)
+
+      const result = await caller.dishes.getAll({ includeHidden: true })
+
+      const hiddenDish = result.dishes.find((d) => d.id === hiddenTestDishId)
+      expect(hiddenDish?.isHidden).toBe(true)
+
+      const visibleDish = result.dishes.find((d) => d.id === testDishId)
+      expect(visibleDish?.isHidden).toBe(false)
+    })
+  })
+
+  describe("T081: dishes.update with isHidden field", () => {
+    test("should update isHidden field to true", async () => {
+      const caller = appRouter.createCaller(mockManagerContext)
+
+      const result = await caller.dishes.update({
+        dishId: testDishId,
+        isHidden: true,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.updatedFields).toContain("isHidden")
+
+      // Verify in database
+      const updatedDish = await db.query.dishes.findFirst({
+        where: (dishes, { eq }) => eq(dishes.id, testDishId),
+      })
+      expect(updatedDish?.isHidden).toBe(true)
+    })
+
+    test("should update isHidden field to false", async () => {
+      const caller = appRouter.createCaller(mockManagerContext)
+
+      const result = await caller.dishes.update({
+        dishId: hiddenTestDishId,
+        isHidden: false,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.updatedFields).toContain("isHidden")
+
+      // Verify in database
+      const updatedDish = await db.query.dishes.findFirst({
+        where: (dishes, { eq }) => eq(dishes.id, hiddenTestDishId),
+      })
+      expect(updatedDish?.isHidden).toBe(false)
+    })
+
+    test("should not allow non-manager to update isHidden", async () => {
+      const caller = appRouter.createCaller(mockContext)
+
+      await expect(
+        caller.dishes.update({
+          dishId: testDishId,
+          isHidden: true,
+        })
+      ).rejects.toThrow()
+    })
+  })
+
+  describe("T083: dishes.toggleVisibility procedure", () => {
+    test("should toggle isHidden from false to true", async () => {
+      // First, ensure dish is visible
+      await db.update(dishes).set({ isHidden: false }).where(eq(dishes.id, testDishId))
+
+      const caller = appRouter.createCaller(mockManagerContext)
+
+      const result = await caller.dishes.toggleVisibility({
+        dishId: testDishId,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.isHidden).toBe(true)
+
+      // Verify in database
+      const updatedDish = await db.query.dishes.findFirst({
+        where: (dishes, { eq }) => eq(dishes.id, testDishId),
+      })
+      expect(updatedDish?.isHidden).toBe(true)
+    })
+
+    test("should toggle isHidden from true to false", async () => {
+      // First, ensure dish is hidden
+      await db.update(dishes).set({ isHidden: true }).where(eq(dishes.id, testDishId))
+
+      const caller = appRouter.createCaller(mockManagerContext)
+
+      const result = await caller.dishes.toggleVisibility({
+        dishId: testDishId,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.isHidden).toBe(false)
+
+      // Verify in database
+      const updatedDish = await db.query.dishes.findFirst({
+        where: (dishes, { eq }) => eq(dishes.id, testDishId),
+      })
+      expect(updatedDish?.isHidden).toBe(false)
+    })
+
+    test("should return updated dish data with toggle", async () => {
+      const caller = appRouter.createCaller(mockManagerContext)
+
+      const result = await caller.dishes.toggleVisibility({
+        dishId: testDishId,
+      })
+
+      expect(result).toBeDefined()
+      expect(result.id).toBe(testDishId)
+      expect(result.name).toBeDefined()
+      expect(result.description).toBeDefined()
+      expect(result.price).toBeDefined()
+    })
+
+    test("should throw error for non-existent dish", async () => {
+      const caller = appRouter.createCaller(mockManagerContext)
+
+      await expect(
+        caller.dishes.toggleVisibility({
+          dishId: 99999,
+        })
+      ).rejects.toThrow()
+    })
+
+    test("should not allow non-manager to toggle visibility", async () => {
+      const caller = appRouter.createCaller(mockContext)
+
+      await expect(
+        caller.dishes.toggleVisibility({
+          dishId: testDishId,
+        })
+      ).rejects.toThrow()
+    })
   })
 })

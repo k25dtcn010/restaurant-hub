@@ -1,4 +1,5 @@
 import { z } from "zod"
+
 import { dishes, dishVariants, eq, recipes } from "@/db"
 
 import { managerOnlyProcedure, publicProcedure, router } from "../index"
@@ -21,7 +22,7 @@ export const dishesRouter = router({
    * - Join with Recipe and Ingredient to compute isAvailable flag
    * - Dish is unavailable if any required ingredient has quantity = 0
    * - Filter by isAvailable if includeDisabled = false (default)
-   * 
+   *
    * T019: Extended with flag fields (isRecommended, isChefSpecial, isHidden, orderPriority)
    * and includeHidden filter
    */
@@ -80,7 +81,7 @@ export const dishesRouter = router({
 
       // Filter out disabled dishes if requested
       let filteredDishes = includeDisabled ? dishes : dishes.filter((dish) => dish.isAvailable)
-      
+
       // T019: Filter out hidden dishes unless includeHidden is true
       if (!includeHidden) {
         filteredDishes = filteredDishes.filter((dish) => !dish.isHidden)
@@ -93,7 +94,7 @@ export const dishesRouter = router({
    * T047: dishes.getById - Get dish details with recipe
    * Auth: Public
    * Contract: dishes-router.md Procedure 2
-   * 
+   *
    * T019: Extended with variants array and flag fields
    */
   getById: publicProcedure
@@ -199,7 +200,16 @@ export const dishesRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       const { db } = ctx
-      const { name, description, price, photoUrl, recipe, isRecommended, isChefSpecial, orderPriority } = input
+      const {
+        name,
+        description,
+        price,
+        photoUrl,
+        recipe,
+        isRecommended,
+        isChefSpecial,
+        orderPriority,
+      } = input
 
       // Validate all ingredient IDs exist
       for (const item of recipe) {
@@ -251,7 +261,7 @@ export const dishesRouter = router({
    * dishes.update - Update dish details
    * Auth: Manager only
    * Contract: dishes-router.md Procedure 4
-   * 
+   *
    * T052: Extended with flag fields (isRecommended, isChefSpecial, orderPriority)
    */
   update: managerOnlyProcedure
@@ -274,11 +284,24 @@ export const dishesRouter = router({
         isRecommended: z.boolean().optional(),
         isChefSpecial: z.boolean().optional(),
         orderPriority: z.number().int().min(0).max(100).optional(),
+        // T081: Add isHidden field for temporary item hiding
+        isHidden: z.boolean().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
       const { db } = ctx
-      const { dishId, name, description, price, photoUrl, recipe, isRecommended, isChefSpecial, orderPriority } = input
+      const {
+        dishId,
+        name,
+        description,
+        price,
+        photoUrl,
+        recipe,
+        isRecommended,
+        isChefSpecial,
+        orderPriority,
+        isHidden,
+      } = input
 
       const dish = await db.query.dishes.findFirst({
         where: (dishes, { eq }) => eq(dishes.id, dishId),
@@ -319,6 +342,11 @@ export const dishesRouter = router({
       if (orderPriority !== undefined) {
         updates.orderPriority = orderPriority
         updatedFields.push("orderPriority")
+      }
+      // T081: Add isHidden field update
+      if (isHidden !== undefined) {
+        updates.isHidden = isHidden
+        updatedFields.push("isHidden")
       }
 
       if (Object.keys(updates).length > 0) {
@@ -388,6 +416,57 @@ export const dishesRouter = router({
         dishId,
         isAvailable,
         updatedAt: new Date(),
+      }
+    }),
+
+  /**
+   * T083: dishes.toggleVisibility - Quick toggle for hiding/showing dishes
+   * Auth: Manager only
+   *
+   * Business Logic:
+   * - Toggles isHidden flag: NOT(isHidden)
+   * - Returns full updated dish data
+   */
+  toggleVisibility: managerOnlyProcedure
+    .input(
+      z.object({
+        dishId: z.number().int().positive(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { db } = ctx
+      const { dishId } = input
+
+      const dish = await db.query.dishes.findFirst({
+        where: (dishes, { eq }) => eq(dishes.id, dishId),
+      })
+
+      if (!dish) {
+        throw new Error(`Dish ID ${dishId} does not exist`)
+      }
+
+      // Toggle isHidden value
+      const newHiddenState = !dish.isHidden
+      await db.update(dishes).set({ isHidden: newHiddenState }).where(eq(dishes.id, dishId))
+
+      // Return updated dish data
+      const updatedDish = await db.query.dishes.findFirst({
+        where: (dishes, { eq }) => eq(dishes.id, dishId),
+      })
+
+      return {
+        id: updatedDish!.id,
+        name: updatedDish!.name,
+        description: updatedDish!.description,
+        price: updatedDish!.price,
+        photoUrl: updatedDish!.photoUrl,
+        isHidden: updatedDish!.isHidden,
+        isAvailable: updatedDish!.isAvailable,
+        isRecommended: updatedDish!.isRecommended,
+        isChefSpecial: updatedDish!.isChefSpecial,
+        orderPriority: updatedDish!.orderPriority,
+        createdAt: updatedDish!.createdAt,
+        updatedAt: updatedDish!.updatedAt,
       }
     }),
 

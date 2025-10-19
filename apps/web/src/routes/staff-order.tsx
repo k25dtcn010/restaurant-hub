@@ -21,6 +21,8 @@ import { queryClient, trpc, trpcClient } from "@/utils/trpc"
  *
  * Auth Guard: research.md Section 5 Access Control Matrix - Waiter or Manager access
  * Plan Reference: plan.md Task 4.1 - Build staff order creation UI
+ *
+ * T088: Extended to allow staff to add hidden dishes with confirmation
  */
 
 export const Route = createFileRoute("/staff-order")({
@@ -65,10 +67,11 @@ function RouteComponent() {
   // Fetch all tables
   const { data: tablesData, isLoading: tablesLoading } = useQuery(trpc.tables.getAll.queryOptions())
 
-  // Fetch dishes
+  // T088: Fetch dishes - include hidden dishes for staff to manually add if needed (e.g., phone orders)
   const { data: dishesData, isLoading: dishesLoading } = useQuery(
     trpc.dishes.getAll.queryOptions({
       includeDisabled: false,
+      includeHidden: true,
     })
   )
 
@@ -227,6 +230,7 @@ function RouteComponent() {
               isLoading={dishesLoading}
               onAddToCart={handleAddToCart}
               cartItems={cartQuantities}
+              requireHiddenConfirmation={true}
             />
           </div>
 
