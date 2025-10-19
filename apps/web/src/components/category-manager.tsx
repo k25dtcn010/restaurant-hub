@@ -1,5 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { Edit, Eye, EyeOff, Plus, Trash2 } from "lucide-react"
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import type { DragEndEvent } from "@dnd-kit/core"
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { Edit, Eye, EyeOff, GripVertical, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -26,7 +30,7 @@ import {
 import { trpc, trpcClient } from "@/utils/trpc"
 
 /**
- * T055: CategoryManager Component
+ * T055 & T057: CategoryManager Component
  * Manager-only UI for creating, editing, and managing categories
  *
  * Features:
@@ -35,6 +39,7 @@ import { trpc, trpcClient } from "@/utils/trpc"
  * - Edit Form: Pre-populated modal for updating categories
  * - Toggle Visibility: Show/hide categories from customer view
  * - Display dish count for each category
+ * - T057: Drag-and-drop reordering with @dnd-kit
  *
  * Dependencies: Backend categories router (T046-T051)
  */
@@ -43,6 +48,104 @@ interface CategoryFormData {
   name: string
   displayOrder: number
   iconUrl?: string | null
+}
+
+interface Category {
+  id: number
+  name: string
+  displayOrder: number
+  iconUrl: string | null
+  isHidden: boolean
+  dishCount: number
+}
+
+/**
+ * T057: SortableRow Component for drag-and-drop
+ */
+function SortableRow({ 
+  category, 
+  onEdit, 
+  onToggleVisibility 
+}: { 
+  category: Category
+  onEdit: (category: Category) => void
+  onToggleVisibility: (id: number, currentIsHidden: boolean) => void
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      <TableCell className="w-[50px]">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {category.iconUrl && (
+            <span className="text-lg">{category.iconUrl}</span>
+          )}
+          <span className="font-medium">{category.name}</span>
+          {category.isHidden && (
+            <Badge variant="secondary" className="ml-2">
+              Hidden
+            </Badge>
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="text-center">{category.displayOrder}</TableCell>
+      <TableCell className="text-center">
+        <Badge variant="outline">{category.dishCount} dishes</Badge>
+      </TableCell>
+      <TableCell className="text-center">
+        {category.isHidden ? (
+          <Badge variant="secondary">Hidden</Badge>
+        ) : (
+          <Badge variant="default">Visible</Badge>
+        )}
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onToggleVisibility(category.id, category.isHidden)}
+            title={category.isHidden ? "Show to customers" : "Hide from customers"}
+          >
+            {category.isHidden ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(category)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  )
 }
 
 export function CategoryManager() {
@@ -111,6 +214,28 @@ export function CategoryManager() {
     },
   })
 
+  // T057: Reorder mutation for drag-and-drop
+  const reorderCategories = useMutation({
+    mutationFn: (categoryOrders: Array<{ id: number; displayOrder: number }>) =>
+      trpcClient.categories.reorder.mutate({ categoryOrders }),
+    onSuccess: () => {
+      toast.success("Categories reordered successfully")
+      refetch()
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to reorder categories: ${error.message}`)
+    },
+  })
+
+  // T057: Drag-and-drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required to start drag
+      },
+    })
+  )
+
   const resetForm = () => {
     setName("")
     setDisplayOrder("")
@@ -171,6 +296,37 @@ export function CategoryManager() {
     })
   }
 
+  // T057: Handle drag end event
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over || active.id === over.id || !categories) {
+      return
+    }
+
+    // Find the indices
+    const oldIndex = categories.findIndex((cat: any) => cat.id === active.id)
+    const newIndex = categories.findIndex((cat: any) => cat.id === over.id)
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return
+    }
+
+    // Create new order array
+    const reorderedCategories = [...categories]
+    const [movedCategory] = reorderedCategories.splice(oldIndex, 1)
+    reorderedCategories.splice(newIndex, 0, movedCategory)
+
+    // Update displayOrder for all categories
+    const categoryOrders = reorderedCategories.map((cat: any, index: number) => ({
+      id: cat.id,
+      displayOrder: index,
+    }))
+
+    // Call reorder mutation
+    reorderCategories.mutate(categoryOrders)
+  }
+
   if (isLoading) {
     return (
       <Card>
@@ -202,70 +358,39 @@ export function CategoryManager() {
       </CardHeader>
       <CardContent>
         {categories && categories.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead className="text-center">Display Order</TableHead>
-                <TableHead className="text-center">Dishes</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categories.map((category: any) => (
-                <TableRow key={category.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {category.iconUrl && (
-                        <span className="text-lg">{category.iconUrl}</span>
-                      )}
-                      <span className="font-medium">{category.name}</span>
-                      {category.isHidden && (
-                        <Badge variant="secondary" className="ml-2">
-                          Hidden
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">{category.displayOrder}</TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant="outline">{category.dishCount} dishes</Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {category.isHidden ? (
-                      <Badge variant="secondary">Hidden</Badge>
-                    ) : (
-                      <Badge variant="default">Visible</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleToggleVisibility(category.id, category.isHidden)}
-                        title={category.isHidden ? "Show to customers" : "Hide from customers"}
-                      >
-                        {category.isHidden ? (
-                          <Eye className="h-4 w-4" />
-                        ) : (
-                          <EyeOff className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleOpenEditDialog(category)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]"></TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="text-center">Display Order</TableHead>
+                  <TableHead className="text-center">Dishes</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <SortableContext
+                items={categories.map((cat: any) => cat.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <TableBody>
+                  {categories.map((category: any) => (
+                    <SortableRow
+                      key={category.id}
+                      category={category}
+                      onEdit={handleOpenEditDialog}
+                      onToggleVisibility={handleToggleVisibility}
+                    />
+                  ))}
+                </TableBody>
+              </SortableContext>
+            </Table>
+          </DndContext>
         ) : (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">No categories found</p>

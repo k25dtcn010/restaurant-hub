@@ -709,10 +709,10 @@
   - **File**: `apps/web/src/routes/menu-management.tsx`
   - **Integration**: Render CategoryManager component in new tab
 
-- [ ] T057 Implement drag-and-drop category reordering
+- [X] T057 Implement drag-and-drop category reordering
   - **File**: `apps/web/src/components/category-manager.tsx`
-  - **Library**: react-beautiful-dnd or @dnd-kit
-  - **Updates**: displayOrder field on drop
+  - **Library**: @dnd-kit (core, sortable, utilities)
+  - **Updates**: displayOrder field on drop using categories.reorder API
 
 - [X] T058 Add category assignment to dish editor
   - **File**: `apps/web/src/components/dish-editor.tsx`
