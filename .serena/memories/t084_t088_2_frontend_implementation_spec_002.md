@@ -3,6 +3,7 @@
 ## Tasks to Implement
 
 ### T084 [P] - Add "Hide"/"Show" toggle button to dish list
+
 - **File**: `apps/web/src/routes/menu-management.tsx`
 - **Component**: Modify dish card in the Dishes tab
 - **UI**: Eye icon button with tooltip
@@ -10,23 +11,27 @@
 - **Behavior**: Toggle icon shows current state (hidden/visible)
 
 ### T085 - Add "Hidden" badge to hidden dishes in manager view
+
 - **File**: `apps/web/src/routes/menu-management.tsx`
 - **Component**: Add badge in dish card header
 - **Styling**: Gray badge with "Hidden" text
 - **Visual**: Dish appears dimmed/muted when hidden
 
 ### T086 - Create "Hidden Items" quick-access section
+
 - **File**: `apps/web/src/routes/menu-management.tsx`
 - **Location**: Menu management dashboard (Dishes tab)
 - **Display**: List of currently hidden dishes with one-click "Show" buttons
 - **Filter**: `dishes.list({ includeHidden: true }).filter(d => d.isHidden)`
 
 ### T087 - Update menu query to exclude hidden dishes
+
 - **File**: `apps/web/src/routes/index.tsx` (public menu)
 - **Change**: Update query from `{ includeDisabled: false }` to `{ includeDisabled: false, includeHidden: false }`
 - **Note**: The backend already filters out hidden dishes by default
 
 ### T088 - Add hidden dish warning in manual order creation
+
 - **File**: `apps/web/src/components/menu-list.tsx`
 - **Component**: Modify MenuList component to show warning for hidden dishes
 - **UI**: Warning badge with ⚠️ icon for hidden dishes
@@ -34,10 +39,12 @@
 - **tRPC**: Use `dishes.getAll({ includeHidden: true })` in staff-order.tsx to access all dishes
 
 ### T088.1 - Test: Hide dish → customer can't see → manager can re-enable
+
 - Integration test file
 - Test workflow: Hide → verify customer menu excludes → verify manager sees badge → re-enable
 
 ### T088.2 - Test: Historical orders with now-hidden dishes still display correctly
+
 - Validation test file
 - Ensure historical orders show dish details even if dish is now hidden
 

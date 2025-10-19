@@ -23,6 +23,7 @@ bun run db:migrate   # Apply migration to database
 ```
 
 **Expected Output**:
+
 ```
 ✓ Migration 0002_advanced_ops.sql applied successfully
 ✓ Created tables: modifiers, modifier_groups, dish_modifiers, order_item_modifiers, categories, dish_categories, dish_variants, variant_recipes, operating_hours, reservations, shifts, shift_staff
@@ -39,6 +40,7 @@ bun run src/seed-advanced-ops.ts  # New seed script for this feature
 ```
 
 **Seeded Data**:
+
 - 20 modifiers (e.g., "Extra Cheese +$2", "No Onions $0", "Spicy +$1")
 - 5 modifier groups (e.g., "Toppings", "Preparation", "Size")
 - 6 categories (e.g., "Appetizers", "Main Course", "Desserts", "Beverages")
@@ -344,6 +346,7 @@ bun run src/seed-advanced-ops.ts  # New seed script for this feature
 ## Testing Checklist
 
 ### Modifiers
+
 - [ ] Create modifier with positive price adjustment
 - [ ] Create modifier with zero price adjustment (free customization)
 - [ ] Create modifier with negative price adjustment (discount)
@@ -355,6 +358,7 @@ bun run src/seed-advanced-ops.ts  # New seed script for this feature
 - [ ] Modifier becomes unavailable when ingredient depleted
 
 ### Categories
+
 - [ ] Create multiple categories with display order
 - [ ] Assign dishes to categories (many-to-many)
 - [ ] Customer browses menu by category
@@ -362,23 +366,27 @@ bun run src/seed-advanced-ops.ts  # New seed script for this feature
 - [ ] Re-enable category → verify appears in customer menu
 
 ### Variants
+
 - [ ] Create dish with variants (Small/Medium/Large)
 - [ ] Customer selects variant → price updates
 - [ ] Customer adds modifiers to variant → total = variant price + modifiers
 - [ ] Order displays variant name in kitchen dashboard
 
 ### Flags
+
 - [ ] Mark dish as "Recommended" → badge appears in menu
 - [ ] Mark dish as "Chef's Special" → distinct badge appears
 - [ ] Set high order priority → dish appears first in kitchen queue
 
 ### Hiding
+
 - [ ] Hide dish → not visible in customer menu
 - [ ] Hidden dish visible in manager dashboard with badge
 - [ ] Staff can manually add hidden dish to order
 - [ ] Re-enable dish → appears in customer menu within 5 seconds
 
 ### Reservations
+
 - [ ] Configure operating hours for all days
 - [ ] Customer submits reservation (valid date/time)
 - [ ] Customer submits reservation for past date → error
@@ -392,6 +400,7 @@ bun run src/seed-advanced-ops.ts  # New seed script for this feature
 - [ ] Check availability for date/time → suggests alternative times if full
 
 ### Shifts
+
 - [ ] Start shift with standard type (Breakfast/Lunch/Dinner)
 - [ ] Start shift with custom type name
 - [ ] Orders auto-tagged with current shift ID

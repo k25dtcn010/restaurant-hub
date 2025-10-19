@@ -58,17 +58,17 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
   const [photoUrl, setPhotoUrl] = useState(dish?.photoUrl || "")
   const [recipe, setRecipe] = useState<RecipeItem[]>([])
   const [selectedModifiers, setSelectedModifiers] = useState<SelectedModifier[]>([])
-  
+
   // T059: Flag fields
   const [isRecommended, setIsRecommended] = useState(dish?.isRecommended || false)
   const [isChefSpecial, setIsChefSpecial] = useState(dish?.isChefSpecial || false)
   const [orderPriority, setOrderPriority] = useState(
     dish?.orderPriority !== undefined ? dish.orderPriority.toString() : "0"
   )
-  
+
   // T058: Category assignment
   const [selectedCategories, setSelectedCategories] = useState<number[]>([])
-  
+
   // T075: Variant toggle
   const [hasVariants, setHasVariants] = useState(false)
 
@@ -87,12 +87,12 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
   const { data: allModifiers } = useQuery({
     ...trpc.modifiers.list.queryOptions({ availableOnly: false }),
   })
-  
+
   // T058: Query all categories for assignment
   const { data: allCategories } = useQuery({
     ...trpc.categories.list.queryOptions({ visibleOnly: false }),
   })
-  
+
   // T058: Query current dish's categories when editing
   const { data: dishCategories } = useQuery({
     ...trpc.categories.listDishes.queryOptions({ categoryId: 0 }), // Will be filtered client-side
@@ -110,7 +110,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
     ...trpc.dishes.getById.queryOptions({ dishId: dish?.id || 0 }),
     enabled: isEditing,
   })
-  
+
   // T076: Load existing variants for editing
   const { data: variantsData, refetch: refetchVariants } = useQuery({
     ...trpc.dishes.listVariants.queryOptions({ dishId: dish?.id || 0 }),
@@ -127,7 +127,11 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
       )
     }
     // T075: Set hasVariants based on existing variants
-    if (dishDetails?.variants && Array.isArray(dishDetails.variants) && dishDetails.variants.length > 0) {
+    if (
+      dishDetails?.variants &&
+      Array.isArray(dishDetails.variants) &&
+      dishDetails.variants.length > 0
+    ) {
       setHasVariants(true)
     }
   }, [dishDetails])
@@ -176,7 +180,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
           console.error("Error assigning categories:", error)
         }
       }
-      
+
       // Assign modifiers after dish creation
       if (selectedModifiers.length > 0) {
         for (const modifier of selectedModifiers) {
@@ -218,7 +222,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
           }
         }
       }
-      
+
       // Note: Modifier assignments are updated separately for now
       // In a full implementation, we would diff and update assignments
       if (dish && selectedModifiers.length > 0) {
@@ -427,16 +431,14 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
             {/* T059: Dish Flags */}
             <div className="space-y-4 border rounded-md p-4">
               <Label className="text-base font-semibold">Dish Flags & Priority</Label>
-              
+
               {/* Recommended Toggle */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="isRecommended" className="cursor-pointer">
                     Recommended 👍
                   </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Show thumbs-up badge to customers
-                  </p>
+                  <p className="text-xs text-muted-foreground">Show thumbs-up badge to customers</p>
                 </div>
                 <Checkbox
                   id="isRecommended"
@@ -451,9 +453,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                   <Label htmlFor="isChefSpecial" className="cursor-pointer">
                     Chef's Special ⭐
                   </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Show star badge to customers
-                  </p>
+                  <p className="text-xs text-muted-foreground">Show star badge to customers</p>
                 </div>
                 <Checkbox
                   id="isChefSpecial"

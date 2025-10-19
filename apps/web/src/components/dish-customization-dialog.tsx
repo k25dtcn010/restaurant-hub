@@ -1,8 +1,7 @@
+import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 
-import { ModifierSelector } from "@/components/modifier-selector"
-import type { SelectedModifier } from "@/components/modifier-selector"
-import { VariantSelector } from "@/components/variant-selector"
+import { ModifierSelector, type SelectedModifier } from "@/components/modifier-selector"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -12,17 +11,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { useQuery } from "@tanstack/react-query"
+import { VariantSelector } from "@/components/variant-selector"
 import { trpc } from "@/utils/trpc"
 
 /**
- * T040: DishCustomizationDialog Component  
+ * T040: DishCustomizationDialog Component
  * Integrates modifier selection into dish detail/order flow
- * 
+ *
  * T042: Adds special request text input to dish customization
- * 
+ *
  * T077-T079: Adds variant selection with pricing
- * 
+ *
  * Features:
  * - Modal dialog for customizing dishes before adding to cart
  * - Variant selection (T077-T078)
@@ -86,7 +85,13 @@ export function DishCustomizationDialog({
       return
     }
 
-    onAddToCart(dish.id, quantity, selectedModifiers, specialRequest.trim(), selectedVariantId || undefined)
+    onAddToCart(
+      dish.id,
+      quantity,
+      selectedModifiers,
+      specialRequest.trim(),
+      selectedVariantId || undefined
+    )
     handleClose()
   }
 

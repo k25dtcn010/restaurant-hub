@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { Clock } from "lucide-react"
+import { Clock, Menu, X } from "lucide-react"
+import { useState } from "react"
+
+import type { ActiveShift } from "@/types/shifts"
+import { trpc } from "@/utils/trpc"
 
 import { ModeToggle } from "./mode-toggle"
-import UserMenu from "./user-menu"
 import { Badge } from "./ui/badge"
-import { trpc } from "@/utils/trpc"
+import { Button } from "./ui/button"
+import UserMenu from "./user-menu"
 
 /**
  * T083: Add authentication guards to protected routes
@@ -15,9 +19,15 @@ import { trpc } from "@/utils/trpc"
  * T129: Display active shift indicator in header
  * UI: Badge in header showing "Shift: Lunch (3h 24m)" for staff awareness
  * Click: Navigate to shifts page
+ *
+ * T133: Update main menu navigation
+ * Add responsive mobile menu with proper organization
+ * Links: Categories, Modifiers (in Menu Management), Reservations (future), Shifts (manager/staff only)
  */
 
 export default function Header() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
   const links = [
     { to: "/", label: "Home" },
     { to: "/dashboard", label: "Dashboard" },
@@ -35,7 +45,7 @@ export default function Header() {
     refetchInterval: 30000, // Poll every 30 seconds
   })
 
-  const activeShift = activeShifts?.[0] || null
+  const activeShift: ActiveShift | null = (activeShifts?.[0] as unknown as ActiveShift) || null
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60)
@@ -46,22 +56,37 @@ export default function Header() {
   return (
     <div>
       <div className="flex flex-row items-center justify-between px-2 py-1">
-        <nav className="flex gap-4 text-lg">
+        {/* Desktop Navigation - Hidden on mobile */}
+        <nav className="hidden md:flex gap-4 text-lg">
           {links.map(({ to, label }) => {
             return (
-              <Link key={to} to={to}>
+              <Link key={to} to={to} className="hover:underline">
                 {label}
               </Link>
             )
           })}
         </nav>
+
+        {/* Mobile Menu Button - Visible only on mobile */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+
         <div className="flex items-center gap-2">
           {/* T129: Active Shift Indicator */}
           {activeShift && (
             <Link to="/shifts">
               <Badge variant="default" className="cursor-pointer hover:opacity-80">
                 <Clock className="h-3 w-3 mr-1" />
-                Shift: {activeShift.shiftType} ({formatDuration(activeShift.duration)})
+                <span className="hidden sm:inline">
+                  Shift: {activeShift.shiftType} ({formatDuration(activeShift.duration)})
+                </span>
+                <span className="sm:hidden">{activeShift.shiftType}</span>
               </Badge>
             </Link>
           )}
@@ -69,6 +94,25 @@ export default function Header() {
           <UserMenu />
         </div>
       </div>
+
+      {/* Mobile Navigation Menu - Slides down when open */}
+      {isMobileMenuOpen && (
+        <nav className="md:hidden flex flex-col gap-2 px-4 py-3 bg-muted/50">
+          {links.map(({ to, label }) => {
+            return (
+              <Link
+                key={to}
+                to={to}
+                className="px-3 py-2 rounded hover:bg-muted text-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {label}
+              </Link>
+            )
+          })}
+        </nav>
+      )}
+
       <hr />
     </div>
   )

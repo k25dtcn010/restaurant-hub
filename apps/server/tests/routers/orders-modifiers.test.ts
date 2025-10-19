@@ -1,19 +1,20 @@
-import { beforeAll, afterAll, beforeEach, afterEach, describe, expect, test } from "bun:test"
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from "bun:test"
+
+import type { Context } from "@/api/context"
+import { appRouter } from "@/api/routers"
 import {
   db,
   dishes,
-  eq,
-  modifiers,
-  modifierGroups,
   dishModifiers,
+  eq,
+  modifierGroups,
+  modifiers,
   orderItemModifiers,
   orderItems,
   orders,
   tables,
 } from "@/db"
 
-import type { Context } from "@/api/context"
-import { appRouter } from "@/api/routers"
 import { mockWsNotifier } from "../setup"
 
 /**
@@ -136,10 +137,7 @@ describe("Orders Router - T031-T034: Order Modifiers Integration", () => {
     // Assign modifiers to dish
     const existingAssignment1 = await db.query.dishModifiers.findFirst({
       where: (dishModifiers, { and, eq }) =>
-        and(
-          eq(dishModifiers.dishId, testDishId),
-          eq(dishModifiers.modifierId, testModifier1Id)
-        ),
+        and(eq(dishModifiers.dishId, testDishId), eq(dishModifiers.modifierId, testModifier1Id)),
     })
 
     if (!existingAssignment1) {
@@ -152,10 +150,7 @@ describe("Orders Router - T031-T034: Order Modifiers Integration", () => {
 
     const existingAssignment2 = await db.query.dishModifiers.findFirst({
       where: (dishModifiers, { and, eq }) =>
-        and(
-          eq(dishModifiers.dishId, testDishId),
-          eq(dishModifiers.modifierId, testModifier2Id)
-        ),
+        and(eq(dishModifiers.dishId, testDishId), eq(dishModifiers.modifierId, testModifier2Id)),
     })
 
     if (!existingAssignment2) {
@@ -435,8 +430,7 @@ describe("Orders Router - T031-T034: Order Modifiers Integration", () => {
 
       // Check orderItemModifiers table
       const savedModifiers = await db.query.orderItemModifiers.findMany({
-        where: (orderItemModifiers, { eq }) =>
-          eq(orderItemModifiers.orderItemId, orderItem!.id),
+        where: (orderItemModifiers, { eq }) => eq(orderItemModifiers.orderItemId, orderItem!.id),
       })
 
       expect(savedModifiers.length).toBe(1)
@@ -475,8 +469,7 @@ describe("Orders Router - T031-T034: Order Modifiers Integration", () => {
       })
 
       const savedModifiers = await db.query.orderItemModifiers.findMany({
-        where: (orderItemModifiers, { eq }) =>
-          eq(orderItemModifiers.orderItemId, orderItem!.id),
+        where: (orderItemModifiers, { eq }) => eq(orderItemModifiers.orderItemId, orderItem!.id),
       })
 
       expect(savedModifiers.length).toBe(2)

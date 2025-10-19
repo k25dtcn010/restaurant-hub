@@ -28,21 +28,15 @@ export default defineConfig({
           // Separate vendor chunks for better caching
           react: ["react", "react-dom"],
           router: ["@tanstack/react-router"],
-          trpc: ["@trpc/client", "@trpc/react-query"],
-          ui: ["@radix-ui/react-dropdown-menu", "@radix-ui/react-slot"],
+          trpc: ["@trpc/client", "@trpc/tanstack-react-query"],
+          ui: ["@radix-ui/react-slot", "@radix-ui/react-dialog"],
         },
       },
     },
     // Target modern browsers for smaller bundle size
     target: "es2022",
-    // Minify with terser for better compression
-    minify: "terser",
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console.log in production
-        dead_code: true,
-      },
-    },
+    // Minify with esbuild (built into Vite)
+    minify: "esbuild",
     // Warn if chunk size exceeds 500KB
     chunkSizeWarningLimit: 500,
   },

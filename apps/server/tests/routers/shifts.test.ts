@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
-import { db, eq, shiftStaff, shifts, user } from "@/db"
+import { db, eq, shifts, shiftStaff, user } from "@/db"
 
 import { mockWsNotifier } from "../setup"
 

@@ -1,19 +1,33 @@
 import { beforeAll, describe, expect, test } from "bun:test"
-import { db, dishes, eq, ingredients, orderItems, orders, payments, recipes, shiftStaff, shifts, tables, user } from "@/db"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
+import {
+  db,
+  dishes,
+  eq,
+  ingredients,
+  orderItems,
+  orders,
+  payments,
+  recipes,
+  shifts,
+  shiftStaff,
+  tables,
+  user,
+} from "@/db"
+
 import { mockWsNotifier } from "../setup"
 
 /**
  * T132.1: Integration test - Shift lifecycle end-to-end
- * 
+ *
  * This test validates the complete shift management workflow:
  * 1. Manager starts a shift with staff assignments
  * 2. Orders are created during the shift (auto-tagged with shift ID)
  * 3. Manager ends the shift
  * 4. Summary is calculated correctly (order count, revenue)
- * 
+ *
  * Tests the integration between shifts and orders routers following
  * User Story 6 specification.
  */
@@ -156,9 +170,11 @@ describe("Integration: Shift Lifecycle End-to-End (T132.1)", () => {
           })
           .onConflictDoNothing()
           .returning()
-        testIngredientId = ingredient?.id || (await db.query.ingredients.findFirst({
-          where: (ingredients, { eq }) => eq(ingredients.name, "Shift Test Ingredient"),
-        }))!.id
+        testIngredientId =
+          ingredient?.id ||
+          (await db.query.ingredients.findFirst({
+            where: (ingredients, { eq }) => eq(ingredients.name, "Shift Test Ingredient"),
+          }))!.id
       } else {
         testIngredientId = existingIngredient.id
       }
@@ -175,17 +191,22 @@ describe("Integration: Shift Lifecycle End-to-End (T132.1)", () => {
           })
           .onConflictDoNothing()
           .returning()
-        testDishId = dish?.id || (await db.query.dishes.findFirst({
-          where: (dishes, { eq }) => eq(dishes.name, "Shift Test Dish"),
-        }))!.id
+        testDishId =
+          dish?.id ||
+          (await db.query.dishes.findFirst({
+            where: (dishes, { eq }) => eq(dishes.name, "Shift Test Dish"),
+          }))!.id
 
         // Create recipe if dish was just created
         if (dish) {
-          await db.insert(recipes).values({
-            dishId: testDishId,
-            ingredientId: testIngredientId,
-            quantityRequired: 0.5,
-          }).onConflictDoNothing()
+          await db
+            .insert(recipes)
+            .values({
+              dishId: testDishId,
+              ingredientId: testIngredientId,
+              quantityRequired: 0.5,
+            })
+            .onConflictDoNothing()
         }
       } else {
         testDishId = existingDish.id
@@ -212,8 +233,8 @@ describe("Integration: Shift Lifecycle End-to-End (T132.1)", () => {
     expect(result.totalOrders).toBeNull()
     expect(result.totalRevenue).toBeNull()
     expect(result.staff).toHaveLength(2)
-    expect(result.staff.map(s => s.id)).toContain("shift-staff-1")
-    expect(result.staff.map(s => s.id)).toContain("shift-staff-2")
+    expect(result.staff.map((s) => s.id)).toContain("shift-staff-1")
+    expect(result.staff.map((s) => s.id)).toContain("shift-staff-2")
   })
 
   test("Step 2: Orders created during shift are auto-tagged with shift ID", async () => {
@@ -276,7 +297,7 @@ describe("Integration: Shift Lifecycle End-to-End (T132.1)", () => {
     const caller = appRouter.createCaller(managerContext)
 
     const activeShifts = await caller.shifts.listActive()
-    const currentShift = activeShifts.find(s => s.id === testShiftId)
+    const currentShift = activeShifts.find((s) => s.id === testShiftId)
 
     expect(currentShift).toBeDefined()
     expect(currentShift!.currentOrderCount).toBe(2)
@@ -293,12 +314,12 @@ describe("Integration: Shift Lifecycle End-to-End (T132.1)", () => {
       await managerCaller.orders.updateStatus({ orderId, newStatus: "ReadyToServe" })
       await managerCaller.orders.updateStatus({ orderId, newStatus: "Served" })
       await managerCaller.orders.updateStatus({ orderId, newStatus: "Completed" })
-      
+
       // Get order total amount for payment
       const order = await db.query.orders.findFirst({
         where: eq(orders.id, orderId),
       })
-      
+
       // Process payment
       await managerCaller.payments.create({
         orderId,
@@ -332,22 +353,22 @@ describe("Integration: Shift Lifecycle End-to-End (T132.1)", () => {
 
     // Verify summary is correct
     expect(result.totalOrders).toBe(2) // We created 2 orders
-    
+
     // Calculate expected revenue: 2 orders of (2 items * $15) + 1 order of (1 item * $15) = $60 + $15 = $75 = 7500 cents
-    const expectedRevenue = (2 * 1500) + (1 * 1500) // 3000 + 1500 = 4500 cents = $45
+    const expectedRevenue = 2 * 1500 + 1 * 1500 // 3000 + 1500 = 4500 cents = $45
     expect(result.totalRevenue).toBe(expectedRevenue)
 
     // Verify staff is included
     expect(result.staff).toHaveLength(2)
-    expect(result.staff.map(s => s.id)).toContain("shift-staff-1")
-    expect(result.staff.map(s => s.id)).toContain("shift-staff-2")
+    expect(result.staff.map((s) => s.id)).toContain("shift-staff-1")
+    expect(result.staff.map((s) => s.id)).toContain("shift-staff-2")
   })
 
   test("Step 6: Ended shift appears in history", async () => {
     const caller = appRouter.createCaller(managerContext)
 
     const history = await caller.shifts.listHistory({})
-    const endedShift = history.find(s => s.id === testShiftId)
+    const endedShift = history.find((s) => s.id === testShiftId)
 
     expect(endedShift).toBeDefined()
     expect(endedShift!.shiftType).toBe("Lunch")
@@ -371,7 +392,7 @@ describe("Integration: Shift Lifecycle End-to-End (T132.1)", () => {
     for (const orderId of testOrderIds) {
       await db.delete(payments).where(eq(payments.orderId, orderId))
     }
-    
+
     // Clean up orders
     for (const orderId of testOrderIds) {
       await db.delete(orderItems).where(eq(orderItems.orderId, orderId))
@@ -441,7 +462,11 @@ describe("Integration: Staff Management Mid-Shift (T132.2)", () => {
 
   const staffMgmtManagerContext: Context = {
     session: { userId: "staff-mgmt-manager-1" },
-    user: { id: "staff-mgmt-manager-1", email: "staff-mgmt-manager@test.com", name: "Staff Mgmt Manager" },
+    user: {
+      id: "staff-mgmt-manager-1",
+      email: "staff-mgmt-manager@test.com",
+      name: "Staff Mgmt Manager",
+    },
     role: "Manager",
     db,
     wsNotifier: mockWsNotifier,
@@ -478,12 +503,12 @@ describe("Integration: Staff Management Mid-Shift (T132.2)", () => {
     const caller = appRouter.createCaller(staffMgmtManagerContext)
 
     const activeShifts = await caller.shifts.listActive()
-    const currentShift = activeShifts.find(s => s.id === testShiftId)
+    const currentShift = activeShifts.find((s) => s.id === testShiftId)
 
     expect(currentShift).toBeDefined()
     expect(currentShift!.staff).toHaveLength(3)
-    
-    const staffIds = currentShift!.staff.map(s => s.id)
+
+    const staffIds = currentShift!.staff.map((s) => s.id)
     expect(staffIds).toContain("staff-mgmt-staff-1")
     expect(staffIds).toContain("staff-mgmt-staff-2")
     expect(staffIds).toContain("staff-mgmt-staff-3")
@@ -505,12 +530,12 @@ describe("Integration: Staff Management Mid-Shift (T132.2)", () => {
     const caller = appRouter.createCaller(staffMgmtManagerContext)
 
     const activeShifts = await caller.shifts.listActive()
-    const currentShift = activeShifts.find(s => s.id === testShiftId)
+    const currentShift = activeShifts.find((s) => s.id === testShiftId)
 
     expect(currentShift).toBeDefined()
     expect(currentShift!.staff).toHaveLength(2)
-    
-    const staffIds = currentShift!.staff.map(s => s.id)
+
+    const staffIds = currentShift!.staff.map((s) => s.id)
     expect(staffIds).toContain("staff-mgmt-staff-1")
     expect(staffIds).toContain("staff-mgmt-staff-3")
     expect(staffIds).not.toContain("staff-mgmt-staff-2") // This one was removed
@@ -527,9 +552,9 @@ describe("Integration: Staff Management Mid-Shift (T132.2)", () => {
 
     expect(result.success).toBe(true)
     // Should not increase count since already exists
-    
+
     const activeShifts = await caller.shifts.listActive()
-    const currentShift = activeShifts.find(s => s.id === testShiftId)
+    const currentShift = activeShifts.find((s) => s.id === testShiftId)
     expect(currentShift!.staff).toHaveLength(2) // Still 2, not 3
   })
 
@@ -541,7 +566,7 @@ describe("Integration: Staff Management Mid-Shift (T132.2)", () => {
     })
 
     expect(result.staff).toHaveLength(2)
-    const finalStaffIds = result.staff.map(s => s.id)
+    const finalStaffIds = result.staff.map((s) => s.id)
     expect(finalStaffIds).toContain("staff-mgmt-staff-1")
     expect(finalStaffIds).toContain("staff-mgmt-staff-3")
     expect(finalStaffIds).not.toContain("staff-mgmt-staff-2")

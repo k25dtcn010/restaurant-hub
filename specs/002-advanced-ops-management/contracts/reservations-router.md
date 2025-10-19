@@ -20,11 +20,13 @@ Get operating hours for all days of the week.
 **Auth**: Public
 
 **Input Schema**:
+
 ```typescript
 z.object({}) // no params
 ```
 
 **Output Schema**:
+
 ```typescript
 z.array(
   z.object({
@@ -38,6 +40,7 @@ z.array(
 ```
 
 **Logic**:
+
 - Return all operating hours records ordered by day of week
 - If no records exist, return empty array (initial setup state)
 
@@ -51,6 +54,7 @@ Update operating hours for a specific day.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   dayOfWeek: z.number().int().min(0).max(6),
@@ -67,6 +71,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -78,10 +83,12 @@ z.object({
 ```
 
 **Logic**:
+
 - Upsert operating hours for the specified day
 - Validate open < close time unless day is closed
 
 **Errors**:
+
 - `BAD_REQUEST` if openTime >= closeTime (when not closed)
 - `UNAUTHORIZED` if not manager
 
@@ -97,6 +104,7 @@ Create a new reservation (public form).
 **Auth**: None (public endpoint with rate limiting)
 
 **Input Schema**:
+
 ```typescript
 z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD
@@ -117,6 +125,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -132,6 +141,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate date is not in the past
 - Validate time is within operating hours for that day of week
 - Create reservation with status = "Pending"
@@ -139,6 +149,7 @@ z.object({
 - Apply rate limiting (max 5 requests per IP per hour)
 
 **Errors**:
+
 - `BAD_REQUEST` if date is in past or time is outside operating hours
 - `TOO_MANY_REQUESTS` if rate limit exceeded
 
@@ -152,16 +163,27 @@ List reservations with filtering.
 **Auth**: Staff or Manager
 
 **Input Schema**:
+
 ```typescript
 z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), // filter by date
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(), // filter by date
   status: z.enum(["Pending", "Confirmed", "Seated", "No-Show", "Cancelled", "Declined"]).optional(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), // date range start
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), // date range end
+  startDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(), // date range start
+  endDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(), // date range end
 })
 ```
 
 **Output Schema**:
+
 ```typescript
 z.array(
   z.object({
@@ -178,14 +200,17 @@ z.array(
     createdAt: z.date(),
     updatedAt: z.date(),
   })
-).transform((reservations) => reservations.sort((a, b) => {
-  const dateTimeA = new Date(`${a.date}T${a.time}`)
-  const dateTimeB = new Date(`${b.date}T${b.time}`)
-  return dateTimeA.getTime() - dateTimeB.getTime()
-}))
+).transform((reservations) =>
+  reservations.sort((a, b) => {
+    const dateTimeA = new Date(`${a.date}T${a.time}`)
+    const dateTimeB = new Date(`${b.date}T${b.time}`)
+    return dateTimeA.getTime() - dateTimeB.getTime()
+  })
+)
 ```
 
 **Logic**:
+
 - Filter by date (exact match) or date range (start/end)
 - Filter by status if provided
 - Order by date + time ASC
@@ -201,6 +226,7 @@ Confirm a pending reservation.
 **Auth**: Staff or Manager
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -209,6 +235,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -219,12 +246,14 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate reservation exists and status = "Pending"
 - Check table availability for reservation date/time (warn if conflicts)
 - Update status to "Confirmed"
 - Optionally assign tables
 
 **Errors**:
+
 - `NOT_FOUND` if reservation doesn't exist
 - `BAD_REQUEST` if status is not "Pending"
 - `CONFLICT` if assigned tables are already booked (soft warning, not error)
@@ -239,6 +268,7 @@ Decline a pending reservation.
 **Auth**: Staff or Manager
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -247,6 +277,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -257,6 +288,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate reservation exists and status = "Pending"
 - Update status to "Declined" with reason
 
@@ -270,6 +302,7 @@ Mark confirmed reservation as seated (customer arrived).
 **Auth**: Staff or Manager
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -277,6 +310,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -287,11 +321,13 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate reservation exists and status = "Confirmed"
 - Update status to "Seated"
 - Optionally create order session for assigned tables (future enhancement)
 
 **Errors**:
+
 - `NOT_FOUND` if reservation doesn't exist
 - `BAD_REQUEST` if status is not "Confirmed"
 
@@ -305,6 +341,7 @@ Mark confirmed reservation as no-show (customer didn't arrive).
 **Auth**: Staff or Manager
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -312,6 +349,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -321,6 +359,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate reservation exists and status = "Confirmed"
 - Update status to "No-Show"
 - Release assigned tables
@@ -335,6 +374,7 @@ Cancel a reservation (customer or staff initiated).
 **Auth**: Public (with reservation ID validation) or Staff/Manager
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -343,6 +383,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -352,12 +393,14 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate reservation exists
 - For customer cancellation: allow only if status = "Pending" or "Confirmed" and time is > 1 hour away
 - For staff cancellation: allow any time
 - Update status to "Cancelled"
 
 **Errors**:
+
 - `BAD_REQUEST` if customer tries to cancel within 1 hour of reservation time
 - `NOT_FOUND` if reservation doesn't exist
 
@@ -371,6 +414,7 @@ Check table availability for a given date/time/party size.
 **Auth**: Public
 
 **Input Schema**:
+
 ```typescript
 z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -380,21 +424,25 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   available: z.boolean(),
   suggestedTimes: z.array(z.string()).optional(), // alternative times if not available
-  availableTables: z.array(
-    z.object({
-      id: z.number(),
-      tableNumber: z.string(),
-      capacity: z.number(),
-    })
-  ).optional(),
+  availableTables: z
+    .array(
+      z.object({
+        id: z.number(),
+        tableNumber: z.string(),
+        capacity: z.number(),
+      })
+    )
+    .optional(),
 })
 ```
 
 **Logic**:
+
 - Query confirmed reservations for date/time ± 90 minutes (default reservation duration)
 - Count available tables with capacity >= party size
 - If no single table fits, suggest table combinations
@@ -409,6 +457,7 @@ z.object({
 Broadcast when new reservation submitted.
 
 **Payload**:
+
 ```typescript
 {
   type: "reservation:new",
@@ -432,6 +481,7 @@ Broadcast when new reservation submitted.
 Broadcast when reservation confirmed by staff.
 
 **Payload**:
+
 ```typescript
 {
   type: "reservation:confirmed",
@@ -446,13 +496,13 @@ Broadcast when reservation confirmed by staff.
 
 ## Error Codes
 
-| Code                | Scenario                                             |
-| ------------------- | ---------------------------------------------------- |
-| `UNAUTHORIZED`      | Non-staff/manager accessing restricted procedures    |
-| `BAD_REQUEST`       | Invalid input (past date, time outside hours, etc.)  |
-| `NOT_FOUND`         | Reservation ID doesn't exist                         |
-| `CONFLICT`          | Table availability conflict (soft warning)           |
-| `TOO_MANY_REQUESTS` | Rate limit exceeded on public reservation creation   |
+| Code                | Scenario                                            |
+| ------------------- | --------------------------------------------------- |
+| `UNAUTHORIZED`      | Non-staff/manager accessing restricted procedures   |
+| `BAD_REQUEST`       | Invalid input (past date, time outside hours, etc.) |
+| `NOT_FOUND`         | Reservation ID doesn't exist                        |
+| `CONFLICT`          | Table availability conflict (soft warning)          |
+| `TOO_MANY_REQUESTS` | Rate limit exceeded on public reservation creation  |
 
 ---
 

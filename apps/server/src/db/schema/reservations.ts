@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { integer, sqliteTable, text, index, unique } from "drizzle-orm/sqlite-core"
+import { index, integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core"
 
 // OperatingHours entity per data-model.md Section 6.1
 export const operatingHours = sqliteTable(

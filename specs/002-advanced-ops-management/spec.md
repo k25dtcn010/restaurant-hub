@@ -109,12 +109,12 @@ Customers can create reservations by specifying date, time, party size, and cont
 3. **Given** a pending reservation exists, **When** staff review and approve it, **Then** the reservation status changes to "Confirmed" and the customer contact information is used for any necessary follow-up
 4. **Given** a reservation is created, **When** staff view the reservations dashboard for a specific date, **Then** they see all confirmed reservations sorted by time with party size and contact info
 5. **Given** a reservation time is approaching (within 15 minutes), **When** staff check the dashboard, **Then** the confirmed reservation is highlighted or moved to an "Arriving Soon" section
-4. **Given** a customer with a reservation arrives, **When** staff mark the reservation as "Seated", **Then** the assigned table is automatically linked to a new order session
-5. **Given** a pending reservation exists, **When** staff determine it cannot be accommodated, **Then** they can decline it with an optional reason (e.g., "fully booked")
-6. **Given** a reservation exists for a specific time slot, **When** another customer tries to book the same time and table count exceeds available tables, **Then** the system suggests alternative times (30 minutes before/after)
-7. **Given** a customer calls to cancel a reservation, **When** staff cancel it in the system, **Then** the table becomes available for that time slot again
-8. **Given** a reservation is for 6 people, **When** staff assign a table, **Then** the system suggests tables with capacity >= party size and allows combining smaller tables
-9. **Given** a reservation is marked "No-Show" (not arrived within 15 minutes after scheduled time), **When** staff check availability, **Then** the table is released for walk-in customers
+6. **Given** a customer with a reservation arrives, **When** staff mark the reservation as "Seated", **Then** the assigned table is automatically linked to a new order session
+7. **Given** a pending reservation exists, **When** staff determine it cannot be accommodated, **Then** they can decline it with an optional reason (e.g., "fully booked")
+8. **Given** a reservation exists for a specific time slot, **When** another customer tries to book the same time and table count exceeds available tables, **Then** the system suggests alternative times (30 minutes before/after)
+9. **Given** a customer calls to cancel a reservation, **When** staff cancel it in the system, **Then** the table becomes available for that time slot again
+10. **Given** a reservation is for 6 people, **When** staff assign a table, **Then** the system suggests tables with capacity >= party size and allows combining smaller tables
+11. **Given** a reservation is marked "No-Show" (not arrived within 15 minutes after scheduled time), **When** staff check availability, **Then** the table is released for walk-in customers
 
 ---
 

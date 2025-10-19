@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import {
   Table,
@@ -203,7 +204,25 @@ export function ModifierManager() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading modifiers...</div>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center mb-4">
+              <Skeleton className="h-10 w-48" />
+              <Skeleton className="h-10 w-32" />
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 border rounded">
+                  <Skeleton className="h-5 flex-1" />
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-5 w-20" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         ) : !modifiers || modifiers.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             No modifiers found. Create your first modifier to get started.
@@ -237,11 +256,7 @@ export function ModifierManager() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(modifier.id)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(modifier.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -258,9 +273,7 @@ export function ModifierManager() {
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>
-                {editingModifier ? "Edit Modifier" : "Create Modifier"}
-              </DialogTitle>
+              <DialogTitle>{editingModifier ? "Edit Modifier" : "Create Modifier"}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
@@ -290,11 +303,7 @@ export function ModifierManager() {
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="available">Available</Label>
-                <Switch
-                  id="available"
-                  checked={isAvailable}
-                  onCheckedChange={setIsAvailable}
-                />
+                <Switch id="available" checked={isAvailable} onCheckedChange={setIsAvailable} />
               </div>
             </div>
             <DialogFooter>

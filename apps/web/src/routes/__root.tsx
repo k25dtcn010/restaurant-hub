@@ -22,7 +22,9 @@ import "../index.css"
  * T133: Error Boundary Component
  * Reference: research.md Section 9 - Error Handling and Validation
  *
+ * T135: Enhanced error boundary for all routes
  * Catches React errors and displays user-friendly messages
+ * Provides actionable guidance without exposing stack traces
  */
 interface ErrorBoundaryState {
   hasError: boolean
@@ -45,20 +47,65 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 
   render() {
     if (this.state.hasError) {
+      const errorMessage = this.state.error?.message || "An unexpected error occurred"
+      const isNetworkError =
+        errorMessage.toLowerCase().includes("network") ||
+        errorMessage.toLowerCase().includes("fetch")
+      const isAuthError =
+        errorMessage.toLowerCase().includes("unauthorized") ||
+        errorMessage.toLowerCase().includes("authentication")
+
       return (
-        <div className="flex items-center justify-center min-h-screen p-6">
-          <div className="max-w-md w-full text-center space-y-4">
-            <h1 className="text-2xl font-bold">Something went wrong</h1>
-            <p className="text-muted-foreground">
-              We encountered an unexpected error. Please try refreshing the page.
-            </p>
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
-              Refresh Page
-            </button>
+        <div className="flex items-center justify-center min-h-screen p-6 bg-background">
+          <div className="max-w-md w-full text-center space-y-6">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h1 className="text-3xl font-bold">Something went wrong</h1>
+            <div className="space-y-2">
+              <p className="text-muted-foreground">
+                {isNetworkError &&
+                  "Unable to connect to the server. Please check your internet connection."}
+                {isAuthError && "Your session may have expired. Please sign in again."}
+                {!isNetworkError &&
+                  !isAuthError &&
+                  "We encountered an unexpected error. Please try again."}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 font-medium"
+              >
+                Refresh Page
+              </button>
+              {isAuthError && (
+                <button
+                  type="button"
+                  onClick={() => (window.location.href = "/login")}
+                  className="px-6 py-3 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 font-medium"
+                >
+                  Go to Login
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => window.history.back()}
+                className="px-6 py-3 border border-border rounded-md hover:bg-accent font-medium"
+              >
+                Go Back
+              </button>
+            </div>
+            {process.env.NODE_ENV === "development" && this.state.error && (
+              <details className="mt-6 text-left">
+                <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                  Error Details (Development Only)
+                </summary>
+                <pre className="mt-2 p-4 bg-muted rounded text-xs overflow-auto max-h-40">
+                  {this.state.error.message}
+                  {this.state.error.stack && `\n\n${this.state.error.stack}`}
+                </pre>
+              </details>
+            )}
           </div>
         </div>
       )
@@ -75,23 +122,67 @@ export interface RouterAppContext {
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
-  errorComponent: ({ error }: { error: Error }) => (
-    <div className="flex items-center justify-center min-h-screen p-6">
-      <div className="max-w-md w-full text-center space-y-4">
-        <h1 className="text-2xl font-bold">Page Error</h1>
-        <p className="text-muted-foreground">
-          {error.message || "An error occurred while loading this page."}
-        </p>
-        <button
-          type="button"
-          onClick={() => window.history.back()}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-        >
-          Go Back
-        </button>
+  errorComponent: ({ error }: { error: Error }) => {
+    const errorMessage = error.message || "An error occurred while loading this page"
+    const isNotFound =
+      errorMessage.toLowerCase().includes("not found") || errorMessage.toLowerCase().includes("404")
+    const isUnauthorized =
+      errorMessage.toLowerCase().includes("unauthorized") ||
+      errorMessage.toLowerCase().includes("403")
+
+    return (
+      <div className="flex items-center justify-center min-h-screen p-6 bg-background">
+        <div className="max-w-md w-full text-center space-y-6">
+          <div className="text-6xl mb-4">{isNotFound ? "🔍" : isUnauthorized ? "🔒" : "⚠️"}</div>
+          <h1 className="text-3xl font-bold">
+            {isNotFound ? "Page Not Found" : isUnauthorized ? "Access Denied" : "Page Error"}
+          </h1>
+          <p className="text-muted-foreground">
+            {isNotFound && "The page you're looking for doesn't exist or has been moved."}
+            {isUnauthorized &&
+              "You don't have permission to access this page. Please sign in or contact an administrator."}
+            {!isNotFound && !isUnauthorized && errorMessage}
+          </p>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => (window.location.href = "/")}
+              className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 font-medium"
+            >
+              Go to Home
+            </button>
+            {isUnauthorized && (
+              <button
+                type="button"
+                onClick={() => (window.location.href = "/login")}
+                className="px-6 py-3 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 font-medium"
+              >
+                Sign In
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="px-6 py-3 border border-border rounded-md hover:bg-accent font-medium"
+            >
+              Go Back
+            </button>
+          </div>
+          {process.env.NODE_ENV === "development" && (
+            <details className="mt-6 text-left">
+              <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                Error Details (Development Only)
+              </summary>
+              <pre className="mt-2 p-4 bg-muted rounded text-xs overflow-auto max-h-40">
+                {error.message}
+                {error.stack && `\n\n${error.stack}`}
+              </pre>
+            </details>
+          )}
+        </div>
       </div>
-    </div>
-  ),
+    )
+  },
   head: () => ({
     meta: [
       {

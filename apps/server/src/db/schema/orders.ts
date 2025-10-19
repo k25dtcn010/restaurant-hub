@@ -3,8 +3,8 @@ import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 
 import { orderItems } from "./order-items"
 import { orderStatusHistory } from "./order-status-history"
-import { tables } from "./tables"
 import { shifts } from "./shifts"
+import { tables } from "./tables"
 
 // Order status enum per data-model.md Section 3
 export const orderStatuses = [

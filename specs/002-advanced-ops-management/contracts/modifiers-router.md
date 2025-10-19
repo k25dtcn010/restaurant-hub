@@ -20,6 +20,7 @@ List all modifiers with optional availability filtering.
 **Auth**: Public (customers see only available modifiers)
 
 **Input Schema** (Zod):
+
 ```typescript
 z.object({
   availableOnly: z.boolean().optional().default(false),
@@ -27,6 +28,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.array(
   z.object({
@@ -41,6 +43,7 @@ z.array(
 ```
 
 **Logic**:
+
 - If `availableOnly = true`, filter `WHERE isAvailable = true`
 - Return all modifiers with metadata
 
@@ -54,6 +57,7 @@ Create a new modifier.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   name: z.string().min(1).max(100),
@@ -63,6 +67,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -75,11 +80,13 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate user role = "manager" via Better-Auth context
 - Insert into `modifiers` table
 - Return created modifier
 
 **Errors**:
+
 - `UNAUTHORIZED` if not manager
 - `BAD_REQUEST` if name is duplicate (unique constraint)
 
@@ -93,6 +100,7 @@ Update an existing modifier.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -103,6 +111,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -114,11 +123,13 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate modifier exists
 - Update only provided fields
 - Return updated modifier
 
 **Errors**:
+
 - `NOT_FOUND` if modifier ID doesn't exist
 - `UNAUTHORIZED` if not manager
 
@@ -132,6 +143,7 @@ Delete a modifier (only if not assigned to any dishes).
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -139,6 +151,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   success: z.boolean(),
@@ -146,11 +159,13 @@ z.object({
 ```
 
 **Logic**:
+
 - Check if modifier is assigned to any dishes via `dish_modifiers`
 - If assigned, return error
 - Otherwise, delete from `modifiers` table
 
 **Errors**:
+
 - `BAD_REQUEST` if modifier is assigned to dishes (message: "Cannot delete modifier assigned to dishes")
 - `NOT_FOUND` if modifier ID doesn't exist
 
@@ -164,11 +179,13 @@ List all modifier groups.
 **Auth**: Public
 
 **Input Schema**:
+
 ```typescript
 z.object({}) // no params
 ```
 
 **Output Schema**:
+
 ```typescript
 z.array(
   z.object({
@@ -182,6 +199,7 @@ z.array(
 ```
 
 **Logic**:
+
 - Return all modifier groups ordered by `displayOrder ASC`
 
 ---
@@ -194,6 +212,7 @@ Create a new modifier group.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   name: z.string().min(1).max(100),
@@ -212,6 +231,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -223,6 +243,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate min <= max constraint
 - Insert into `modifier_groups` table
 - Return created group
@@ -237,6 +258,7 @@ Update an existing modifier group.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -256,6 +278,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -276,6 +299,7 @@ Delete a modifier group (only if not assigned to any dishes).
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -283,6 +307,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   success: z.boolean(),
@@ -290,6 +315,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Check if group is assigned to any dishes via `dish_modifiers`
 - If assigned, return error
 - Otherwise, delete from `modifier_groups` table
@@ -304,6 +330,7 @@ List all modifiers available for a specific dish, grouped by modifier group.
 **Auth**: Public
 
 **Input Schema**:
+
 ```typescript
 z.object({
   dishId: z.number(),
@@ -311,6 +338,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.array(
   z.object({
@@ -334,6 +362,7 @@ z.array(
 ```
 
 **Logic**:
+
 - Join `dish_modifiers` → `modifier_groups` → `modifiers`
 - Filter `WHERE dish_id = :dishId`
 - Group results by `modifier_groups.id`
@@ -349,6 +378,7 @@ Assign modifiers to a dish within a specific modifier group.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   dishId: z.number(),
@@ -358,6 +388,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   success: z.boolean(),
@@ -366,11 +397,13 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate dish and modifier group exist
 - Insert into `dish_modifiers` for each modifier ID
 - Ignore duplicates (upsert pattern)
 
 **Errors**:
+
 - `NOT_FOUND` if dish or modifier group doesn't exist
 - `BAD_REQUEST` if any modifier ID is invalid
 
@@ -384,6 +417,7 @@ Remove modifiers from a dish.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   dishId: z.number(),
@@ -392,6 +426,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   success: z.boolean(),
@@ -400,6 +435,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Delete from `dish_modifiers` where `dishId` and `modifierId` match
 - Return count of deleted rows
 
@@ -412,6 +448,7 @@ z.object({
 Broadcast when a modifier becomes unavailable (e.g., ingredient depleted).
 
 **Payload**:
+
 ```typescript
 {
   type: "modifier:unavailable",
@@ -426,12 +463,12 @@ Broadcast when a modifier becomes unavailable (e.g., ingredient depleted).
 
 ## Error Codes
 
-| Code            | Scenario                                      |
-| --------------- | --------------------------------------------- |
-| `UNAUTHORIZED`  | Non-manager attempting manager-only operation |
-| `BAD_REQUEST`   | Invalid input (e.g., min > max, duplicate)    |
-| `NOT_FOUND`     | Modifier/group ID doesn't exist               |
-| `CONFLICT`      | Cannot delete modifier assigned to dishes     |
+| Code           | Scenario                                      |
+| -------------- | --------------------------------------------- |
+| `UNAUTHORIZED` | Non-manager attempting manager-only operation |
+| `BAD_REQUEST`  | Invalid input (e.g., min > max, duplicate)    |
+| `NOT_FOUND`    | Modifier/group ID doesn't exist               |
+| `CONFLICT`     | Cannot delete modifier assigned to dishes     |
 
 ---
 

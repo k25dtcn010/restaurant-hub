@@ -1,11 +1,13 @@
 # T084->T088.2 Implementation Complete - Temporary Item Hiding Feature
 
 ## Summary
+
 Successfully implemented the complete frontend workflow for temporarily hiding dishes from customer view. All tasks marked complete and tested.
 
 ## Tasks Completed
 
 ### T084 ✅ Add "Hide"/"Show" toggle button to dish list
+
 - **Location**: `apps/web/src/routes/menu-management.tsx`
 - **Implementation**:
   - Added Eye/EyeOff icons from lucide-react to header of visible dish cards
@@ -15,6 +17,7 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
 - **Status**: PASS - Frontend renders toggle button correctly
 
 ### T085 ✅ Add "Hidden" badge to hidden dishes in manager view
+
 - **Location**: `apps/web/src/routes/menu-management.tsx` - Hidden Items section
 - **Implementation**:
   - Gray badge with "Hidden" text (bg-gray-500 text-white)
@@ -24,6 +27,7 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
 - **Status**: PASS - Manager can easily identify and restore hidden dishes
 
 ### T086 ✅ Create "Hidden Items" quick-access section
+
 - **Location**: `apps/web/src/routes/menu-management.tsx` - Menu Items tab
 - **Implementation**:
   - Dedicated "Hidden Items" section at top of dishes tab
@@ -34,6 +38,7 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
 - **Status**: PASS - Staff can quickly access and manage hidden items
 
 ### T087 ✅ Update public menu query to exclude hidden dishes
+
 - **Location**: `apps/web/src/routes/index.tsx` (public menu)
 - **Implementation**:
   - Changed query from `{ includeDisabled: false }` to `{ includeDisabled: false, includeHidden: false }`
@@ -42,6 +47,7 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
 - **Status**: PASS - Hidden dishes excluded from customer-facing menu
 
 ### T088 ✅ Add hidden dish warning in manual order creation
+
 - **Location**: `apps/web/src/routes/staff-order.tsx` + `apps/web/src/components/menu-list.tsx`
 - **Implementation**:
   - Updated `MenuList` component with `requireHiddenConfirmation` prop for staff mode
@@ -56,6 +62,7 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
   - Menu-list.tsx: New `requireHiddenConfirmation` prop, added Dialog component, handleAddToCart logic
 
 ### T088.1 ✅ Integration Test: Hide dish → customer can't see → manager can re-enable
+
 - **Location**: `apps/server/tests/integration/hiding-workflow.test.ts`
 - **Test Flow**:
   1. Create visible dish
@@ -68,6 +75,7 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
 - **Result**: ✅ ALL TESTS PASS (7/7 tests)
 
 ### T088.2 ✅ Integration Test: Historical orders with now-hidden dishes still display correctly
+
 - **Location**: `apps/server/tests/integration/hiding-workflow.test.ts`
 - **Test Flow**:
   1. Create test dish
@@ -83,6 +91,7 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
 ## Files Modified
 
 ### Frontend
+
 1. **apps/web/src/routes/menu-management.tsx** - NEW Complete implementation
    - Added Eye/EyeOff icon imports
    - Added toggleVisibility mutation
@@ -105,6 +114,7 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
    - Added confirmation dialog when staff tries to add hidden dish
 
 ### Backend (Tests)
+
 5. **apps/server/tests/integration/hiding-workflow.test.ts** - NEW
    - 16 comprehensive integration tests
    - Tests for T088.1 (hide/show workflow)
@@ -112,23 +122,27 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
    - All tests passing
 
 ## Backend Already Implemented (Previous Phase)
+
 - T081: dishes.update with isHidden field ✅
 - T082: dishes.getAll with includeHidden filtering ✅
 - T083: dishes.toggleVisibility procedure ✅
 
 ## Type Safety
+
 - All TypeScript checks pass (bun check-types)
 - Proper types for MenuList component
 - Dialog component correctly imported from shadcn/ui
 - Mutation types properly inferred from tRPC
 
 ## Testing Results
+
 - Type checking: ✅ PASS (no errors)
 - Integration tests: 16/16 PASS
 - Full test suite runs: 423 pass, 49 fail (unrelated to hiding feature)
 - Frontend builds: ✅ PASS
 
 ## Design Notes
+
 - Used existing Eye/EyeOff icons from lucide-react for consistency
 - Gray badge (#808080 equivalent) with "Hidden" text for clear identification
 - Confirmation dialog prevents accidental addition of hidden items
@@ -139,6 +153,7 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
 ## User Experience Flow
 
 ### Manager View
+
 1. Menu Management → Dishes tab shows two sections:
    - "Hidden Items" section (if any exist) at top
    - "Menu Items" section with visible dishes
@@ -147,23 +162,27 @@ Successfully implemented the complete frontend workflow for temporarily hiding d
 4. Clicking eye icon toggles visibility
 
 ### Customer View
+
 1. Public menu shows only visible dishes
 2. Hidden dishes completely absent from menu
 3. No indication that dishes were hidden
 
 ### Staff View (Order Creation)
+
 1. See all dishes including hidden (for phone/walk-in orders)
 2. Hidden dishes show with ⚠️ warning badge
 3. Clicking Add on hidden dish shows confirmation dialog
 4. Can confirm to add despite warning
 
 ## Backward Compatibility
+
 - Existing orders still display full dish details even if dish is now hidden
 - Historical data preserved, only visibility filtering changed
 - No database migrations needed (isHidden column already exists)
 - Existing functionality unaffected
 
 ## Security
+
 - Only Manager role can toggle visibility (protected by managerOnlyProcedure)
 - Staff/Waiter can add hidden dishes (intended for phone orders)
 - Public customers cannot see any hidden dishes

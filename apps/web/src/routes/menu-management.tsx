@@ -78,29 +78,103 @@ function RouteComponent() {
     }),
   })
 
-  // Mutation for toggling availability
+  // T136: Mutation for toggling availability with optimistic updates
   const toggleAvailability = useMutation({
     mutationFn: (variables: { dishId: number; isAvailable: boolean }) =>
       trpcClient.dishes.toggleAvailability.mutate(variables),
+    onMutate: async (variables) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: trpc.dishes.getAll.queryKey({ includeDisabled: true, includeHidden: true }),
+      })
+
+      // Snapshot previous value
+      const previousDishes = queryClient.getQueryData(
+        trpc.dishes.getAll.queryKey({ includeDisabled: true, includeHidden: true })
+      )
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(
+        trpc.dishes.getAll.queryKey({ includeDisabled: true, includeHidden: true }),
+        (old: any) => {
+          if (!old) return old
+          return {
+            ...old,
+            dishes: old.dishes.map((dish: any) =>
+              dish.id === variables.dishId ? { ...dish, isAvailable: variables.isAvailable } : dish
+            ),
+          }
+        }
+      )
+
+      return { previousDishes }
+    },
     onSuccess: () => {
       toast.success("Dish availability updated")
-      refetch()
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      // Rollback on error
+      if (context?.previousDishes) {
+        queryClient.setQueryData(
+          trpc.dishes.getAll.queryKey({ includeDisabled: true, includeHidden: true }),
+          context.previousDishes
+        )
+      }
       toast.error(`Failed to update availability: ${error.message}`)
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure sync
+      refetch()
     },
   })
 
-  // T084: Mutation for toggling visibility (hide/show)
+  // T136: Mutation for toggling visibility (hide/show) with optimistic updates
   const toggleVisibility = useMutation({
     mutationFn: (variables: { dishId: number }) =>
       trpcClient.dishes.toggleVisibility.mutate(variables),
+    onMutate: async (variables) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: trpc.dishes.getAll.queryKey({ includeDisabled: true, includeHidden: true }),
+      })
+
+      // Snapshot previous value
+      const previousDishes = queryClient.getQueryData(
+        trpc.dishes.getAll.queryKey({ includeDisabled: true, includeHidden: true })
+      )
+
+      // Optimistically toggle the visibility
+      queryClient.setQueryData(
+        trpc.dishes.getAll.queryKey({ includeDisabled: true, includeHidden: true }),
+        (old: any) => {
+          if (!old) return old
+          return {
+            ...old,
+            dishes: old.dishes.map((dish: any) =>
+              dish.id === variables.dishId ? { ...dish, isHidden: !dish.isHidden } : dish
+            ),
+          }
+        }
+      )
+
+      return { previousDishes }
+    },
     onSuccess: () => {
       toast.success("Dish visibility updated")
-      refetch()
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      // Rollback on error
+      if (context?.previousDishes) {
+        queryClient.setQueryData(
+          trpc.dishes.getAll.queryKey({ includeDisabled: true, includeHidden: true }),
+          context.previousDishes
+        )
+      }
       toast.error(`Failed to update visibility: ${error.message}`)
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure sync
+      refetch()
     },
   })
 
@@ -283,7 +357,9 @@ function RouteComponent() {
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-4">{dish.description}</p>
                     <div className="flex justify-between items-center mb-4">
-                      <span className="text-lg font-semibold">${(dish.price / 100).toFixed(2)}</span>
+                      <span className="text-lg font-semibold">
+                        ${(dish.price / 100).toFixed(2)}
+                      </span>
                       <span
                         className={`text-sm px-2 py-1 rounded ${
                           dish.isAvailable

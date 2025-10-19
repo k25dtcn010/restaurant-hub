@@ -20,6 +20,7 @@ Start a new operational shift.
 **Auth**: Manager only
 
 **Input Schema** (Zod):
+
 ```typescript
 z.object({
   shiftType: z.enum(["Breakfast", "Lunch", "Dinner", "Custom"]),
@@ -37,6 +38,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -56,12 +58,14 @@ z.object({
 ```
 
 **Logic**:
+
 - Create new shift record with `startTime = NOW()`, `endTime = NULL`
 - If `staffIds` provided, insert into `shift_staff` join table
 - Store `shiftType` as-is, or use `customTypeName` if Custom
 - Check for existing active shifts of same type (warn but allow)
 
 **Errors**:
+
 - `UNAUTHORIZED` if not manager
 - `BAD_REQUEST` if Custom type without customTypeName
 
@@ -75,6 +79,7 @@ End an active shift and generate summary.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -82,6 +87,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -101,6 +107,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate shift exists and `endTime = NULL` (active shift)
 - Set `endTime = NOW()`
 - Count orders where `orders.shiftId = :shiftId`
@@ -109,6 +116,7 @@ z.object({
 - Return shift summary
 
 **Errors**:
+
 - `NOT_FOUND` if shift doesn't exist
 - `BAD_REQUEST` if shift already ended
 - Display warning if there are open (unpaid) orders
@@ -123,11 +131,13 @@ List all currently active shifts.
 **Auth**: Staff or Manager
 
 **Input Schema**:
+
 ```typescript
 z.object({}) // no params
 ```
 
 **Output Schema**:
+
 ```typescript
 z.array(
   z.object({
@@ -147,6 +157,7 @@ z.array(
 ```
 
 **Logic**:
+
 - Query shifts where `endTime IS NULL`
 - For each shift, count orders with `shiftId`
 - Calculate duration in minutes: `(NOW() - startTime) / 60000`
@@ -162,16 +173,24 @@ List historical shifts with filtering.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  startDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  endDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   shiftType: z.enum(["Breakfast", "Lunch", "Dinner", "Custom"]).optional(),
   staffId: z.number().optional(), // filter by staff member
 })
 ```
 
 **Output Schema**:
+
 ```typescript
 z.array(
   z.object({
@@ -192,6 +211,7 @@ z.array(
 ```
 
 **Logic**:
+
 - Query shifts where `endTime IS NOT NULL`
 - Filter by date range if provided (startTime between start/end dates)
 - Filter by shiftType if provided
@@ -208,6 +228,7 @@ Add staff members to an active shift.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   shiftId: z.number(),
@@ -216,6 +237,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   success: z.boolean(),
@@ -224,11 +246,13 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate shift exists and is active (`endTime = NULL`)
 - Insert into `shift_staff` for each staff ID
 - Ignore duplicates (upsert pattern)
 
 **Errors**:
+
 - `NOT_FOUND` if shift doesn't exist
 - `BAD_REQUEST` if shift already ended or any staff ID is invalid
 
@@ -242,6 +266,7 @@ Remove staff members from an active shift.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   shiftId: z.number(),
@@ -250,6 +275,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   success: z.boolean(),
@@ -258,6 +284,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate shift exists
 - Delete from `shift_staff` where `shiftId` and `staffId` match
 - Return count of deleted rows
@@ -272,6 +299,7 @@ Get detailed summary for a specific shift (active or ended).
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -279,6 +307,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -307,6 +336,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Query shift by ID
 - Join with `shift_staff` to get staff list
 - Join with `orders` where `orders.shiftId = :shiftId`
@@ -323,11 +353,13 @@ Get the currently active shift for the authenticated user (auto-assignment for o
 **Auth**: Staff or Manager
 
 **Input Schema**:
+
 ```typescript
 z.object({}) // no params, uses auth context
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -337,6 +369,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Query active shifts where user is in `shift_staff`
 - Return the most recent active shift (by `startTime DESC`)
 - Used by order creation middleware to auto-tag orders with shift ID
@@ -350,6 +383,7 @@ z.object({
 When an order is created via `orders.create`, automatically assign the current shift ID.
 
 **Logic**:
+
 - Call `shifts.getCurrentShift` in tRPC context middleware
 - If active shift found, set `orders.shiftId = shift.id`
 - If no active shift, leave `orders.shiftId = NULL`
@@ -364,11 +398,11 @@ None (shift changes don't require real-time notifications).
 
 ## Error Codes
 
-| Code            | Scenario                                             |
-| --------------- | ---------------------------------------------------- |
-| `UNAUTHORIZED`  | Non-manager attempting manager-only operation        |
-| `BAD_REQUEST`   | Invalid input (ending non-active shift, etc.)        |
-| `NOT_FOUND`     | Shift ID doesn't exist                               |
+| Code           | Scenario                                      |
+| -------------- | --------------------------------------------- |
+| `UNAUTHORIZED` | Non-manager attempting manager-only operation |
+| `BAD_REQUEST`  | Invalid input (ending non-active shift, etc.) |
+| `NOT_FOUND`    | Shift ID doesn't exist                        |
 
 ---
 

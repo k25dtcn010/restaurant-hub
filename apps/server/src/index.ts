@@ -4,10 +4,10 @@ import { trpcServer } from "@hono/trpc-server"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
-import { auth } from "@/auth"
 
 import { createContext } from "@/api/context"
 import { appRouter } from "@/api/routers"
+import { auth } from "@/auth"
 
 import { publicRateLimit } from "./rate-limit"
 import {

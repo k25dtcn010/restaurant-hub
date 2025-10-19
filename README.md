@@ -9,6 +9,8 @@ A lightweight restaurant management platform built with the Better-T-Stack, enab
 - **QR Code Ordering** - Scan table QR code to browse menu and place orders
 - **Real-Time Menu** - View available dishes with automatic stock availability
 - **Order Tracking** - Track order status from submission to completion
+- **Menu Customization** - Add modifiers to dishes for personalized orders
+- **Category Browsing** - Browse menu by organized categories
 
 ### Staff Management
 
@@ -17,6 +19,33 @@ A lightweight restaurant management platform built with the Better-T-Stack, enab
 - **Inventory Management** - Track ingredient stock with low-stock alerts
 - **Menu Management** - Create and edit dishes with recipes (Manager only)
 - **Payment Processing** - Simple cash payment recording
+- **Shift Management** - Track staff shifts and operating sessions
+
+### Advanced Operations Management
+
+- **Modifiers & Customization** - Add customizable modifiers to menu items (e.g., "Extra Cheese +$2", "No Onions")
+  - Create modifier groups with selection constraints (min/max selections)
+  - Flexible pricing adjustments (positive or negative)
+  - Availability toggling for modifiers
+- **Menu Categories** - Organize dishes into hierarchical categories
+  - Drag-and-drop reordering for display priority
+  - Hide/show categories from customer view
+  - Icon/emoji support for visual organization
+- **Dish Variants** - Support multiple sizes and options per dish
+  - Define variants with individual pricing (e.g., Small/Medium/Large)
+  - Variant-specific availability management
+- **Temporary Visibility Control** - Hide menu items without deletion
+  - Quick hide/show toggle for seasonal items
+  - Separate hidden items view for easy management
+- **Menu Flags** - Highlight special dishes
+  - Recommended items badge (👍)
+  - Chef's Special marker (⭐)
+  - Kitchen priority ordering
+- **Shift & Session Management** - Track restaurant operations
+  - Start/end shift tracking with duration monitoring
+  - Multi-staff shift assignments
+  - Shift summary with order counts and revenue
+  - Warning alerts for long-running shifts (>12 hours)
 
 ### Technical Stack
 
@@ -176,7 +205,9 @@ restaurant-hub/
 
 ### Database Schema
 
-9 core entities with full type safety:
+20+ entities with full type safety:
+
+**Core MVP Entities:**
 
 - **User** - Authentication and role-based access
 - **Table** - Restaurant tables with QR codes
@@ -188,15 +219,38 @@ restaurant-hub/
 - **OrderStatusHistory** - Audit trail
 - **Payment** - Transaction records
 
+**Advanced Operations Entities:**
+
+- **Modifier** - Customizable add-ons with price adjustments
+- **ModifierGroup** - Groups of modifiers with selection constraints
+- **DishModifier** - Dish-to-modifier assignments
+- **OrderItemModifier** - Selected modifiers per order item
+- **Category** - Menu organization categories
+- **DishCategory** - Dish-to-category assignments
+- **DishVariant** - Size/option variants per dish
+- **Shift** - Staff shift tracking
+- **ShiftStaff** - Staff assignments to shifts
+- **Reservation** - Table reservations (future)
+- **OperatingHours** - Restaurant schedule (future)
+
 ### API Endpoints
 
-5 tRPC routers with comprehensive validation:
+9 tRPC routers with comprehensive validation:
+
+**Core Routers:**
 
 - **tables** - QR code validation and table management
-- **dishes** - Menu CRUD with recipe management
+- **dishes** - Menu CRUD with recipe management, variants, and flags
 - **orders** - Order lifecycle from creation to completion
 - **inventory** - Stock management with alerts
 - **payments** - Cash payment processing
+
+**Advanced Operations Routers:**
+
+- **modifiers** - Modifier and modifier group management
+- **categories** - Category organization and visibility
+- **shifts** - Shift tracking and session management
+- **reservations** - Table reservation system (future)
 
 See [docs/api-reference.md](./docs/api-reference.md) for complete API documentation.
 
@@ -251,7 +305,8 @@ See [.github/instructions](./. github/instructions) for the project constitution
 
 - [API Reference](./docs/api-reference.md) - Complete tRPC API documentation
 - [WebSocket Protocol](./docs/websocket-protocol.md) - Real-time event specifications
-- [Feature Specifications](./specs/001-restaurant-hub-mvp/) - Detailed requirements and design
+- [MVP Specifications](./specs/001-restaurant-hub-mvp/) - Core feature requirements
+- [Advanced Operations Specifications](./specs/002-advanced-ops-management/) - Modifiers, categories, variants, reservations, shifts
 - [Quick Start Guide](./specs/001-restaurant-hub-mvp/quickstart.md) - Development workflow
 
 ## Performance Goals
@@ -274,7 +329,31 @@ See [.github/instructions](./. github/instructions) for the project constitution
 
 MIT
 
+## Recent Updates
+
+### Version 2.0 - Advanced Operations Management (2025-10-18)
+
+Added comprehensive restaurant operations features:
+
+- ✅ Modifiers system with flexible pricing
+- ✅ Menu category organization
+- ✅ Dish variants (sizes/options)
+- ✅ Temporary visibility controls
+- ✅ Menu flags (recommended, chef's special, priority)
+- ✅ Shift and session management
+- 🚧 Table reservations (in development)
+
+### Version 1.0 - MVP Launch (2025-10-18)
+
+Initial release with core features:
+
+- QR code ordering system
+- Kitchen and serving dashboards
+- Inventory management
+- Role-based authentication
+- Real-time WebSocket notifications
+
 ---
 
 **Built with** [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack)  
-**Generated**: 2025-10-18
+**Last Updated**: 2025-10-18

@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import { trpc } from "@/utils/trpc"
 
 /**
@@ -65,16 +66,15 @@ export function ModifierSelector({
 
     modifierGroups?.forEach((group: any) => {
       const groupId = group.group.id
-      const selectedCount = selectedModifiers.filter(
-        (m) => m.modifierGroupId === groupId
-      ).length
+      const selectedCount = selectedModifiers.filter((m) => m.modifierGroupId === groupId).length
 
       const minSelections = group.group.minSelections
       const maxSelections = group.group.maxSelections
 
       // Check minimum constraint
       if (minSelections != null && selectedCount < minSelections) {
-        errors[groupId] = `Please select at least ${minSelections} item${minSelections > 1 ? "s" : ""}`
+        errors[groupId] =
+          `Please select at least ${minSelections} item${minSelections > 1 ? "s" : ""}`
         isValid = false
       }
 
@@ -170,7 +170,34 @@ export function ModifierSelector({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="text-sm text-muted-foreground">Loading modifiers...</div>
+        <div className="flex items-center gap-2 mb-4">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-6 w-48" />
+        </div>
+
+        {/* Skeleton for modifier groups */}
+        {Array.from({ length: 2 }).map((_, groupIndex) => (
+          <div key={groupIndex} className="border rounded-lg p-4 space-y-3">
+            {/* Group header skeleton */}
+            <div className="flex justify-between items-start">
+              <div className="space-y-2 flex-1">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <Skeleton className="h-6 w-20" />
+            </div>
+
+            {/* Modifier items skeleton */}
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, modIndex) => (
+                <div key={modIndex} className="flex items-center space-x-3 p-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 flex-1" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     )
   }
@@ -193,9 +220,7 @@ export function ModifierSelector({
         const maxSelections = group.group.maxSelections
         const modifiers = group.modifiers || []
 
-        const selectedCount = selectedModifiers.filter(
-          (m) => m.modifierGroupId === groupId
-        ).length
+        const selectedCount = selectedModifiers.filter((m) => m.modifierGroupId === groupId).length
 
         const hasError = validationErrors[groupId]
 
@@ -208,9 +233,7 @@ export function ModifierSelector({
                   {formatConstraint(minSelections, maxSelections)}
                 </p>
               </div>
-              <Badge variant={hasError ? "destructive" : "outline"}>
-                {selectedCount} selected
-              </Badge>
+              <Badge variant={hasError ? "destructive" : "outline"}>{selectedCount} selected</Badge>
             </div>
 
             {hasError && (
@@ -224,9 +247,7 @@ export function ModifierSelector({
               {modifiers.map((modifier: any) => {
                 const isSelected = isModifierSelected(modifier.id, groupId)
                 const isDisabled =
-                  !isSelected &&
-                  maxSelections != null &&
-                  selectedCount >= maxSelections
+                  !isSelected && maxSelections != null && selectedCount >= maxSelections
 
                 return (
                   <div

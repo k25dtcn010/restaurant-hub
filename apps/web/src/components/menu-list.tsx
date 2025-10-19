@@ -8,9 +8,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -120,10 +120,7 @@ export function MenuList({
           const isUnavailable = !dish.isAvailable
 
           return (
-            <Card
-              key={dish.id}
-              className={isUnavailable || dish.isHidden ? "opacity-60" : ""}
-            >
+            <Card key={dish.id} className={isUnavailable || dish.isHidden ? "opacity-60" : ""}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -170,17 +167,12 @@ export function MenuList({
                 )}
 
                 <div className="flex items-center justify-between">
-                  <div className="text-2xl font-bold">
-                    ${(dish.price / 100).toFixed(2)}
-                  </div>
+                  <div className="text-2xl font-bold">${(dish.price / 100).toFixed(2)}</div>
 
                   {!isUnavailable && (
                     <div className="flex items-center gap-2">
                       {quantity === 0 ? (
-                        <Button
-                          size="sm"
-                          onClick={() => handleAddToCart(dish.id, 1)}
-                        >
+                        <Button size="sm" onClick={() => handleAddToCart(dish.id, 1)}>
                           <Plus className="mr-1 h-4 w-4" />
                           Add
                         </Button>
@@ -193,13 +185,8 @@ export function MenuList({
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
-                          <span className="min-w-[2rem] text-center font-semibold">
-                            {quantity}
-                          </span>
-                          <Button
-                            size="sm"
-                            onClick={() => handleAddToCart(dish.id, quantity + 1)}
-                          >
+                          <span className="min-w-[2rem] text-center font-semibold">{quantity}</span>
+                          <Button size="sm" onClick={() => handleAddToCart(dish.id, quantity + 1)}>
                             <Plus className="h-4 w-4" />
                           </Button>
                         </div>
@@ -232,15 +219,10 @@ export function MenuList({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setHiddenDishDialog(null)}
-            >
+            <Button variant="outline" onClick={() => setHiddenDishDialog(null)}>
               Cancel
             </Button>
-            <Button onClick={handleConfirmHiddenDish}>
-              Add Anyway
-            </Button>
+            <Button onClick={handleConfirmHiddenDish}>Add Anyway</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

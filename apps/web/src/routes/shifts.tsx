@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { authClient } from "@/lib/auth-client"
+import type { ActiveShift, ShiftHistory } from "@/types/shifts"
 import { trpc, trpcClient } from "@/utils/trpc"
 
 /**
@@ -109,7 +110,7 @@ function RouteComponent() {
       endDate: endDate || undefined,
       shiftType: filterShiftType || undefined,
       staffId: filterStaffId || undefined,
-    }),
+    } as any),
     enabled: activeTab === "history",
   })
 
@@ -123,7 +124,7 @@ function RouteComponent() {
   // Add staff mutation
   const addStaffMutation = useMutation({
     mutationFn: (data: { shiftId: number; staffIds: string[] }) =>
-      trpcClient.shifts.addStaff.mutate(data),
+      trpcClient.shifts.addStaff.mutate(data as any),
     onSuccess: () => {
       toast.success("Staff added successfully")
       setEditStaffShiftId(null)
@@ -138,7 +139,7 @@ function RouteComponent() {
   // Remove staff mutation
   const removeStaffMutation = useMutation({
     mutationFn: (data: { shiftId: number; staffIds: string[] }) =>
-      trpcClient.shifts.removeStaff.mutate(data),
+      trpcClient.shifts.removeStaff.mutate(data as any),
     onSuccess: () => {
       toast.success("Staff removed successfully")
       refetchActiveShifts()
@@ -220,7 +221,7 @@ function RouteComponent() {
                 </div>
               ) : activeShifts && activeShifts.length > 0 ? (
                 <div className="space-y-4">
-                  {activeShifts.map((shift) => (
+                  {(activeShifts as ActiveShift[]).map((shift) => (
                     <Card key={shift.id}>
                       <CardHeader>
                         <div className="flex items-center justify-between">
@@ -230,9 +231,7 @@ function RouteComponent() {
                           </CardTitle>
                           <Badge variant="default">Active</Badge>
                         </div>
-                        <CardDescription>
-                          Started {formatDateTime(shift.startTime)}
-                        </CardDescription>
+                        <CardDescription>Started {formatDateTime(shift.startTime)}</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -389,12 +388,14 @@ function RouteComponent() {
                 </div>
               ) : shiftHistory && shiftHistory.length > 0 ? (
                 <div className="space-y-4">
-                  {shiftHistory.map((shift) => {
-                    const duration = Math.floor(
-                      (new Date(shift.endTime).getTime() -
-                        new Date(shift.startTime).getTime()) /
-                        60000
-                    )
+                  {(shiftHistory as ShiftHistory[]).map((shift) => {
+                    const duration = shift.endTime
+                      ? Math.floor(
+                          (new Date(shift.endTime).getTime() -
+                            new Date(shift.startTime).getTime()) /
+                            60000
+                        )
+                      : 0
 
                     return (
                       <Card key={shift.id}>
@@ -407,7 +408,8 @@ function RouteComponent() {
                             <Badge variant="secondary">Completed</Badge>
                           </div>
                           <CardDescription>
-                            {formatDateTime(shift.startTime)} - {formatDateTime(shift.endTime)}
+                            {formatDateTime(shift.startTime)} -{" "}
+                            {shift.endTime ? formatDateTime(shift.endTime) : "Ongoing"}
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -447,7 +449,10 @@ function RouteComponent() {
                           {shift.staff.length > 0 && (
                             <div className="mt-4">
                               <p className="text-sm text-muted-foreground">
-                                {shift.staff.map((s) => s.name).join(", ")}
+                                Staff:{" "}
+                                {shift.staff
+                                  .map((staff: ActiveShift["staff"][0]) => staff.name)
+                                  .join(", ")}
                               </p>
                             </div>
                           )}

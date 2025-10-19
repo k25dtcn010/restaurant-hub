@@ -20,6 +20,7 @@ List all categories with optional visibility filtering.
 **Auth**: Public (customers see only visible categories)
 
 **Input Schema** (Zod):
+
 ```typescript
 z.object({
   visibleOnly: z.boolean().optional().default(false),
@@ -27,6 +28,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.array(
   z.object({
@@ -41,6 +43,7 @@ z.array(
 ```
 
 **Logic**:
+
 - If `visibleOnly = true`, filter `WHERE isHidden = false`
 - Join with `dish_categories` to count dishes per category
 - Order by `displayOrder ASC`
@@ -55,6 +58,7 @@ Create a new category.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   name: z.string().min(1).max(100),
@@ -64,6 +68,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -77,11 +82,13 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate user role = "manager"
 - Insert into `categories` table
 - Return created category
 
 **Errors**:
+
 - `UNAUTHORIZED` if not manager
 - `BAD_REQUEST` if name is duplicate
 
@@ -95,6 +102,7 @@ Update an existing category.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -106,6 +114,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -118,11 +127,13 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate category exists
 - Update only provided fields
 - Return updated category
 
 **Errors**:
+
 - `NOT_FOUND` if category ID doesn't exist
 - `UNAUTHORIZED` if not manager
 
@@ -136,6 +147,7 @@ Hide or show a category (soft delete pattern).
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -144,6 +156,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   id: z.number(),
@@ -152,6 +165,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Update `isHidden` field
 - Return updated category
 - Use optimistic updates in UI
@@ -174,6 +188,7 @@ List all dishes in a specific category.
 **Auth**: Public
 
 **Input Schema**:
+
 ```typescript
 z.object({
   categoryId: z.number(),
@@ -182,6 +197,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.array(
   z.object({
@@ -199,6 +215,7 @@ z.array(
 ```
 
 **Logic**:
+
 - Join `dish_categories` → `dishes`
 - Filter `WHERE category_id = :categoryId`
 - If `includeHidden = false`, filter `AND dishes.isHidden = false`
@@ -214,6 +231,7 @@ Assign multiple dishes to a category.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   categoryId: z.number(),
@@ -222,6 +240,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   success: z.boolean(),
@@ -230,11 +249,13 @@ z.object({
 ```
 
 **Logic**:
+
 - Validate category exists
 - Insert into `dish_categories` for each dish ID
 - Ignore duplicates (upsert pattern)
 
 **Errors**:
+
 - `NOT_FOUND` if category doesn't exist
 - `BAD_REQUEST` if any dish ID is invalid
 
@@ -248,6 +269,7 @@ Remove dishes from a category.
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
   categoryId: z.number(),
@@ -256,6 +278,7 @@ z.object({
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   success: z.boolean(),
@@ -264,6 +287,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Delete from `dish_categories` where `categoryId` and `dishId` match
 - Return count of deleted rows
 
@@ -277,18 +301,22 @@ Batch update display order for categories (drag-and-drop support).
 **Auth**: Manager only
 
 **Input Schema**:
+
 ```typescript
 z.object({
-  categoryOrders: z.array(
-    z.object({
-      id: z.number(),
-      displayOrder: z.number().int(),
-    })
-  ).min(1),
+  categoryOrders: z
+    .array(
+      z.object({
+        id: z.number(),
+        displayOrder: z.number().int(),
+      })
+    )
+    .min(1),
 })
 ```
 
 **Output Schema**:
+
 ```typescript
 z.object({
   success: z.boolean(),
@@ -297,6 +325,7 @@ z.object({
 ```
 
 **Logic**:
+
 - Batch update `displayOrder` for each category ID
 - Use transaction to ensure atomic update
 
@@ -310,11 +339,11 @@ None (category changes don't require real-time notifications).
 
 ## Error Codes
 
-| Code            | Scenario                                      |
-| --------------- | --------------------------------------------- |
-| `UNAUTHORIZED`  | Non-manager attempting manager-only operation |
-| `BAD_REQUEST`   | Invalid input (e.g., duplicate name)          |
-| `NOT_FOUND`     | Category ID doesn't exist                     |
+| Code           | Scenario                                      |
+| -------------- | --------------------------------------------- |
+| `UNAUTHORIZED` | Non-manager attempting manager-only operation |
+| `BAD_REQUEST`  | Invalid input (e.g., duplicate name)          |
+| `NOT_FOUND`    | Category ID doesn't exist                     |
 
 ---
 

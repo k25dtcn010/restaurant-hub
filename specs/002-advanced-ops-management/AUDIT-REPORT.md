@@ -27,9 +27,11 @@ The implementation plan is **well-structured** with clear phases, dependencies, 
 
 ```markdown
 ❌ CURRENT (T021):
+
 - [ ] T021 [P] [US1] Implement modifiers.list procedure in packages/api/src/routers/modifiers.ts with Zod input schema (availableOnly: boolean) and output schema
 
 ✅ SHOULD BE:
+
 - [ ] T021 [P] [US1] Implement modifiers.list procedure in packages/api/src/routers/modifiers.ts
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.list" for full Zod schemas
   - **Test First**: Write integration test in `packages/api/tests/integration/modifiers.test.ts` (Red phase)
@@ -40,7 +42,8 @@ The implementation plan is **well-structured** with clear phases, dependencies, 
 **Impact**: Developers must hunt through multiple files to understand what to implement.
 
 **Recommendation**: Add subsections to EVERY backend task with:
-- `Contract`: Link to specific section in contracts/*.md
+
+- `Contract`: Link to specific section in contracts/\*.md
 - `Test First`: Where to write the test (TDD requirement)
 - `Data Model`: Link to relevant table in data-model.md (if applicable)
 - `Logic`: Brief implementation hint
@@ -57,8 +60,9 @@ The implementation plan is **well-structured** with clear phases, dependencies, 
 ❌ T007: Extend packages/db/src/schema/dishes.ts with columns: isHidden, isRecommended, isChefSpecial, orderPriority
 
 ✅ SHOULD SPECIFY:
+
 - [ ] T007 Extend dishes schema in packages/db/src/schema/dishes.ts
-  - **Add Columns**: 
+  - **Add Columns**:
     - `isHidden: boolean().notNull().default(false)` - Soft delete flag
     - `isRecommended: boolean().notNull().default(false)` - Show thumbs-up badge in menu
     - `isChefSpecial: boolean().notNull().default(false)` - Show star badge in menu
@@ -79,16 +83,18 @@ The implementation plan is **well-structured** with clear phases, dependencies, 
 
 **Example from Phase 3**:
 
-```markdown
+````markdown
 ❌ CURRENT:
+
 - [ ] T021 [P] [US1] Implement modifiers.list procedure
 
 ✅ SHOULD INCLUDE TDD CYCLE:
+
 - [ ] T021-RED [US1] Write FAILING test for modifiers.list procedure
   - **File**: packages/api/tests/integration/modifiers.test.ts
-  - **Test Case**: 
+  - **Test Case**:
     ```typescript
-    test('modifiers.list with availableOnly=true returns only available modifiers', async () => {
+    test("modifiers.list with availableOnly=true returns only available modifiers", async () => {
       // Arrange: Seed 5 modifiers (3 available, 2 unavailable)
       // Act: Call modifiers.list({ availableOnly: true })
       // Assert: Expect 3 modifiers returned, all with isAvailable=true
@@ -105,7 +111,7 @@ The implementation plan is **well-structured** with clear phases, dependencies, 
 - [ ] T021-REFACTOR [US1] Optimize modifiers.list query and add caching if needed
   - **Review**: Code quality, naming conventions, error handling
   - **Expected**: Tests still PASS
-```
+````
 
 **Impact**: Developers may implement without tests (violates constitution).
 
@@ -121,9 +127,11 @@ The implementation plan is **well-structured** with clear phases, dependencies, 
 
 ```markdown
 ❌ CURRENT (T035):
+
 - [ ] T035 [P] [US1] Create modifier management UI component apps/web/src/components/modifier-manager.tsx with list, create, edit, delete forms
 
 ✅ SHOULD REFERENCE:
+
 - [ ] T035 [P] [US1] Create modifier management UI component apps/web/src/components/modifier-manager.tsx
   - **UI Reference**: See `quickstart.md` § A "Manager: Create Modifiers" for expected workflow
   - **Features**:
@@ -171,13 +179,16 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
 **Problem**: No explicit "validate integration" tasks between backend and frontend.
 
 **Current Checkpoints**:
+
 ```markdown
 ✅ "Checkpoint": At this point, User Story 1 should be fully functional
 ```
 
 **Should Add**:
+
 ```markdown
 ✅ "Checkpoint" + Validation Tasks:
+
 - [ ] T045.1 [US1] Integration Test: End-to-end modifier workflow
   - Test: Manager creates modifier → assigns to dish → customer selects modifier → kitchen sees modifier
   - **Reference**: `quickstart.md` § A full walkthrough
@@ -204,6 +215,7 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
 **Status**: 🟢 GOOD - Clear, actionable tasks
 
 **Improvements**:
+
 - T002-T006: Add note "See `data-model.md` for exact column definitions"
 - T011: Add expected output: "Migration file should be named `0002_advanced_ops.sql`"
 - T013: Add note "See `quickstart.md` § Setup for sample data requirements"
@@ -215,6 +227,7 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
 **Critical Issue**: Tasks say "empty procedures" but don't specify procedure signatures.
 
 **Fix T014**:
+
 ```markdown
 - [ ] T014 [P] Create tRPC router skeleton packages/api/src/routers/modifiers.ts
   - **Procedures to Add** (empty implementations, just return TODO error):
@@ -235,7 +248,7 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
 - [ ] T### [P?] [Story] Task Title
   - **Purpose**: One-sentence what and why
   - **File**: Exact file path to modify
-  - **References**: 
+  - **References**:
     - Contract: `contracts/###-router.md` § Procedure Name (for backend tasks)
     - Data Model: `data-model.md` § Table Name (for schema tasks)
     - Quickstart: `quickstart.md` § Section Name (for validation)
@@ -243,7 +256,7 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
     - RED: Write failing test in `packages/api/tests/...`
     - GREEN: Implement to pass test
     - REFACTOR: Clean up while keeping tests green
-  - **Implementation Notes**: 
+  - **Implementation Notes**:
     - Key logic points (e.g., "Filter WHERE isAvailable=true")
     - Edge cases (e.g., "Return error if modifier assigned to dishes")
   - **Dependencies**: DEPENDS ON: [T###], BLOCKS: [T###]
@@ -255,6 +268,7 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
 **Status**: 🟢 GOOD - Clear final tasks
 
 **Improvements**:
+
 - T138: Change from "Run full quickstart.md walkthrough" to checklist of specific scenarios
 - T142: Add requirement to update feature list in copilot-instructions.md
 
@@ -315,7 +329,7 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
 
 ### ✅ AFTER (Improved with Cross-References):
 
-```markdown
+````markdown
 ### Implementation for User Story 1
 
 **Backend: Modifier Management**
@@ -326,25 +340,25 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
 
 - [ ] T021-RED [P] [US1] Write FAILING test for modifiers.list
   - **File**: `packages/api/tests/routers/modifiers.test.ts`
-  - **Test Case**: 
+  - **Test Case**:
     ```typescript
-    describe('modifiers.list', () => {
-      test('returns only available modifiers when availableOnly=true', async () => {
+    describe("modifiers.list", () => {
+      test("returns only available modifiers when availableOnly=true", async () => {
         // Arrange: Seed 5 modifiers (3 available, 2 unavailable)
         await db.insert(modifiers).values([
-          { name: 'Extra Cheese', priceAdjustment: 200, isAvailable: true },
-          { name: 'Bacon', priceAdjustment: 150, isAvailable: true },
-          { name: 'Avocado', priceAdjustment: 100, isAvailable: true },
-          { name: 'Olives', priceAdjustment: 50, isAvailable: false },
-          { name: 'Mushrooms', priceAdjustment: 75, isAvailable: false },
-        ]);
+          { name: "Extra Cheese", priceAdjustment: 200, isAvailable: true },
+          { name: "Bacon", priceAdjustment: 150, isAvailable: true },
+          { name: "Avocado", priceAdjustment: 100, isAvailable: true },
+          { name: "Olives", priceAdjustment: 50, isAvailable: false },
+          { name: "Mushrooms", priceAdjustment: 75, isAvailable: false },
+        ])
         // Act
-        const result = await caller.modifiers.list({ availableOnly: true });
+        const result = await caller.modifiers.list({ availableOnly: true })
         // Assert
-        expect(result).toHaveLength(3);
-        expect(result.every(m => m.isAvailable)).toBe(true);
-      });
-    });
+        expect(result).toHaveLength(3)
+        expect(result.every((m) => m.isAvailable)).toBe(true)
+      })
+    })
     ```
   - **Expected**: Test FAILS (procedure not implemented)
 
@@ -391,7 +405,7 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
 
 - [ ] T022-REFACTOR [US1] Review modifiers.create error messages
   - **UX**: Ensure error messages are user-friendly (per Constitution § III)
-```
+````
 
 ---
 
@@ -404,6 +418,7 @@ T031: Update orders.createOrder (DEPENDS ON T030 - must fetch modifiers first)
 **ROI**: HIGH - This upfront effort will save 10-20 hours of developer confusion, file hunting, and rework during implementation.
 
 **Next Steps**:
+
 1. Accept this audit report
 2. Create `tasks-v2.md` with improved task format
 3. Use improved format as template for future features

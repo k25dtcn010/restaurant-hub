@@ -16,8 +16,12 @@ This document provides a complete reference for all RestaurantHub API endpoints,
 4. [Orders Router](#orders-router)
 5. [Inventory Router](#inventory-router)
 6. [Payments Router](#payments-router)
-7. [Error Handling](#error-handling)
-8. [Rate Limiting](#rate-limiting)
+7. [Modifiers Router](#modifiers-router)
+8. [Categories Router](#categories-router)
+9. [Reservations Router](#reservations-router)
+10. [Shifts Router](#shifts-router)
+11. [Error Handling](#error-handling)
+12. [Rate Limiting](#rate-limiting)
 
 ---
 
@@ -710,6 +714,388 @@ Process cash payments and clear table sessions.
 
 ---
 
+## Modifiers Router
+
+Manage menu item modifiers and modifier groups.
+
+### `modifiers.list`
+
+**Type**: Query (Public)  
+**Description**: List all modifiers with optional availability filtering
+
+**Input**:
+
+```typescript
+{
+  availableOnly?: boolean  // Default: false
+}
+```
+
+**Output**:
+
+```typescript
+{
+  modifiers: Array<{
+    id: number
+    name: string
+    priceAdjustment: number // In cents
+    isAvailable: boolean
+    createdAt: Date
+    updatedAt: Date
+  }>
+}
+```
+
+---
+
+### `modifiers.create` 🔒
+
+**Type**: Mutation (Manager Only)  
+**Description**: Create a new modifier
+
+**Input**:
+
+```typescript
+{
+  name: string              // Max 100 chars
+  priceAdjustment: number  // In cents, can be negative
+  isAvailable?: boolean    // Default: true
+}
+```
+
+**Output**:
+
+```typescript
+{
+  id: number
+  name: string
+  priceAdjustment: number
+  isAvailable: boolean
+}
+```
+
+**Errors**:
+
+- `UNAUTHORIZED`: User is not Manager
+- `BAD_REQUEST`: Duplicate modifier name
+
+---
+
+### `modifiers.getByDish`
+
+**Type**: Query (Public)  
+**Description**: Get all modifiers for a specific dish grouped by modifier groups
+
+**Input**:
+
+```typescript
+{
+  dishId: number
+}
+```
+
+**Output**:
+
+```typescript
+{
+  modifierGroups: Array<{
+    group: {
+      id: number
+      name: string
+      minSelections: number | null
+      maxSelections: number | null
+      displayOrder: number
+    }
+    modifiers: Array<{
+      id: number
+      name: string
+      priceAdjustment: number
+      isAvailable: boolean
+    }>
+  }>
+}
+```
+
+---
+
+## Categories Router
+
+Manage menu categories for organizing dishes.
+
+### `categories.list`
+
+**Type**: Query (Public)  
+**Description**: List all categories ordered by display order
+
+**Input**:
+
+```typescript
+{
+  visibleOnly?: boolean  // Default: false
+}
+```
+
+**Output**:
+
+```typescript
+{
+  categories: Array<{
+    id: number
+    name: string
+    iconUrl: string | null
+    displayOrder: number
+    isHidden: boolean
+    dishCount: number // Number of dishes in category
+    createdAt: Date
+  }>
+}
+```
+
+---
+
+### `categories.create` 🔒
+
+**Type**: Mutation (Manager Only)  
+**Description**: Create a new category
+
+**Input**:
+
+```typescript
+{
+  name: string         // Max 100 chars
+  iconUrl?: string     // Emoji or icon URL
+  displayOrder?: number  // Default: 0
+}
+```
+
+**Output**:
+
+```typescript
+{
+  id: number
+  name: string
+  iconUrl: string | null
+  displayOrder: number
+}
+```
+
+---
+
+### `categories.reorder` 🔒
+
+**Type**: Mutation (Manager Only)  
+**Description**: Reorder categories by updating display orders
+
+**Input**:
+
+```typescript
+{
+  categoryOrders: Array<{
+    id: number
+    displayOrder: number
+  }>
+}
+```
+
+**Output**:
+
+```typescript
+{
+  success: boolean
+  updatedCount: number
+}
+```
+
+---
+
+### `categories.toggleVisibility` 🔒
+
+**Type**: Mutation (Manager Only)  
+**Description**: Hide or show a category from customers
+
+**Input**:
+
+```typescript
+{
+  categoryId: number
+}
+```
+
+**Output**:
+
+```typescript
+{
+  categoryId: number
+  isHidden: boolean
+  updatedAt: Date
+}
+```
+
+---
+
+## Reservations Router
+
+Manage table reservations (future implementation).
+
+### `reservations.list`
+
+**Type**: Query (Staff)  
+**Description**: List all reservations for a specific date
+
+**Input**:
+
+```typescript
+{
+  date: string  // ISO date format (YYYY-MM-DD)
+  status?: "Pending" | "Confirmed" | "Seated" | "Cancelled"
+}
+```
+
+**Output**:
+
+```typescript
+{
+  reservations: Array<{
+    id: number
+    customerName: string
+    customerPhone: string
+    partySize: number
+    reservationTime: Date
+    status: string
+    tableId: number | null
+    createdAt: Date
+  }>
+}
+```
+
+---
+
+### `reservations.create`
+
+**Type**: Mutation (Public/Staff)  
+**Description**: Create a new reservation
+
+**Input**:
+
+```typescript
+{
+  customerName: string
+  customerPhone: string
+  partySize: number
+  reservationTime: Date  // ISO datetime
+  notes?: string
+}
+```
+
+**Output**:
+
+```typescript
+{
+  id: number
+  confirmationCode: string
+  customerName: string
+  reservationTime: Date
+}
+```
+
+---
+
+## Shifts Router
+
+Manage restaurant shifts and operating sessions.
+
+### `shifts.listActive`
+
+**Type**: Query (Public)  
+**Description**: Get currently active shifts
+
+**Input**: None
+
+**Output**:
+
+```typescript
+{
+  shifts: Array<{
+    id: number
+    shiftType: "Breakfast" | "Lunch" | "Dinner" | string
+    startTime: Date
+    duration: number // Minutes since start
+    currentOrderCount: number
+    staff: Array<{
+      id: string
+      name: string
+    }>
+  }>
+}
+```
+
+---
+
+### `shifts.start` 🔒
+
+**Type**: Mutation (Manager Only)  
+**Description**: Start a new shift
+
+**Input**:
+
+```typescript
+{
+  shiftType: "Breakfast" | "Lunch" | "Dinner" | "Custom"
+  customTypeName?: string  // Required if shiftType is "Custom"
+  staffIds?: string[]      // Optional staff assignments
+  notes?: string
+}
+```
+
+**Output**:
+
+```typescript
+{
+  id: number
+  shiftType: string
+  startTime: Date
+}
+```
+
+**Errors**:
+
+- `BAD_REQUEST`: Active shift already exists
+- `UNAUTHORIZED`: User is not Manager
+
+---
+
+### `shifts.end` 🔒
+
+**Type**: Mutation (Manager Only)  
+**Description**: End the active shift
+
+**Input**:
+
+```typescript
+{
+  id: number
+  notes?: string
+}
+```
+
+**Output**:
+
+```typescript
+{
+  id: number
+  endTime: Date
+  duration: number
+  totalOrders: number
+  totalRevenue: number
+}
+```
+
+**Errors**:
+
+- `NOT_FOUND`: Shift ID does not exist or already ended
+
+---
+
 ## Error Handling
 
 ### Error Codes
@@ -770,4 +1156,7 @@ See [websocket-protocol.md](./websocket-protocol.md) for complete WebSocket even
 ---
 
 **Generated**: 2025-10-18  
-**Contract References**: `specs/001-restaurant-hub-mvp/contracts/`
+**Contract References**:
+
+- MVP: `specs/001-restaurant-hub-mvp/contracts/`
+- Advanced Operations: `specs/002-advanced-ops-management/contracts/`

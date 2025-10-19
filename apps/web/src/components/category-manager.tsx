@@ -1,8 +1,14 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
-import type { DragEndEvent } from "@dnd-kit/core"
+import {
+  closestCenter,
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { Edit, Eye, EyeOff, GripVertical, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -19,6 +25,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -62,23 +69,18 @@ interface Category {
 /**
  * T057: SortableRow Component for drag-and-drop
  */
-function SortableRow({ 
-  category, 
-  onEdit, 
-  onToggleVisibility 
-}: { 
+function SortableRow({
+  category,
+  onEdit,
+  onToggleVisibility,
+}: {
   category: Category
   onEdit: (category: Category) => void
   onToggleVisibility: (id: number, currentIsHidden: boolean) => void
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: category.id })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: category.id,
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -89,19 +91,13 @@ function SortableRow({
   return (
     <TableRow ref={setNodeRef} style={style}>
       <TableCell className="w-[50px]">
-        <div
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing"
-        >
+        <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
           <GripVertical className="h-5 w-5 text-muted-foreground" />
         </div>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          {category.iconUrl && (
-            <span className="text-lg">{category.iconUrl}</span>
-          )}
+          {category.iconUrl && <span className="text-lg">{category.iconUrl}</span>}
           <span className="font-medium">{category.name}</span>
           {category.isHidden && (
             <Badge variant="secondary" className="ml-2">
@@ -129,17 +125,9 @@ function SortableRow({
             onClick={() => onToggleVisibility(category.id, category.isHidden)}
             title={category.isHidden ? "Show to customers" : "Hide from customers"}
           >
-            {category.isHidden ? (
-              <Eye className="h-4 w-4" />
-            ) : (
-              <EyeOff className="h-4 w-4" />
-            )}
+            {category.isHidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onEdit(category)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => onEdit(category)}>
             <Edit className="h-4 w-4" />
           </Button>
         </div>
@@ -334,7 +322,25 @@ export function CategoryManager() {
           <CardTitle>Categories</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">Loading categories...</div>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-10 w-48" />
+              <Skeleton className="h-10 w-32" />
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 border rounded">
+                  <Skeleton className="h-5 w-5" />
+                  <Skeleton className="h-5 flex-1" />
+                  <Skeleton className="h-5 w-20" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </CardContent>
       </Card>
     )
@@ -406,9 +412,7 @@ export function CategoryManager() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingCategory ? "Edit Category" : "Create New Category"}
-            </DialogTitle>
+            <DialogTitle>{editingCategory ? "Edit Category" : "Create New Category"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
@@ -446,17 +450,10 @@ export function CategoryManager() {
               </div>
             </div>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={createCategory.isPending || updateCategory.isPending}
-              >
+              <Button type="submit" disabled={createCategory.isPending || updateCategory.isPending}>
                 {editingCategory ? "Update" : "Create"}
               </Button>
             </DialogFooter>

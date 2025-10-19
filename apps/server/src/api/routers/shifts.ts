@@ -2,8 +2,9 @@ import { TRPCError } from "@trpc/server"
 import { and, asc, count, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm"
 import { z } from "zod"
 
+import { shifts, shiftStaff, user } from "@/db"
+
 import { managerOnlyProcedure, protectedProcedure, router } from "../index"
-import { shiftStaff, shifts, user } from "@/db"
 
 /**
  * Shifts Router
@@ -79,16 +80,17 @@ export const shiftsRouter = router({
       }
 
       // Fetch assigned staff details
-      const staffDetails = staffIds.length > 0
-        ? await ctx.db.query.user.findMany({
-            where: inArray(user.id, staffIds),
-            columns: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          })
-        : []
+      const staffDetails =
+        staffIds.length > 0
+          ? await ctx.db.query.user.findMany({
+              where: inArray(user.id, staffIds),
+              columns: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            })
+          : []
 
       return {
         id: newShift.id,
@@ -138,24 +140,21 @@ export const shiftsRouter = router({
 
       // Calculate totalOrders and totalRevenue from orders linked to this shift
       const { orders } = await import("@/db")
-      
+
       // Count orders in this shift
       const orderCountResult = await ctx.db
         .select({ count: count() })
         .from(orders)
         .where(eq(orders.shiftId, id))
-      
+
       const totalOrders = orderCountResult[0]?.count || 0
 
       // Sum total revenue from paid orders
       const revenueResult = await ctx.db
         .select({ total: sql<number>`COALESCE(SUM(${orders.totalAmount}), 0)` })
         .from(orders)
-        .where(and(
-          eq(orders.shiftId, id),
-          eq(orders.status, "Paid")
-        ))
-      
+        .where(and(eq(orders.shiftId, id), eq(orders.status, "Paid")))
+
       const totalRevenue = revenueResult[0]?.total || 0
 
       // Update shift with end time and summary
@@ -206,55 +205,71 @@ export const shiftsRouter = router({
    * Auth: Manager/Staff
    * Contract: shifts-router.md § shifts.listActive
    */
-  listActive: protectedProcedure.query(async ({ ctx }) => {
-    // T116-GREEN: List all active shifts
-    const { orders } = await import("@/db")
-    
-    // Get active shifts (where endTime IS NULL)
-    const activeShifts = await ctx.db.query.shifts.findMany({
-      where: isNull(shifts.endTime),
-      orderBy: [asc(shifts.startTime)],
-    })
-
-    // For each shift, get staff and order count
-    const shiftsWithDetails = await Promise.all(
-      activeShifts.map(async (shift) => {
-        // Get staff
-        const staffMembers = await ctx.db
-          .select({
-            id: user.id,
-            name: user.name,
-          })
-          .from(shiftStaff)
-          .innerJoin(user, eq(shiftStaff.userId, user.id))
-          .where(eq(shiftStaff.shiftId, shift.id))
-
-        // Count orders
-        const orderCountResult = await ctx.db
-          .select({ count: count() })
-          .from(orders)
-          .where(eq(orders.shiftId, shift.id))
-
-        const currentOrderCount = orderCountResult[0]?.count || 0
-
-        // Calculate duration in minutes
-        const duration = Math.floor(
-          (Date.now() - shift.startTime.getTime()) / 60000
-        )
-
-        return {
-          id: shift.id,
-          shiftType: shift.shiftType,
-          startTime: shift.startTime,
-          duration,
-          currentOrderCount,
-          staff: staffMembers,
-        }
-      })
+  listActive: protectedProcedure
+    .output(
+      z.array(
+        z.object({
+          id: z.number(),
+          shiftType: z.string(),
+          startTime: z.date(),
+          duration: z.number(),
+          currentOrderCount: z.number(),
+          staff: z.array(
+            z.object({
+              id: z.string(),
+              name: z.string().nullable(),
+            })
+          ),
+        })
+      )
     )
+    .query(async ({ ctx }) => {
+      // T116-GREEN: List all active shifts
+      const { orders } = await import("@/db")
 
-    return shiftsWithDetails
-  }),
+      // Get active shifts (where endTime IS NULL)
+      const activeShifts = await ctx.db.query.shifts.findMany({
+        where: isNull(shifts.endTime),
+        orderBy: [asc(shifts.startTime)],
+      })
+
+      // For each shift, get staff and order count
+      const shiftsWithDetails = await Promise.all(
+        activeShifts.map(async (shift) => {
+          // Get staff
+          const staffMembers = await ctx.db
+            .select({
+              id: user.id,
+              name: user.name,
+            })
+            .from(shiftStaff)
+            .innerJoin(user, eq(shiftStaff.userId, user.id))
+            .where(eq(shiftStaff.shiftId, shift.id))
+
+          // Count orders
+          const orderCountResult = await ctx.db
+            .select({ count: count() })
+            .from(orders)
+            .where(eq(orders.shiftId, shift.id))
+
+          const currentOrderCount = orderCountResult[0]?.count || 0
+
+          // Calculate duration in minutes
+          const duration = Math.floor((Date.now() - shift.startTime.getTime()) / 60000)
+
+          return {
+            id: shift.id,
+            shiftType: shift.shiftType,
+            startTime: shift.startTime,
+            duration,
+            currentOrderCount,
+            staff: staffMembers,
+          }
+        })
+      )
+
+      return shiftsWithDetails
+    }),
 
   /**
    * shifts.listHistory - List shift history with filters
@@ -402,12 +417,7 @@ export const shiftsRouter = router({
       const staffCount = await ctx.db
         .select({ count: count() })
         .from(shiftStaff)
-        .where(
-          and(
-            eq(shiftStaff.shiftId, shiftId),
-            inArray(shiftStaff.userId, staffIds)
-          )
-        )
+        .where(and(eq(shiftStaff.shiftId, shiftId), inArray(shiftStaff.userId, staffIds)))
 
       return {
         success: true,
@@ -446,12 +456,7 @@ export const shiftsRouter = router({
       // Remove staff members
       await ctx.db
         .delete(shiftStaff)
-        .where(
-          and(
-            eq(shiftStaff.shiftId, shiftId),
-            inArray(shiftStaff.userId, staffIds)
-          )
-        )
+        .where(and(eq(shiftStaff.shiftId, shiftId), inArray(shiftStaff.userId, staffIds)))
 
       // Return count of staff IDs requested for removal (optimistic count)
       return {

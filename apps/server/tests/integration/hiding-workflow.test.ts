@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, test } from "bun:test"
-import { db, dishes, eq } from "@/db"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
+import { db, dishes, eq } from "@/db"
+
 import { mockWsNotifier } from "../setup"
 
 /**
@@ -239,9 +240,7 @@ describe("T088.1 & T088.2: Hiding/Showing Dishes Workflow", () => {
       const hiddenDish = result.dishes.find((d) => d.id === testDishId)
       expect(hiddenDish).toBeTruthy()
       expect(hiddenDish!.isHidden).toBe(true)
-      console.log(
-        `✓ Staff can see hidden dish ${testDishId} (for manual phone order creation)`
-      )
+      console.log(`✓ Staff can see hidden dish ${testDishId} (for manual phone order creation)`)
     })
 
     test("Manager can unhide the dish", async () => {

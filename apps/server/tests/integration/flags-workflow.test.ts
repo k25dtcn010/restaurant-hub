@@ -1,20 +1,21 @@
 import { beforeAll, describe, expect, test } from "bun:test"
-import { db, dishes, eq } from "@/db"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
+import { db, dishes, eq } from "@/db"
+
 import { mockWsNotifier } from "../setup"
 
 /**
  * T065.2: Integration Test - Flags Workflow End-to-End
- * 
+ *
  * Test Flow:
  * 1. Manager creates "Chef's Burger" dish with Chef's Special flag and priority 90
  * 2. Customer views menu and sees ⭐ badge on "Chef's Burger"
  * 3. Customer creates order with "Chef's Burger"
  * 4. Kitchen receives order and it appears with high priority (priority 90)
  * 5. Verify kitchen queue sorts high-priority dishes first
- * 
+ *
  * Following TDD approach per Constitution § I
  */
 
@@ -219,7 +220,9 @@ describe("T065.2: Flags Workflow Integration Test", () => {
     expect(normalOrder).toBeTruthy()
 
     // Get the indices
-    const highPriorityIndex = kitchenOrders.orders.findIndex((o: any) => o.id === highPriorityOrderId)
+    const highPriorityIndex = kitchenOrders.orders.findIndex(
+      (o: any) => o.id === highPriorityOrderId
+    )
     const normalOrderIndex = kitchenOrders.orders.findIndex((o: any) => o.id === normalOrderId)
 
     // High-priority order should appear before normal order

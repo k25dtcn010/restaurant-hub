@@ -26,10 +26,7 @@ interface CategoryListProps {
 
 export function CategoryList({ selectedCategoryId, onSelectCategory }: CategoryListProps) {
   // Query visible categories only (customers don't see hidden categories)
-  const {
-    data: categories,
-    isLoading,
-  } = useQuery({
+  const { data: categories, isLoading } = useQuery({
     ...trpc.categories.list.queryOptions({ visibleOnly: true }),
   })
 
@@ -75,9 +72,7 @@ export function CategoryList({ selectedCategoryId, onSelectCategory }: CategoryL
           >
             <CardContent className="flex items-center gap-3 p-4">
               {/* Category icon (emoji or image) */}
-              {category.iconUrl && (
-                <span className="text-2xl">{category.iconUrl}</span>
-              )}
+              {category.iconUrl && <span className="text-2xl">{category.iconUrl}</span>}
 
               {/* Category name and dish count */}
               <div className="flex flex-col">

@@ -1,13 +1,24 @@
 import { beforeAll, describe, expect, test } from "bun:test"
-import { db, dishes, dishVariants, eq, ingredients, orderItems, orders, recipes, tables } from "@/db"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
+import {
+  db,
+  dishes,
+  dishVariants,
+  eq,
+  ingredients,
+  orderItems,
+  orders,
+  recipes,
+  tables,
+} from "@/db"
+
 import { mockWsNotifier } from "../setup"
 
 /**
  * T080.1: End-to-End Integration Test for Variant Workflow
- * 
+ *
  * This test validates the complete variant workflow from creation to kitchen display:
  * 1. Manager creates a dish with variants (Small, Medium, Large)
  * 2. Customer views dish and sees variant options
@@ -46,7 +57,7 @@ describe("T080.1: Variant Workflow Integration Test", () => {
     // Clean up any existing test data
     await db.delete(orderItems).where(eq(orderItems.dishId, 1))
     await db.delete(dishVariants).where(eq(dishVariants.dishId, 1))
-    
+
     // Create test table
     const existingTable = await db.query.tables.findFirst({
       where: (tables, { eq }) => eq(tables.number, 999),
@@ -73,7 +84,10 @@ describe("T080.1: Variant Workflow Integration Test", () => {
 
     if (existingIngredient) {
       testIngredientId = existingIngredient.id
-      await db.update(ingredients).set({ quantity: 100 }).where(eq(ingredients.id, testIngredientId))
+      await db
+        .update(ingredients)
+        .set({ quantity: 100 })
+        .where(eq(ingredients.id, testIngredientId))
     } else {
       const [ingredient] = await db
         .insert(ingredients)
@@ -150,7 +164,9 @@ describe("T080.1: Variant Workflow Integration Test", () => {
     expect(largeResult.variantId).toBeTypeOf("number")
     largeVariantId = largeResult.variantId
 
-    console.log(`✅ Created 3 variants: Small (${smallVariantId}), Medium (${mediumVariantId}), Large (${largeVariantId})`)
+    console.log(
+      `✅ Created 3 variants: Small (${smallVariantId}), Medium (${mediumVariantId}), Large (${largeVariantId})`
+    )
   })
 
   test("Step 2: Customer views dish and sees variants", async () => {
@@ -162,7 +178,7 @@ describe("T080.1: Variant Workflow Integration Test", () => {
     expect(dishDetails).toBeDefined()
     expect(dishDetails.variants).toBeArray()
     expect(dishDetails.variants).toHaveLength(3)
-    
+
     // Verify variants are ordered by displayOrder
     expect(dishDetails.variants[0].name).toBe("Small")
     expect(dishDetails.variants[0].price).toBe(300)
@@ -193,7 +209,9 @@ describe("T080.1: Variant Workflow Integration Test", () => {
     expect(orderResult.orderId).toBeTypeOf("number")
     expect(orderResult.totalAmount).toBe(800) // $4.00 * 2 = $8.00
 
-    console.log(`✅ Order created with variant. OrderId: ${orderResult.orderId}, Total: $${orderResult.totalAmount / 100}`)
+    console.log(
+      `✅ Order created with variant. OrderId: ${orderResult.orderId}, Total: $${orderResult.totalAmount / 100}`
+    )
   })
 
   test("Step 4: Verify price calculation with variant", async () => {
@@ -212,8 +230,10 @@ describe("T080.1: Variant Workflow Integration Test", () => {
     })
 
     expect(orderResult.totalAmount).toBe(500) // $5.00 * 1 = $5.00
-    
-    console.log(`✅ Price calculation correct: Large variant ($5.00) * 1 = $${orderResult.totalAmount / 100}`)
+
+    console.log(
+      `✅ Price calculation correct: Large variant ($5.00) * 1 = $${orderResult.totalAmount / 100}`
+    )
   })
 
   test("Step 5: Kitchen receives order with variant name", async () => {
@@ -226,7 +246,7 @@ describe("T080.1: Variant Workflow Integration Test", () => {
     expect(kitchenOrders.orders).toBeArray()
 
     // Find our test orders
-    const testOrders = kitchenOrders.orders.filter((order: any) => 
+    const testOrders = kitchenOrders.orders.filter((order: any) =>
       order.items.some((item: any) => item.dishName === "Coffee - E2E Test")
     )
 
@@ -259,7 +279,9 @@ describe("T080.1: Variant Workflow Integration Test", () => {
     const variants = await caller.dishes.listVariants({ dishId: testDishId })
 
     // Verify Large is now first (lowest displayOrder)
-    const sortedVariants = variants.variants.sort((a: any, b: any) => a.displayOrder - b.displayOrder)
+    const sortedVariants = variants.variants.sort(
+      (a: any, b: any) => a.displayOrder - b.displayOrder
+    )
     expect(sortedVariants[0].name).toBe("Large")
 
     console.log(`✅ Variant reordering works: Large is now first`)
@@ -337,7 +359,9 @@ describe("T080.1: Variant + Modifiers Integration Test", () => {
 
     expect(orderResult.totalAmount).toBe(450) // $4.50 * 1
 
-    console.log(`✅ Variant + Modifiers pricing: Variant ($4.50) + Modifiers ($0.00) = $${orderResult.totalAmount / 100}`)
+    console.log(
+      `✅ Variant + Modifiers pricing: Variant ($4.50) + Modifiers ($0.00) = $${orderResult.totalAmount / 100}`
+    )
   })
 })
 

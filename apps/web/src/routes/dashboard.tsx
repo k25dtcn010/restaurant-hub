@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, redirect } from "@tanstack/react-router"
 import {
   ChefHat,
-  Clock,
   ClipboardList,
+  Clock,
   History,
   Package,
   TruckIcon,

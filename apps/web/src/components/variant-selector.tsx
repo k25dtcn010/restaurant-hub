@@ -1,12 +1,12 @@
 /**
  * T077: Variant Selector Component
  * Component for customers to select dish variants when ordering
- * 
+ *
  * Features:
  * - Radio buttons for variants (only one selection allowed)
  * - Display price for each variant
  * - Required selection if dish has variants
- * 
+ *
  * Props:
  * - variants: DishVariant[] - Available variants
  * - selectedVariantId: number | null - Currently selected variant

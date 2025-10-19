@@ -1,8 +1,9 @@
 import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
-import { db, dishes, eq, ingredients, orderItems, orders, recipes, tables } from "@/db"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
+import { db, dishes, eq, ingredients, orderItems, orders, recipes, tables } from "@/db"
+
 import { mockWsNotifier } from "../setup"
 
 /**

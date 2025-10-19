@@ -49,19 +49,24 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ## What Changed by Phase
 
 ### Phase 1: Setup (T001-T013)
+
 **Before**: Vague "Create schema file with tables X, Y, Z"  
-**After**: 
+**After**:
+
 - Exact table definitions with column types, defaults, constraints
 - References to `data-model.md` sections
 - Expected outputs for migrations
 - Validation steps for each task
 
 **Example Improvement**:
+
 ```markdown
 ❌ BEFORE:
+
 - [ ] T002 Create modifiers schema with tables
 
 ✅ AFTER:
+
 - [ ] T002 Create modifiers schema
   - **Data Model**: See data-model.md § 1.1, 1.2, 1.3, 1.4
   - **Tables**: modifiers, modifierGroups, dishModifiers, orderItemModifiers
@@ -70,19 +75,24 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ```
 
 ### Phase 2: Foundational (T014-T020)
+
 **Before**: "Create router skeleton with empty procedures"  
-**After**: 
+**After**:
+
 - Exact procedure signatures with Zod schemas
 - Contract references for each procedure
 - Temporary implementation guidance (return TODO errors)
 - Validation commands
 
 **Example Improvement**:
+
 ```markdown
 ❌ BEFORE:
+
 - [ ] T014 Create modifiers router skeleton
 
 ✅ AFTER:
+
 - [ ] T014 Create modifiers router skeleton
   - **Contract**: See contracts/modifiers-router.md
   - **Procedures**: list, create, update, delete, listGroups, createGroup... (10 total)
@@ -91,19 +101,24 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ```
 
 ### Phase 3: User Story 1 - Modifiers (T021-T045)
+
 **Before**: Single-line tasks like "Implement modifiers.list procedure"  
-**After**: 
+**After**:
+
 - **Backend**: TDD breakdown with RED-GREEN-REFACTOR subtasks
 - **Frontend**: UI references to quickstart.md workflows
 - **Dependencies**: Clear blocking relationships (T029 BLOCKS T038)
 - **Validation**: 4 checkpoint tasks (integration, performance, type safety, coverage)
 
 **Example Improvement**:
+
 ```markdown
 ❌ BEFORE:
+
 - [ ] T021 Implement modifiers.list procedure
 
 ✅ AFTER (3 subtasks):
+
 - [ ] T021-RED Write FAILING test for modifiers.list
   - **File**: packages/api/tests/routers/modifiers.test.ts
   - **Contract**: contracts/modifiers-router.md § modifiers.list
@@ -121,16 +136,20 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ```
 
 ### Phase 4-8: User Stories 2-6
+
 **Before**: Minimal task descriptions  
-**After**: 
+**After**:
+
 - Contract and data model references for all backend tasks
 - UI/UX references to quickstart.md for frontend tasks
 - Condensed but complete format (less verbose than US1 but still comprehensive)
 - Validation tasks after each checkpoint
 
 ### Phase 9: Polish
+
 **Before**: Simple checklist  
-**After**: 
+**After**:
+
 - Categorized by purpose (UI/UX, Documentation, Quality Assurance)
 - Constitution references (§ III User Experience, § II Code Quality)
 - Specific commands and expected outputs
@@ -141,18 +160,21 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ## Key Improvements by Fix Type
 
 ### Cross-References Added
+
 - **152 contract references** to `contracts/*.md` files
 - **84 data model references** to `data-model.md` sections
 - **47 quickstart references** to `quickstart.md` workflows
 - **31 dependency annotations** (DEPENDS ON, BLOCKS)
 
 ### TDD Implementation
+
 - **10 backend procedures** split into RED-GREEN-REFACTOR subtasks (30 subtasks total)
 - Test file locations specified for all backend tasks
 - Expected test outcomes documented
 - Refactoring criteria defined (lint, types, performance)
 
 ### Validation Tasks
+
 - **6 user story checkpoints** with validation subtasks (24 new tasks)
 - Integration test scenarios defined
 - Performance benchmarks specified (< 200ms per Constitution)
@@ -160,6 +182,7 @@ Fixed **all critical and medium priority issues** identified in the audit report
 - Test coverage targets (80% per Constitution)
 
 ### UI/UX Clarity
+
 - **All 45 frontend tasks** now reference expected user workflows
 - Component features lists provided
 - shadcn/ui component usage specified
@@ -170,6 +193,7 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ## Metrics
 
 ### Before Fixes
+
 - Total tasks: 143
 - Tasks with cross-references: ~10 (7%)
 - Tasks with TDD breakdown: 0 (0%)
@@ -177,6 +201,7 @@ Fixed **all critical and medium priority issues** identified in the audit report
 - Average task clarity: 3/10
 
 ### After Fixes
+
 - Total tasks: 174 (includes new validation subtasks)
 - Tasks with cross-references: 143 (100%)
 - Tasks with TDD breakdown: 30 (all backend procedures)
@@ -188,13 +213,16 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ## Examples of Specific Improvements
 
 ### Setup Phase Example (T007)
+
 **Before**:
+
 ```markdown
-- [ ] T007 Extend packages/db/src/schema/dishes.ts with columns: 
-        isHidden, isRecommended, isChefSpecial, orderPriority
+- [ ] T007 Extend packages/db/src/schema/dishes.ts with columns:
+      isHidden, isRecommended, isChefSpecial, orderPriority
 ```
 
 **After**:
+
 ```markdown
 - [ ] T007 Extend packages/db/src/schema/dishes.ts with flag columns
   - **Data Model Reference**: See `data-model.md` § 4.1 "Dish Extensions"
@@ -208,18 +236,21 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ```
 
 ### Backend Procedure Example (T029)
+
 **Before**:
+
 ```markdown
-- [ ] T029 Implement modifiers.assignToDish procedure 
-        (inserts into dishModifiers table)
+- [ ] T029 Implement modifiers.assignToDish procedure
+      (inserts into dishModifiers table)
 ```
 
 **After**:
+
 ```markdown
 - [ ] T029-RED Write FAILING test for modifiers.assignToDish
   - **Contract**: contracts/modifiers-router.md § modifiers.assignToDish
   - **Data Model**: Inserts into dishModifiers join table (data-model.md § 1.3)
-  - **Test Cases**: 
+  - **Test Cases**:
     1. Manager can assign modifier to dish with group
     2. Duplicate assignment is idempotent
   - **BLOCKS**: T038 (dish editor needs this)
@@ -232,14 +263,17 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ```
 
 ### Frontend Component Example (T035)
+
 **Before**:
+
 ```markdown
-- [ ] T035 Create modifier management UI component 
-        apps/web/src/components/modifier-manager.tsx 
-        with list, create, edit, delete forms
+- [ ] T035 Create modifier management UI component
+      apps/web/src/components/modifier-manager.tsx
+      with list, create, edit, delete forms
 ```
 
 **After**:
+
 ```markdown
 - [ ] T035 Create modifier management UI component
   - **File**: apps/web/src/components/modifier-manager.tsx
@@ -261,6 +295,7 @@ Fixed **all critical and medium priority issues** identified in the audit report
 
 **Before**: No validation tasks  
 **After** (for User Story 1):
+
 ```markdown
 - [ ] T045.1 End-to-end integration test for modifier workflow
   - **Quickstart**: Run quickstart.md § A full walkthrough
@@ -294,11 +329,13 @@ Fixed **all critical and medium priority issues** identified in the audit report
 ## Impact Assessment
 
 ### Time Investment
+
 - **Audit**: 1 hour
 - **Fixes Applied**: 3 hours
 - **Total**: 4 hours upfront investment
 
 ### Time Saved During Implementation (Estimated)
+
 - **Developer confusion reduced**: ~8 hours saved
 - **File hunting eliminated**: ~4 hours saved
 - **Test-first workflow enforced**: ~2 hours saved (prevents rework)
@@ -306,6 +343,7 @@ Fixed **all critical and medium priority issues** identified in the audit report
 - **Total**: ~18 hours saved
 
 ### ROI
+
 **4.5x return on investment** (18 hours saved / 4 hours invested)
 
 ---

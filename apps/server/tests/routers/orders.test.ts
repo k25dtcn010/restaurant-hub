@@ -1,4 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
+
+import type { Context } from "@/api/context"
+import { appRouter } from "@/api/routers"
 import {
   db,
   dishes,
@@ -11,8 +14,6 @@ import {
   tables,
 } from "@/db"
 
-import type { Context } from "@/api/context"
-import { appRouter } from "@/api/routers"
 import { mockWsNotifier } from "../setup"
 
 /**
@@ -1236,7 +1237,7 @@ describe("Orders Router - orders.getKitchenOrders with priority sorting (T054)",
         })
         .returning()
       highPriorityDishId = dish.id
-      
+
       // Create recipe
       await db.insert(recipes).values({
         dishId: dish.id,
@@ -1262,7 +1263,7 @@ describe("Orders Router - orders.getKitchenOrders with priority sorting (T054)",
         })
         .returning()
       normalPriorityDishId = dish.id
-      
+
       // Create recipe
       await db.insert(recipes).values({
         dishId: dish.id,
@@ -1288,7 +1289,7 @@ describe("Orders Router - orders.getKitchenOrders with priority sorting (T054)",
         })
         .returning()
       lowPriorityDishId = dish.id
-      
+
       // Create recipe
       await db.insert(recipes).values({
         dishId: dish.id,
@@ -1385,8 +1386,8 @@ describe("Orders Router - orders.getKitchenOrders with priority sorting (T054)",
     expect(result.orders.length).toBeGreaterThanOrEqual(3)
 
     // Find our test orders
-    const testOrders = result.orders.filter((o) => 
-      o.items.some(item => 
+    const testOrders = result.orders.filter((o) =>
+      o.items.some((item) =>
         ["High Priority Dish", "Normal Priority Dish", "Low Priority Dish"].includes(item.dishName)
       )
     )
@@ -1394,10 +1395,14 @@ describe("Orders Router - orders.getKitchenOrders with priority sorting (T054)",
     expect(testOrders.length).toBeGreaterThanOrEqual(3)
 
     // The first order should have the high priority dish
-    const firstOrder = testOrders.find(o => o.items.some(item => item.dishName === "High Priority Dish"))
+    const firstOrder = testOrders.find((o) =>
+      o.items.some((item) => item.dishName === "High Priority Dish")
+    )
     const firstOrderIndex = testOrders.indexOf(firstOrder!)
-    
-    const lowPriorityOrder = testOrders.find(o => o.items.some(item => item.dishName === "Low Priority Dish"))
+
+    const lowPriorityOrder = testOrders.find((o) =>
+      o.items.some((item) => item.dishName === "Low Priority Dish")
+    )
     const lowPriorityIndex = testOrders.indexOf(lowPriorityOrder!)
 
     // High priority should come before low priority

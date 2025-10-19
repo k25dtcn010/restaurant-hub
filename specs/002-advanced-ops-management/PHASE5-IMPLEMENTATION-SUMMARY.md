@@ -1,15 +1,18 @@
 # Phase 5 User Story 3 Implementation Summary
 
 ## Overview
+
 Successfully implemented Menu Item Variants feature enabling dishes to have multiple size/option variants (e.g., Small/Medium/Large) with different prices. Customers can select variants when ordering, and kitchen staff see the variant information.
 
 ## Completion Status: ✅ 100%
 
 ### Backend (8/8 tasks completed)
+
 - ✅ T066-T070: Variant CRUD procedures (create, update, delete, list, getDishDetails)
 - ✅ T071-T073: Order integration with variant pricing and display
 
 ### Frontend (7/7 tasks completed)
+
 - ✅ T074-T076: Manager variant editor with drag-and-drop
 - ✅ T077-T079: Customer variant selector with pricing
 - ✅ T080: Kitchen display with variant names
@@ -17,6 +20,7 @@ Successfully implemented Menu Item Variants feature enabling dishes to have mult
 ## Technical Implementation
 
 ### Database Schema
+
 ```sql
 CREATE TABLE dish_variants (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,6 +42,7 @@ ALTER TABLE order_items ADD COLUMN variant_id INTEGER REFERENCES dish_variants(i
 ```
 
 ### API Endpoints (tRPC)
+
 1. `dishes.createVariant` - Create new variant for a dish
 2. `dishes.updateVariant` - Update variant name, price, or display order
 3. `dishes.deleteVariant` - Delete variant (protected if used in orders)
@@ -49,7 +54,9 @@ ALTER TABLE order_items ADD COLUMN variant_id INTEGER REFERENCES dish_variants(i
 ### Component Architecture
 
 #### Manager Components
+
 **VariantEditor** (`apps/web/src/components/variant-editor.tsx`)
+
 - Features:
   - Add new variants with name and price
   - Inline editing for existing variants
@@ -60,13 +67,16 @@ ALTER TABLE order_items ADD COLUMN variant_id INTEGER REFERENCES dish_variants(i
 - Mutations: tRPC with optimistic updates and cache invalidation
 
 **DishEditor Integration** (`apps/web/src/components/dish-editor.tsx`)
+
 - "Has Variants" toggle (Switch component)
 - Conditional variant editor display (only for existing dishes)
 - Helper text for new dishes (must save first)
 - Integration with existing modifier and category assignment
 
 #### Customer Components
+
 **VariantSelector** (`apps/web/src/components/variant-selector.tsx`)
+
 - Features:
   - Radio button UI for single selection
   - Price display per variant
@@ -75,19 +85,24 @@ ALTER TABLE order_items ADD COLUMN variant_id INTEGER REFERENCES dish_variants(i
 - Props: `variants`, `selectedVariantId`, `onSelect`, `required`
 
 **DishCustomizationDialog Integration**
+
 - Variant selector placed before modifier selector
 - Price calculation: `(variant.price + modifierTotal) * quantity`
 - Validation: Prevents cart addition without variant selection
 - Price breakdown shows variant name
 
 #### Kitchen Components
+
 **OrderCard Extension** (`apps/web/src/components/order-card.tsx`)
+
 - Display format: "Coffee (Medium) x2" instead of "Coffee x2"
 - OrderItem interface extended with `variantName?: string | null`
 - Graceful handling of null variants (older orders)
 
 ### UI Components Added
+
 **RadioGroup** (`apps/web/src/components/ui/radio-group.tsx`)
+
 - shadcn/ui compatible component
 - Based on @radix-ui/react-radio-group
 - Accessible with keyboard navigation
@@ -96,6 +111,7 @@ ALTER TABLE order_items ADD COLUMN variant_id INTEGER REFERENCES dish_variants(i
 ### Data Flow
 
 #### Manager Creating Variants
+
 1. Manager opens dish editor for existing dish
 2. Toggles "Has Variants" switch ON
 3. VariantEditor component loads current variants via `dishes.listVariants`
@@ -107,6 +123,7 @@ ALTER TABLE order_items ADD COLUMN variant_id INTEGER REFERENCES dish_variants(i
 9. Manager can reorder via drag-and-drop → `dishes.updateVariant` with new displayOrder
 
 #### Customer Ordering with Variants
+
 1. Customer clicks dish with variants
 2. DishCustomizationDialog opens
 3. `dishes.listVariants` query loads variants
@@ -118,6 +135,7 @@ ALTER TABLE order_items ADD COLUMN variant_id INTEGER REFERENCES dish_variants(i
 9. Order saved with variant_id in order_items table
 
 #### Kitchen Receiving Order
+
 1. Kitchen dashboard queries `orders.getKitchenOrders`
 2. Backend joins order_items → dish_variants
 3. Response includes variantName field
@@ -127,11 +145,12 @@ ALTER TABLE order_items ADD COLUMN variant_id INTEGER REFERENCES dish_variants(i
 ### Price Calculation Logic
 
 **Backend (orders.createOrder)**
+
 ```typescript
 // Get variant if specified
 let basePrice = dish.price
 if (item.variantId) {
-  variant = dish.dishVariants.find(v => v.id === item.variantId)
+  variant = dish.dishVariants.find((v) => v.id === item.variantId)
   if (variant) {
     basePrice = variant.price
   }
@@ -144,8 +163,9 @@ const itemTotal = itemPrice * quantity
 ```
 
 **Frontend (DishCustomizationDialog)**
+
 ```typescript
-const selectedVariant = variants.find(v => v.id === selectedVariantId)
+const selectedVariant = variants.find((v) => v.id === selectedVariantId)
 const basePrice = selectedVariant ? selectedVariant.price : dish.price
 const modifierTotal = selectedModifiers.reduce((sum, m) => sum + m.priceAdjustment, 0)
 const itemTotal = (basePrice + modifierTotal) * quantity
@@ -154,6 +174,7 @@ const itemTotal = (basePrice + modifierTotal) * quantity
 ### Validation & Error Handling
 
 **Backend Validation**
+
 - Variant name: Required, max 100 characters
 - Price: Required, minimum 0 (in cents)
 - displayOrder: Optional, defaults to 0
@@ -161,6 +182,7 @@ const itemTotal = (basePrice + modifierTotal) * quantity
 - Dish existence: Validates dishId before creating variant
 
 **Frontend Validation**
+
 - Variant required: If dish has variants, must select one
 - Add to cart disabled: Until variant selected
 - Price format: Always shows 2 decimal places
@@ -168,6 +190,7 @@ const itemTotal = (basePrice + modifierTotal) * quantity
 - Deletion confirmation: "Are you sure?" dialog
 
 ### Dependencies Added
+
 - `@radix-ui/react-radio-group@1.3.8` - Radio button primitive
 - `@dnd-kit/core@6.1.0` (already in project) - Drag and drop core
 - `@dnd-kit/sortable@8.0.0` (already in project) - Sortable utilities
@@ -175,18 +198,21 @@ const itemTotal = (basePrice + modifierTotal) * quantity
 ## Testing Evidence
 
 ### Development Environment
+
 - ✅ Backend server: http://localhost:3000
 - ✅ Frontend server: http://localhost:3001
 - ✅ Database: SQLite (local.db) with migrations applied
 - ✅ Seed data: 3 users, 30 tables, 20 ingredients, 15 dishes
 
 ### Type Safety
+
 - TypeScript strict mode enabled
 - Full type inference from DB → API → UI
 - Zod schemas for runtime validation
 - Some pre-existing type errors in unrelated components (not introduced by this work)
 
 ### API Endpoints Tested
+
 - `POST /trpc/dishes.createVariant` ✅
 - `POST /trpc/dishes.updateVariant` ✅
 - `POST /trpc/dishes.deleteVariant` ✅
@@ -198,11 +224,13 @@ const itemTotal = (basePrice + modifierTotal) * quantity
 ## Files Modified/Created
 
 ### Created (3 files)
+
 1. `apps/web/src/components/variant-editor.tsx` - 418 lines
 2. `apps/web/src/components/variant-selector.tsx` - 82 lines
 3. `apps/web/src/components/ui/radio-group.tsx` - 48 lines
 
 ### Modified (4 files)
+
 1. `apps/web/src/components/dish-editor.tsx`
    - Added variant toggle and editor integration (+95 lines)
 2. `apps/web/src/components/dish-customization-dialog.tsx`
@@ -213,38 +241,46 @@ const itemTotal = (basePrice + modifierTotal) * quantity
    - Marked all Phase 5 tasks as complete
 
 ### Dependencies
+
 - `apps/web/package.json`: Added @radix-ui/react-radio-group
 - `bun.lock`: Updated with new dependencies
 
 ## Acceptance Criteria ✅
 
 ### User Story 3 from spec.md
+
 ✅ **Scenario 1**: Manager creates dish with variants
+
 - Manager enables "Has Variants" toggle
 - Adds "Small ($3)", "Medium ($4)", "Large ($5)"
 - Variants saved with correct prices
 
 ✅ **Scenario 2**: Customer selects variant when ordering
+
 - Customer views dish with variants
 - Must select one variant (required)
 - Cannot add to cart without selection
 
 ✅ **Scenario 3**: Order total reflects variant price
+
 - Selected variant price used instead of base dish price
 - Modifiers add to variant price
 - Total = (variant.price + modifiers) × quantity
 
 ✅ **Scenario 4**: Kitchen sees variant information
+
 - Order displays "Coffee (Medium) x2"
 - Variant name shown in parentheses
 - Historical orders preserve variant names
 
 ✅ **Scenario 5**: Manager reorders variants
+
 - Drag-and-drop functionality works
 - displayOrder updates in database
 - Customer sees variants in correct order
 
 ✅ **Scenario 6**: Deletion protection works
+
 - Cannot delete variant used in orders
 - Error message clear and actionable
 - Unused variants can be deleted
@@ -308,6 +344,7 @@ Phase 5 User Story 3 is **fully implemented and functional**. All 15 tasks (T066
 **Status**: ✅ READY FOR REVIEW AND TESTING
 
 ---
+
 **Last Updated**: 2025-10-19  
 **Author**: GitHub Copilot  
 **Task Reference**: Phase 5, User Story 3, Tasks T066-T080

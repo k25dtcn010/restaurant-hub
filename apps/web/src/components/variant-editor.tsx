@@ -1,32 +1,21 @@
 /**
  * T074: Variant Editor Component
  * Component for managing dish variants (sizes/options)
- * 
+ *
  * Features:
  * - Add/edit/delete variants
  * - Reorder by drag-and-drop
  * - Set price per variant
- * 
+ *
  * Props:
  * - dishId: number - The dish to manage variants for
  * - variants: DishVariant[] - Current variants
  * - onVariantsChange: () => void - Callback after variants change
  */
 
-import { useMutation } from "@tanstack/react-query"
-import { GripVertical, Plus, Trash2 } from "lucide-react"
-import { useState } from "react"
-import { toast } from "sonner"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { queryClient, trpcClient } from "@/utils/trpc"
-
 import {
-  DndContext,
   closestCenter,
+  DndContext,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -41,6 +30,16 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { useMutation } from "@tanstack/react-query"
+import { GripVertical, Plus, Trash2 } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { queryClient, trpcClient } from "@/utils/trpc"
 
 interface DishVariant {
   id: number
@@ -135,18 +134,12 @@ function SortableVariantItem({ variant, onEdit, onDelete }: SortableVariantItemP
         <>
           <div className="flex-1">
             <div className="font-medium">{variant.name}</div>
-            <div className="text-sm text-muted-foreground">
-              ${(variant.price / 100).toFixed(2)}
-            </div>
+            <div className="text-sm text-muted-foreground">${(variant.price / 100).toFixed(2)}</div>
           </div>
           <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
             Edit
           </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => onDelete(variant.id)}
-          >
+          <Button size="sm" variant="destructive" onClick={() => onDelete(variant.id)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </>

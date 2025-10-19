@@ -202,7 +202,10 @@ export function ModifierGroupEditor() {
     }
   }
 
-  const formatConstraint = (min: number | null | undefined, max: number | null | undefined): string => {
+  const formatConstraint = (
+    min: number | null | undefined,
+    max: number | null | undefined
+  ): string => {
     if ((min === null || min === undefined) && (max === null || max === undefined)) {
       return "No limits"
     }

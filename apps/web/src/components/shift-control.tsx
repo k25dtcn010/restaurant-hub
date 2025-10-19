@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
+import type { ActiveShift } from "@/types/shifts"
 import { trpc, trpcClient } from "@/utils/trpc"
 
 /**
@@ -68,7 +70,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
     { id: "3", name: "Bob Johnson" },
   ]
 
-  const activeShift = activeShifts?.[0] || null
+  const activeShift: ActiveShift | null = (activeShifts?.[0] as unknown as ActiveShift) || null
 
   // Start shift mutation
   const startShiftMutation = useMutation({
@@ -77,7 +79,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
       customTypeName?: string
       staffIds?: string[]
       notes?: string
-    }) => trpcClient.shifts.start.mutate(data),
+    }) => trpcClient.shifts.start.mutate(data as any),
     onSuccess: () => {
       toast.success("Shift started successfully")
       setStartDialogOpen(false)
@@ -154,7 +156,17 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoadingActiveShifts ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-48" />
+                </div>
+              </div>
+              <Skeleton className="h-10 w-full" />
+            </div>
           ) : activeShift ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -170,7 +182,8 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
                   </p>
                   {activeShift.staff.length > 0 && (
                     <p className="text-sm text-muted-foreground">
-                      Staff: {activeShift.staff.map((s) => s.name).join(", ")}
+                      Staff:{" "}
+                      {activeShift.staff.map((s: ActiveShift["staff"][0]) => s.name).join(", ")}
                     </p>
                   )}
                 </div>
@@ -295,10 +308,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
             </Button>
             <Button
               onClick={handleStartShift}
-              disabled={
-                startShiftMutation.isPending ||
-                (shiftType === "Custom" && !customTypeName)
-              }
+              disabled={startShiftMutation.isPending || (shiftType === "Custom" && !customTypeName)}
             >
               {startShiftMutation.isPending ? "Starting..." : "Start Shift"}
             </Button>
@@ -335,7 +345,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
                   <div>
                     <span className="font-medium">Staff:</span>
                     <div className="text-sm text-muted-foreground mt-1">
-                      {activeShift.staff.map((s) => s.name).join(", ")}
+                      {activeShift.staff.map((s: ActiveShift["staff"][0]) => s.name).join(", ")}
                     </div>
                   </div>
                 )}

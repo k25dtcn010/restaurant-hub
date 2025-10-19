@@ -2,7 +2,7 @@
 
 ## Summary of Issues:
 
-1. **Flags Workflow Test (2 fails)** - `highPriorityIndex=0, normalOrderIndex=0` 
+1. **Flags Workflow Test (2 fails)** - `highPriorityIndex=0, normalOrderIndex=0`
    - Issue: High-priority order not appearing before normal order
    - Root cause: Kitchen orders query not sorting by priority/order_priority
 
@@ -14,7 +14,7 @@
    - Issues: Multiple failures in category operations
    - Failures in creating categories with dishes
    - categoryId being undefined in responses
-   - Root causes: 
+   - Root causes:
      - Categories router not returning ID in responses
      - Assign to category expecting categoryId that's not provided
 
@@ -27,6 +27,7 @@
    - Root cause: Error handling for non-existent ingredients missing
 
 ## Files to Fix:
+
 - `apps/server/src/api/routers/orders.ts` - isNew logic for modifiers
 - `apps/server/src/api/routers/categories.ts` - Response format issues
 - `apps/server/src/api/routers/inventory.ts` - Error handling

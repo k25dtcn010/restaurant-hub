@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm"
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 
-import { dishVariants } from "./variants"
 import { recipes } from "./recipes"
+import { dishVariants } from "./variants"
 
 // Dish entity per data-model.md Section 5
 export const dishes = sqliteTable("dishes", {

@@ -102,10 +102,9 @@ export const ordersRouter = router({
         orderId = activeOrder.id
       } else {
         // T120: Query active shift for auto-tagging
-        const { shifts } = await import("@/db")
         const activeShift = await db.query.shifts.findFirst({
-          where: (shifts, { isNull }) => isNull(shifts.endTime),
-          orderBy: (shifts, { desc }) => [desc(shifts.startTime)],
+          where: (s, { isNull }) => isNull(s.endTime),
+          orderBy: (s, { desc }) => [desc(s.startTime)],
         })
 
         // Create new order with shift ID if active shift exists
@@ -115,7 +114,7 @@ export const ordersRouter = router({
             tableId,
             status: "Pending",
             totalAmount: 0,
-            shiftId: activeShift?.id || null,  // T120: Auto-tag with active shift
+            shiftId: activeShift?.id || null, // T120: Auto-tag with active shift
           })
           .returning()
 

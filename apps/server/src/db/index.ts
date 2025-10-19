@@ -3,20 +3,20 @@ import { drizzle } from "drizzle-orm/libsql"
 
 // Import all schemas
 import * as authSchema from "./schema/auth"
+import * as categoriesSchema from "./schema/categories"
 import * as dishesSchema from "./schema/dishes"
 import * as ingredientsSchema from "./schema/ingredients"
+// New schemas per spec 002-advanced-ops-management
+import * as modifiersSchema from "./schema/modifiers"
 import * as orderItemsSchema from "./schema/order-items"
 import * as orderStatusHistorySchema from "./schema/order-status-history"
 import * as ordersSchema from "./schema/orders"
 import * as paymentsSchema from "./schema/payments"
 import * as recipesSchema from "./schema/recipes"
-import * as tablesSchema from "./schema/tables"
-// New schemas per spec 002-advanced-ops-management
-import * as modifiersSchema from "./schema/modifiers"
-import * as categoriesSchema from "./schema/categories"
-import * as variantsSchema from "./schema/variants"
 import * as reservationsSchema from "./schema/reservations"
 import * as shiftsSchema from "./schema/shifts"
+import * as tablesSchema from "./schema/tables"
+import * as variantsSchema from "./schema/variants"
 
 // Create database client
 // Note: DATABASE_URL must be set in environment before importing this module
@@ -54,7 +54,22 @@ const schema = {
 export const db = drizzle({ client, schema })
 
 // Export drizzle helpers for queries
-export { eq, and, ne, inArray, sql, or, gt, lt, gte, lte, like, asc, desc, count } from "drizzle-orm"
+export {
+  eq,
+  and,
+  ne,
+  inArray,
+  sql,
+  or,
+  gt,
+  lt,
+  gte,
+  lte,
+  like,
+  asc,
+  desc,
+  count,
+} from "drizzle-orm"
 
 // Export all schemas and types per data-model.md Type Exports Summary
 export * from "./schema/auth"
