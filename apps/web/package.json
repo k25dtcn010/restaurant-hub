@@ -12,8 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
-    "@learn-bettert/api": "workspace:*",
-    "@learn-bettert/auth": "workspace:*",
+    "@learn-bettert/server": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",

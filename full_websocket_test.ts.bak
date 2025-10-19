@@ -9,7 +9,7 @@
  * 4. Verifies WebSocket notification is received
  */
 
-import { db, tables, dishes, ingredients, recipes } from "@learn-bettert/db";
+import { db, tables, dishes, ingredients, recipes } from "@/db";
 
 console.log('🧪 Full WebSocket Integration Test\n');
 

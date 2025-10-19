@@ -4,9 +4,10 @@ import { trpcServer } from "@hono/trpc-server"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
-import { createContext } from "@learn-bettert/api/context"
-import { appRouter } from "@learn-bettert/api/routers/index"
-import { auth } from "@learn-bettert/auth"
+import { auth } from "@/auth"
+
+import { createContext } from "@/api/context"
+import { appRouter } from "@/api/routers"
 
 import { publicRateLimit } from "./rate-limit"
 import {
@@ -16,6 +17,8 @@ import {
   notifyOrderStatusChanged,
   websocket,
 } from "./websocket"
+
+export type { AppRouter } from "@/api/routers"
 
 /**
  * RestaurantHub Backend Server
