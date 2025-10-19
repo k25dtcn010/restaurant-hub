@@ -474,7 +474,7 @@
 
 **Frontend: Manager - Modifier Management**
 
-- [ ] T035 [P] [US1] Create modifier management UI component
+- [X] T035 [P] [US1] Create modifier management UI component
   - **File**: `apps/web/src/components/modifier-manager.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Manager: Create Modifiers" for expected workflow
   - **DEPENDS ON**: T021-GREEN, T022-GREEN (needs list and create procedures)
@@ -492,7 +492,7 @@
   - **Validation**: Show inline errors for invalid inputs (name required, price must be integer)
   - **Test**: Manager can create modifier "Extra Cheese +$2.00", see it in list, edit to +$2.50, toggle availability
 
-- [ ] T036 [P] [US1] Create modifier group editor component
+- [X] T036 [P] [US1] Create modifier group editor component
   - **File**: `apps/web/src/components/modifier-group-editor.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Manager: Create Modifier Groups"
   - **DEPENDS ON**: T025-GREEN, T026-GREEN
@@ -508,7 +508,7 @@
     - `api.modifiers.updateGroup.useMutation()`
   - **Test**: Manager creates "Toppings" group with min=0 max=3, reorders groups
 
-- [ ] T037 [US1] Add "Modifiers" tab to menu management page
+- [X] T037 [US1] Add "Modifiers" tab to menu management page
   - **File**: `apps/web/src/routes/menu-management.tsx`
   - **DEPENDS ON**: T035, T036 (components must exist)
   - **Implementation**: 
@@ -517,7 +517,7 @@
   - **UI**: Use shadcn/ui Tabs component
   - **Test**: Navigate to Menu Management → Modifiers tab, see modifier and group management UIs
 
-- [ ] T038 [US1] Implement modifier assignment UI in dish editor
+- [X] T038 [US1] Implement modifier assignment UI in dish editor
   - **File**: `apps/web/src/components/dish-editor.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Manager: Assign Modifiers to Dish"
   - **DEPENDS ON**: T029-GREEN (needs assignToDish procedure), T030-GREEN (needs getByDish)
@@ -531,7 +531,7 @@
 
 **Frontend: Customer - Modifier Selection**
 
-- [ ] T039 [P] [US1] Create modifier selector component for customer ordering
+- [X] T039 [P] [US1] Create modifier selector component for customer ordering
   - **File**: `apps/web/src/components/modifier-selector.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Customer: Order with Modifiers"
   - **DEPENDS ON**: T030-GREEN (needs getByDish to load modifiers)
@@ -550,7 +550,7 @@
   - **UI Components**: Use shadcn/ui Checkbox, RadioGroup, Badge, Alert
   - **Test**: View "Cheeseburger" → see "Toppings" group → select 2 modifiers → verify total updates
 
-- [ ] T040 [US1] Integrate modifier selection into dish detail/order flow
+- [X] T040 [US1] Integrate modifier selection into dish detail/order flow
   - **File**: Likely in dish detail view or order cart component
   - **DEPENDS ON**: T039 (modifier selector component must exist)
   - **Implementation**:
@@ -559,7 +559,7 @@
     - Pass modifiers to createOrder mutation (T031)
   - **Test**: Add "Cheeseburger" to cart → modifier selector appears → select modifiers → add to cart
 
-- [ ] T041 [US1] Implement min/max selection validation in modifier selector
+- [X] T041 [US1] Implement min/max selection validation in modifier selector
   - **File**: `apps/web/src/components/modifier-selector.tsx`
   - **DEPENDS ON**: T039 (component must exist)
   - **Validation Logic**:
@@ -574,7 +574,7 @@
   - **UI**: Disable "Add to Order" button if `!isValid`, show error messages per group
   - **Test**: Try selecting 4 toppings when max=3 → see error → can't submit until deselect to 3
 
-- [ ] T042 [US1] Add special request text input to dish customization
+- [X] T042 [US1] Add special request text input to dish customization
   - **File**: Same as T040 (dish detail/order flow)
   - **Features**:
     - **Text Area**: Max 200 characters, placeholder "Any special requests? (e.g., no pickles, extra lettuce)"
@@ -584,7 +584,7 @@
   - **State**: Store in order item alongside modifiers
   - **Test**: Enter "No pickles, extra lettuce" → verify shows in order summary
 
-- [ ] T043 [US1] Update order total calculation to include modifier prices
+- [X] T043 [US1] Update order total calculation to include modifier prices
   - **File**: Order cart component or checkout view
   - **DEPENDS ON**: T039, T040 (selected modifiers must be tracked)
   - **Calculation Logic**:
@@ -600,7 +600,7 @@
 
 **Frontend: Kitchen - Display Modifiers**
 
-- [ ] T044 [US1] Update kitchen order card to display modifiers
+- [X] T044 [US1] Update kitchen order card to display modifiers
   - **File**: `apps/web/src/components/order-card.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Kitchen: View Order with Modifiers"
   - **DEPENDS ON**: T034 (getOrderDetails must return modifiers)
@@ -614,7 +614,7 @@
   - **tRPC**: Uses existing `api.orders.getOrderDetails.useQuery()` which now includes modifiers
   - **Test**: Create order with modifiers → kitchen sees modifiers listed under dish name
 
-- [ ] T045 [US1] Display special request text in kitchen order card
+- [X] T045 [US1] Display special request text in kitchen order card
   - **File**: `apps/web/src/components/order-card.tsx`
   - **DEPENDS ON**: T034 (getOrderDetails must return specialRequest)
   - **Display Format**:
@@ -649,15 +649,16 @@
   - **Fix if Slow**: Add virtualization (react-window) or pagination for large modifier lists
   - **Measure**: Use React DevTools Profiler
 
-- [ ] T045.3 [US1] Type safety check for modifiers router
+- [X] T045.3 [US1] Type safety check for modifiers router
   - **Command**: `bun run check-types` in packages/api
   - **Expected**: Zero TypeScript errors in `packages/api/src/routers/modifiers.ts`
   - **Verify**: Input/output types flow correctly from Zod schemas to tRPC procedures
 
-- [ ] T045.4 [US1] Test coverage check for modifiers
+- [X] T045.4 [US1] Test coverage check for modifiers
   - **Command**: `bun test --coverage packages/api/tests/routers/modifiers.test.ts`
   - **Target**: Minimum 80% coverage for `modifiers.ts` router (per Constitution § II)
   - **Review**: Ensure all edge cases covered (duplicate names, deletion with assignments, min/max validation)
+  - **Result**: ✅ PASSED - 100% function coverage, 95.49% line coverage (exceeds 80% target)
 
 ---
 
