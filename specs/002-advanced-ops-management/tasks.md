@@ -261,7 +261,7 @@
 
 #### T021: modifiers.list - List all modifiers with availability filter
 
-- [ ] T021-RED [P] [US1] Write FAILING test for modifiers.list procedure
+- [X] T021-RED [P] [US1] Write FAILING test for modifiers.list procedure
   - **File**: `packages/api/tests/routers/modifiers.test.ts` (create if doesn't exist)
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.list" for input/output schemas
   - **Test Cases**:
@@ -271,7 +271,7 @@
   - **Setup**: Seed 5 modifiers (3 available, 2 unavailable)
   - **Expected**: Tests FAIL (procedure not fully implemented yet)
 
-- [ ] T021-GREEN [US1] Implement modifiers.list to make tests pass
+- [X] T021-GREEN [US1] Implement modifiers.list to make tests pass
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.list"
   - **Data Model**: Query `modifiers` table (see `data-model.md` § 1.1)
@@ -288,14 +288,14 @@
     ```
   - **Expected**: All tests PASS
 
-- [ ] T021-REFACTOR [US1] Review modifiers.list code quality
+- [X] T021-REFACTOR [US1] Review modifiers.list code quality
   - **Quality Checks**: Run `bun run lint`, `bun run check-types`
   - **Performance**: Should handle 1000+ modifiers in < 50ms
   - **Expected**: Tests still PASS, no lint errors
 
 #### T022: modifiers.create - Create new modifier (manager only)
 
-- [ ] T022-RED [P] [US1] Write FAILING test for modifiers.create
+- [X] T022-RED [P] [US1] Write FAILING test for modifiers.create
   - **File**: `packages/api/tests/routers/modifiers.test.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.create"
   - **Test Cases**:
@@ -305,20 +305,20 @@
     4. Negative price adjustment is allowed (e.g., discount)
   - **Expected**: Tests FAIL
 
-- [ ] T022-GREEN [US1] Implement modifiers.create with manager auth
+- [X] T022-GREEN [US1] Implement modifiers.create with manager auth
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.create"
   - **Auth**: Use `protectedProcedure` and check `ctx.user.role === 'manager'`
   - **Implementation**: Insert into `modifiers` table, catch unique constraint errors
   - **Expected**: All tests PASS
 
-- [ ] T022-REFACTOR [US1] Review error handling in modifiers.create
+- [X] T022-REFACTOR [US1] Review error handling in modifiers.create
   - **UX Check**: Error messages should be user-friendly (per Constitution § III)
   - **Expected**: Tests still PASS
 
 #### T023: modifiers.update - Update existing modifier (manager only)
 
-- [ ] T023-RED [P] [US1] Write FAILING test for modifiers.update
+- [X] T023-RED [P] [US1] Write FAILING test for modifiers.update
   - **File**: `packages/api/tests/routers/modifiers.test.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.update"
   - **Test Cases**:
@@ -328,18 +328,18 @@
     4. Partial updates work (only provided fields updated)
   - **Expected**: Tests FAIL
 
-- [ ] T023-GREEN [US1] Implement modifiers.update
+- [X] T023-GREEN [US1] Implement modifiers.update
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.update"
   - **Implementation**: Update only provided fields, return updated modifier
   - **Expected**: All tests PASS
 
-- [ ] T023-REFACTOR [US1] Optimize modifiers.update query
+- [X] T023-REFACTOR [US1] Optimize modifiers.update query
   - **Expected**: Tests still PASS
 
 #### T024: modifiers.delete - Delete modifier if not in use (manager only)
 
-- [ ] T024-RED [P] [US1] Write FAILING test for modifiers.delete
+- [X] T024-RED [P] [US1] Write FAILING test for modifiers.delete
   - **File**: `packages/api/tests/routers/modifiers.test.ts`
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.delete"
   - **Test Cases**:
@@ -349,7 +349,7 @@
   - **Data Model**: Check `dishModifiers` table (see `data-model.md` § 1.3)
   - **Expected**: Tests FAIL
 
-- [ ] T024-GREEN [US1] Implement modifiers.delete with assignment check
+- [X] T024-GREEN [US1] Implement modifiers.delete with assignment check
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Logic**: 
     1. Query `dishModifiers WHERE modifierId = input.id`
@@ -357,43 +357,43 @@
     3. Otherwise, delete from `modifiers` table
   - **Expected**: All tests PASS
 
-- [ ] T024-REFACTOR [US1] Review modifiers.delete error messages
+- [X] T024-REFACTOR [US1] Review modifiers.delete error messages
   - **Expected**: Tests still PASS
 
 #### T025-T028: Modifier Groups CRUD
 
-- [ ] T025-RED [P] [US1] Write FAILING tests for modifiers.listGroups
+- [X] T025-RED [P] [US1] Write FAILING tests for modifiers.listGroups
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.listGroups"
   - **Test**: Returns groups ordered by displayOrder ASC
 
-- [ ] T025-GREEN [US1] Implement modifiers.listGroups
+- [X] T025-GREEN [US1] Implement modifiers.listGroups
   - **Data Model**: Query `modifierGroups` table (see `data-model.md` § 1.2)
   - **Implementation**: Query all groups, order by displayOrder
 
-- [ ] T026-RED [P] [US1] Write FAILING tests for modifiers.createGroup
+- [X] T026-RED [P] [US1] Write FAILING tests for modifiers.createGroup
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.createGroup"
   - **Test Cases**: Manager can create, min/max validation works
 
-- [ ] T026-GREEN [US1] Implement modifiers.createGroup with validation
+- [X] T026-GREEN [US1] Implement modifiers.createGroup with validation
   - **Validation**: Ensure minSelections <= maxSelections (if both provided)
   - **Implementation**: Insert into `modifierGroups` table
 
-- [ ] T027-RED [P] [US1] Write FAILING tests for modifiers.updateGroup
+- [X] T027-RED [P] [US1] Write FAILING tests for modifiers.updateGroup
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.updateGroup"
 
-- [ ] T027-GREEN [US1] Implement modifiers.updateGroup
+- [X] T027-GREEN [US1] Implement modifiers.updateGroup
   - **Implementation**: Update provided fields in `modifierGroups`
 
-- [ ] T028-RED [P] [US1] Write FAILING tests for modifiers.deleteGroup
+- [X] T028-RED [P] [US1] Write FAILING tests for modifiers.deleteGroup
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.deleteGroup"
   - **Test**: Check if group assigned to dishes via dishModifiers
 
-- [ ] T028-GREEN [US1] Implement modifiers.deleteGroup with assignment check
+- [X] T028-GREEN [US1] Implement modifiers.deleteGroup with assignment check
   - **Implementation**: Similar to T024, check dishModifiers before deleting
 
 #### T029-T030: Dish-Modifier Assignment
 
-- [ ] T029-RED [US1] Write FAILING test for modifiers.assignToDish
+- [X] T029-RED [US1] Write FAILING test for modifiers.assignToDish
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.assignToDish"
   - **Data Model**: Inserts into `dishModifiers` join table (see `data-model.md` § 1.3)
   - **Test Cases**:
@@ -402,19 +402,19 @@
   - **BLOCKS**: T038 (dish editor needs this to assign modifiers)
   - **Expected**: Tests FAIL
 
-- [ ] T029-GREEN [US1] Implement modifiers.assignToDish
+- [X] T029-GREEN [US1] Implement modifiers.assignToDish
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Implementation**: Insert into `dishModifiers (dishId, modifierId, modifierGroupId)`
   - **Handle Duplicates**: Use `ON CONFLICT DO NOTHING` or check before inserting
   - **Expected**: Tests PASS
 
-- [ ] T030-RED [US1] Write FAILING test for modifiers.getByDish
+- [X] T030-RED [US1] Write FAILING test for modifiers.getByDish
   - **Contract**: See `contracts/modifiers-router.md` § "modifiers.getByDish"
   - **Test**: Returns modifiers grouped by modifierGroup for a specific dish
   - **BLOCKS**: T039 (modifier selector needs this data)
   - **Expected**: Tests FAIL
 
-- [ ] T030-GREEN [US1] Implement modifiers.getByDish with grouping
+- [X] T030-GREEN [US1] Implement modifiers.getByDish with grouping
   - **File**: `packages/api/src/routers/modifiers.ts`
   - **Implementation**:
     1. Join `dishModifiers → modifiers → modifierGroups`
@@ -426,14 +426,14 @@
 
 **Backend: Order Item Modifiers**
 
-- [ ] T031 [US1] Update orders.createOrder to accept modifiers array per item
+- [X] T031 [US1] Update orders.createOrder to accept modifiers array per item
   - **File**: `packages/api/src/routers/orders.ts`
   - **Note**: Input schema already extended in T020, now process the data
   - **DEPENDS ON**: T030 (needs getByDish to validate modifier selections)
   - **Implementation**: Accept modifiers in input, validate they belong to dish
   - **Don't Implement Yet**: Price calculation (done in T032)
 
-- [ ] T032 [US1] Implement modifier price calculation in orders.createOrder
+- [X] T032 [US1] Implement modifier price calculation in orders.createOrder
   - **File**: `packages/api/src/routers/orders.ts`
   - **DEPENDS ON**: T031
   - **Logic**:
@@ -446,7 +446,7 @@
   - **Data Model**: Use `priceAdjustment` from modifiers table (see `data-model.md` § 1.1)
   - **Test**: Order with modifiers has correct total price
 
-- [ ] T033 [US1] Insert selected modifiers into orderItemModifiers table
+- [X] T033 [US1] Insert selected modifiers into orderItemModifiers table
   - **File**: `packages/api/src/routers/orders.ts`
   - **DEPENDS ON**: T032
   - **Data Model**: Insert into `orderItemModifiers` join table (see `data-model.md` § 1.4)
@@ -463,7 +463,7 @@
     ```
   - **Test**: Query orderItemModifiers table, verify modifiers stored with historical prices
 
-- [ ] T034 [US1] Update orders.getOrderDetails to include modifiers in response
+- [X] T034 [US1] Update orders.getOrderDetails to include modifiers in response
   - **File**: `packages/api/src/routers/orders.ts`
   - **DEPENDS ON**: T033
   - **Implementation**: 

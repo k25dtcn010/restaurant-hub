@@ -1,6 +1,14 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
-import { eq, ingredients, orderItems, orders, orderStatusHistory, sql } from "@learn-bettert/db"
+import {
+  eq,
+  ingredients,
+  orderItems,
+  orderItemModifiers,
+  orders,
+  orderStatusHistory,
+  sql,
+} from "@learn-bettert/db"
 
 import { publicProcedure, router } from "../index"
 
@@ -157,16 +165,81 @@ export const ordersRouter = router({
           }
         }
 
-        // Add order item
-        await db.insert(orderItems).values({
-          orderId,
-          dishId: item.dishId,
-          quantity: item.quantity,
-          priceAtOrder: dish.price,
-          specialInstructions: item.specialInstructions,
-        })
+        // T031: Validate modifiers belong to dish
+        let modifierObjects: Array<{ id: number; name: string; priceAdjustment: number }> = []
+        if (item.modifiers && item.modifiers.length > 0) {
+          // Get available modifiers for this dish
+          const availableModifiers = await db.query.dishModifiers.findMany({
+            where: (dishModifiers, { eq }) => eq(dishModifiers.dishId, item.dishId),
+            with: {
+              modifier: true,
+            },
+          })
 
-        totalAmount += dish.price * item.quantity
+          const availableModifierIds = new Set(availableModifiers.map((dm) => dm.modifier.id))
+
+          // Validate all selected modifiers are available for this dish
+          for (const selectedModifier of item.modifiers) {
+            if (!availableModifierIds.has(selectedModifier.modifierId)) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: `Modifier is not available for this dish`,
+              })
+            }
+
+            // Get modifier details for price calculation
+            const modifierDetail = availableModifiers.find(
+              (dm) => dm.modifier.id === selectedModifier.modifierId
+            )
+            if (modifierDetail) {
+              modifierObjects.push({
+                id: modifierDetail.modifier.id,
+                name: modifierDetail.modifier.name,
+                priceAdjustment: modifierDetail.modifier.priceAdjustment,
+              })
+            }
+          }
+        }
+
+        // T032: Calculate item total with modifiers
+        const modifierTotal = modifierObjects.reduce((sum, m) => sum + m.priceAdjustment, 0)
+        const itemPrice = dish.price + modifierTotal
+        const itemTotal = itemPrice * item.quantity
+
+        // Add order item
+        const [createdOrderItem] = await db
+          .insert(orderItems)
+          .values({
+            orderId,
+            dishId: item.dishId,
+            quantity: item.quantity,
+            priceAtOrder: dish.price,
+            specialInstructions: item.specialInstructions,
+            variantId: item.variantId,
+            specialRequest: item.specialRequest,
+          })
+          .returning()
+
+        if (!createdOrderItem) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create order item",
+          })
+        }
+
+        // T033: Insert modifiers into orderItemModifiers with historical snapshot
+        if (modifierObjects.length > 0) {
+          for (const modifier of modifierObjects) {
+            await db.insert(orderItemModifiers).values({
+              orderItemId: createdOrderItem.id,
+              modifierId: modifier.id,
+              name: modifier.name,
+              priceAtOrder: modifier.priceAdjustment,
+            })
+          }
+        }
+
+        totalAmount += itemTotal
         itemCount += item.quantity
       }
 
@@ -694,6 +767,7 @@ export const ordersRouter = router({
       const { orderId } = input
 
       // Get order with all related data
+      // T034: Include orderItemModifiers in the query
       const order = await db.query.orders.findFirst({
         where: (orders, { eq }) => eq(orders.id, orderId),
         with: {
@@ -701,6 +775,7 @@ export const ordersRouter = router({
           orderItems: {
             with: {
               dish: true,
+              variant: true,
             },
           },
         },
@@ -719,6 +794,32 @@ export const ordersRouter = router({
         orderBy: (history, { asc }) => [asc(history.changedAt)],
       })
 
+      // T034: Get modifiers for each order item
+      const itemsWithModifiers = await Promise.all(
+        order.orderItems.map(async (item) => {
+          const itemModifiers = await db.query.orderItemModifiers.findMany({
+            where: (orderItemModifiers, { eq }) =>
+              eq(orderItemModifiers.orderItemId, item.id),
+          })
+
+          return {
+            id: item.id,
+            dishId: item.dishId,
+            dishName: item.dish.name,
+            quantity: item.quantity,
+            priceAtOrder: item.priceAtOrder,
+            specialInstructions: item.specialInstructions || null,
+            specialRequest: item.specialRequest || null,
+            variantId: item.variantId || null,
+            variantName: item.variant?.name || null,
+            modifiers: itemModifiers.map((m) => ({
+              name: m.name,
+              priceAtOrder: m.priceAtOrder,
+            })),
+          }
+        })
+      )
+
       // Transform to match contract output schema
       return {
         id: order.id,
@@ -734,14 +835,7 @@ export const ordersRouter = router({
         totalAmount: order.totalAmount,
         createdAt: new Date(order.createdAt),
         updatedAt: new Date(order.updatedAt),
-        items: order.orderItems.map((item) => ({
-          id: item.id,
-          dishId: item.dishId,
-          dishName: item.dish.name,
-          quantity: item.quantity,
-          priceAtOrder: item.priceAtOrder,
-          specialInstructions: item.specialInstructions || null,
-        })),
+        items: itemsWithModifiers,
         statusHistory: statusHistoryData.map((entry) => ({
           status: entry.status as
             | "Pending"
