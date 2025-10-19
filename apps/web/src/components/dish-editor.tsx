@@ -29,6 +29,9 @@ interface DishEditorProps {
     price: number
     photoUrl: string | null
     isAvailable: boolean
+    isRecommended?: boolean
+    isChefSpecial?: boolean
+    orderPriority?: number
   } | null
   onClose: (success: boolean) => void
 }
@@ -53,6 +56,13 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
   const [photoUrl, setPhotoUrl] = useState(dish?.photoUrl || "")
   const [recipe, setRecipe] = useState<RecipeItem[]>([])
   const [selectedModifiers, setSelectedModifiers] = useState<SelectedModifier[]>([])
+  
+  // T059: Flag fields
+  const [isRecommended, setIsRecommended] = useState(dish?.isRecommended || false)
+  const [isChefSpecial, setIsChefSpecial] = useState(dish?.isChefSpecial || false)
+  const [orderPriority, setOrderPriority] = useState(
+    dish?.orderPriority !== undefined ? dish.orderPriority.toString() : "0"
+  )
 
   // Query ingredients for dropdown
   const { data: inventoryData } = useQuery({
@@ -193,6 +203,13 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
     const priceInCents = Math.round(parseFloat(price) * 100)
 
+    // Parse order priority (T059)
+    const priorityValue = parseInt(orderPriority) || 0
+    if (priorityValue < 0 || priorityValue > 100) {
+      toast.error("Order priority must be between 0 and 100")
+      return
+    }
+
     try {
       if (isEditing) {
         await updateDish.mutateAsync({
@@ -202,7 +219,10 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
           price: priceInCents,
           photoUrl: photoUrl || null,
           recipe,
-        })
+          isRecommended,
+          isChefSpecial,
+          orderPriority: priorityValue,
+        } as any)
       } else {
         await createDish.mutateAsync({
           name,
@@ -210,7 +230,10 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
           price: priceInCents,
           photoUrl: photoUrl || null,
           recipe,
-        })
+          isRecommended,
+          isChefSpecial,
+          orderPriority: priorityValue,
+        } as any)
       }
     } catch (error) {
       // Error handled by mutation
@@ -337,6 +360,62 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                 onChange={(e) => setPhotoUrl(e.target.value)}
                 placeholder="https://example.com/dish.jpg"
               />
+            </div>
+
+            {/* T059: Dish Flags */}
+            <div className="space-y-4 border rounded-md p-4">
+              <Label className="text-base font-semibold">Dish Flags & Priority</Label>
+              
+              {/* Recommended Toggle */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="isRecommended" className="cursor-pointer">
+                    Recommended 👍
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Show thumbs-up badge to customers
+                  </p>
+                </div>
+                <Checkbox
+                  id="isRecommended"
+                  checked={isRecommended}
+                  onCheckedChange={(checked) => setIsRecommended(checked as boolean)}
+                />
+              </div>
+
+              {/* Chef's Special Toggle */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="isChefSpecial" className="cursor-pointer">
+                    Chef's Special ⭐
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Show star badge to customers
+                  </p>
+                </div>
+                <Checkbox
+                  id="isChefSpecial"
+                  checked={isChefSpecial}
+                  onCheckedChange={(checked) => setIsChefSpecial(checked as boolean)}
+                />
+              </div>
+
+              {/* Order Priority */}
+              <div className="space-y-2">
+                <Label htmlFor="orderPriority">Kitchen Priority (0-100)</Label>
+                <Input
+                  id="orderPriority"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={orderPriority}
+                  onChange={(e) => setOrderPriority(e.target.value)}
+                  placeholder="0"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Higher priority dishes appear first in kitchen queue (0 = normal, 100 = highest)
+                </p>
+              </div>
             </div>
 
             {/* Recipe */}

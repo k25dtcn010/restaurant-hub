@@ -700,12 +700,12 @@
 
 **Frontend: Manager - Category Management** _(UI: `quickstart.md` § B)_
 
-- [ ] T055 [P] Create category manager component
+- [X] T055 [P] Create category manager component
   - **File**: `apps/web/src/components/category-manager.tsx`
   - **Features**: CRUD operations, show/hide toggle, dish count display
   - **tRPC**: categories.list, create, update, toggleVisibility
 
-- [ ] T056 Add "Categories" tab to menu management
+- [X] T056 Add "Categories" tab to menu management
   - **File**: `apps/web/src/routes/menu-management.tsx`
   - **Integration**: Render CategoryManager component in new tab
 
@@ -721,12 +721,12 @@
 
 **Frontend: Manager - Dish Flags**
 
-- [ ] T059 Add flag toggles to dish editor
+- [X] T059 Add flag toggles to dish editor
   - **File**: `apps/web/src/components/dish-editor.tsx`
   - **Controls**: Recommended checkbox, Chef's Special checkbox, Priority number input (0-100)
   - **Validation**: Priority must be integer 0-100
 
-- [ ] T060 Add flag badges to dish list view
+- [X] T060 Add flag badges to dish list view
   - **File**: `apps/web/src/routes/menu-management.tsx`
   - **Badges**: 👍 Recommended, ⭐ Chef's Special, with priority number
 
