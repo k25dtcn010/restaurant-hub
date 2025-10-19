@@ -1,16 +1,7 @@
 import { AlertCircle, Minus, Plus } from "lucide-react"
-import { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import {
   Field,
   FieldContent,
@@ -50,29 +41,19 @@ export function MenuItemCard({
   onQuantityChange,
   requireHiddenConfirmation,
 }: MenuItemCardProps) {
-  const [hiddenDishDialog, setHiddenDishDialog] = useState(false)
-
   const handleAddClick = () => {
-    if (dish.isHidden && requireHiddenConfirmation) {
-      setHiddenDishDialog(true)
-      return
-    }
     onQuantityChange(dish.id, 1)
-  }
-
-  const handleConfirmHidden = () => {
-    onQuantityChange(dish.id, 1)
-    setHiddenDishDialog(false)
   }
 
   const isUnavailable = !dish.isAvailable
+  const isHiddenItem = dish.isHidden && requireHiddenConfirmation
 
   return (
     <>
       <FieldLabel htmlFor={`dish-${dish.id}`} className="cursor-pointer">
         <Field orientation="horizontal">
           <FieldContent>
-            <div className="space-y-2 w-full">
+            <div className={`space-y-2 w-full ${isHiddenItem ? "opacity-50" : ""}`}>
               <div className="flex items-start justify-between gap-2">
                 <FieldTitle className="flex items-center gap-2 flex-wrap">
                   <span>{dish.name}</span>
@@ -86,7 +67,7 @@ export function MenuItemCard({
                       ⭐
                     </span>
                   )}
-                  {dish.isHidden && requireHiddenConfirmation && (
+                  {isHiddenItem && (
                     <Badge
                       variant="outline"
                       className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-xs"
@@ -114,7 +95,7 @@ export function MenuItemCard({
               <div className="flex items-center justify-between pt-2 border-t">
                 <div className="text-lg font-bold">${(dish.price / 100).toFixed(2)}</div>
 
-                {!isUnavailable && (
+                {!isUnavailable && !isHiddenItem && (
                   <div className="flex items-center gap-2">
                     {quantity === 0 ? (
                       <Button size="sm" onClick={handleAddClick}>
@@ -140,32 +121,16 @@ export function MenuItemCard({
                     )}
                   </div>
                 )}
+                {isHiddenItem && (
+                  <Badge variant="secondary" className="text-xs">
+                    Not Available
+                  </Badge>
+                )}
               </div>
             </div>
           </FieldContent>
         </Field>
       </FieldLabel>
-
-      {/* Hidden Dish Confirmation Dialog */}
-      <Dialog open={hiddenDishDialog} onOpenChange={setHiddenDishDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Hidden Item Warning</DialogTitle>
-            <DialogDescription>
-              <p className="mb-4">
-                <strong>{dish.name}</strong> is currently hidden from the customer menu.
-              </p>
-              <p>Add this item to the order anyway?</p>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setHiddenDishDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmHidden}>Add Anyway</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }
