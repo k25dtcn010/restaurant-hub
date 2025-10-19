@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test"
-import { db, dishes, eq, ingredients, recipes } from "@/db"
+import { db, dishes, dishVariants, eq, ingredients, orderItems, orders, recipes, tables } from "@/db"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
@@ -279,5 +279,588 @@ describe("Dishes Router - dishes.update with flag fields (T052)", () => {
     expect(updatedDish?.isRecommended).toBe(true)
     expect(updatedDish?.isChefSpecial).toBe(true)
     expect(updatedDish?.orderPriority).toBe(80)
+  })
+})
+
+/**
+ * T066-RED: Test for dishes.createVariant
+ * TDD Red Phase: This test should FAIL before implementation
+ * Contract: Add variant to dish (name, price, displayOrder)
+ */
+describe("Dishes Router - dishes.createVariant (T066)", () => {
+  let testDishId: number
+
+  beforeAll(async () => {
+    // Create test ingredient
+    const [ingredient] = await db
+      .insert(ingredients)
+      .values({
+        name: "Test Flour for Variant",
+        unit: "kg",
+        quantity: 100,
+        minQuantity: 10,
+        costPerUnit: 500,
+      })
+      .returning()
+
+    // Create test dish
+    const [dish] = await db
+      .insert(dishes)
+      .values({
+        name: "Test Pizza for Variants",
+        description: "Test pizza to test variant creation",
+        price: 1200, // Base price $12.00
+        photoUrl: null,
+        isAvailable: true,
+      })
+      .returning()
+
+    testDishId = dish!.id
+  })
+
+  test("Manager can create a variant for a dish", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    const result = await caller.dishes.createVariant({
+      dishId: testDishId,
+      name: "Small",
+      price: 800, // $8.00
+      displayOrder: 0,
+    })
+
+    expect(result).toBeDefined()
+    expect(result.variantId).toBeTypeOf("number")
+    expect(result.name).toBe("Small")
+
+    // Verify in database
+    const variant = await db.query.dishVariants.findFirst({
+      where: (dishVariants, { eq }) => eq(dishVariants.id, result.variantId),
+    })
+    expect(variant).toBeDefined()
+    expect(variant?.name).toBe("Small")
+    expect(variant?.price).toBe(800)
+    expect(variant?.dishId).toBe(testDishId)
+  })
+
+  test("Multiple variants can be created with different display orders", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    const medium = await caller.dishes.createVariant({
+      dishId: testDishId,
+      name: "Medium",
+      price: 1200, // $12.00
+      displayOrder: 1,
+    })
+
+    const large = await caller.dishes.createVariant({
+      dishId: testDishId,
+      name: "Large",
+      price: 1600, // $16.00
+      displayOrder: 2,
+    })
+
+    expect(medium.variantId).toBeTypeOf("number")
+    expect(large.variantId).toBeTypeOf("number")
+    expect(medium.variantId).not.toBe(large.variantId)
+  })
+
+  test("Non-manager cannot create variant", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "waiter-1" },
+      role: "waiter",
+    } as Context)
+
+    await expect(
+      caller.dishes.createVariant({
+        dishId: testDishId,
+        name: "Extra Large",
+        price: 2000,
+        displayOrder: 3,
+      })
+    ).rejects.toThrow()
+  })
+
+  test("Cannot create variant for non-existent dish", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    await expect(
+      caller.dishes.createVariant({
+        dishId: 99999,
+        name: "Small",
+        price: 800,
+        displayOrder: 0,
+      })
+    ).rejects.toThrow("Dish ID 99999 does not exist")
+  })
+})
+
+/**
+ * T067-RED: Test for dishes.updateVariant
+ * TDD Red Phase: This test should FAIL before implementation
+ * Contract: Update variant fields (name, price, displayOrder)
+ */
+describe("Dishes Router - dishes.updateVariant (T067)", () => {
+  let testDishId: number
+  let testVariantId: number
+
+  beforeAll(async () => {
+    // Create test dish
+    const [dish] = await db
+      .insert(dishes)
+      .values({
+        name: "Test Dish for Update Variant",
+        description: "Test dish",
+        price: 1000,
+        photoUrl: null,
+        isAvailable: true,
+      })
+      .returning()
+
+    testDishId = dish!.id
+
+    // Create test variant
+    const [variant] = await db
+      .insert(dishVariants)
+      .values({
+        dishId: testDishId,
+        name: "Original Name",
+        price: 1000,
+        displayOrder: 0,
+      })
+      .returning()
+
+    testVariantId = variant!.id
+  })
+
+  test("Manager can update variant name", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    const result = await caller.dishes.updateVariant({
+      variantId: testVariantId,
+      name: "Updated Name",
+    })
+
+    expect(result).toBeDefined()
+    expect(result.updatedFields).toContain("name")
+
+    // Verify in database
+    const variant = await db.query.dishVariants.findFirst({
+      where: (dishVariants, { eq }) => eq(dishVariants.id, testVariantId),
+    })
+    expect(variant?.name).toBe("Updated Name")
+  })
+
+  test("Manager can update variant price", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    const result = await caller.dishes.updateVariant({
+      variantId: testVariantId,
+      price: 1500,
+    })
+
+    expect(result.updatedFields).toContain("price")
+
+    const variant = await db.query.dishVariants.findFirst({
+      where: (dishVariants, { eq }) => eq(dishVariants.id, testVariantId),
+    })
+    expect(variant?.price).toBe(1500)
+  })
+
+  test("Manager can update display order", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    const result = await caller.dishes.updateVariant({
+      variantId: testVariantId,
+      displayOrder: 5,
+    })
+
+    expect(result.updatedFields).toContain("displayOrder")
+
+    const variant = await db.query.dishVariants.findFirst({
+      where: (dishVariants, { eq }) => eq(dishVariants.id, testVariantId),
+    })
+    expect(variant?.displayOrder).toBe(5)
+  })
+
+  test("Cannot update non-existent variant", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    await expect(
+      caller.dishes.updateVariant({
+        variantId: 99999,
+        name: "Updated",
+      })
+    ).rejects.toThrow("Variant ID 99999 does not exist")
+  })
+
+  test("Non-manager cannot update variant", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "waiter-1" },
+      role: "waiter",
+    } as Context)
+
+    await expect(
+      caller.dishes.updateVariant({
+        variantId: testVariantId,
+        name: "Hacked Name",
+      })
+    ).rejects.toThrow()
+  })
+})
+
+/**
+ * T068-RED: Test for dishes.deleteVariant
+ * TDD Red Phase: This test should FAIL before implementation
+ * Contract: Delete variant if not used in orders
+ */
+describe("Dishes Router - dishes.deleteVariant (T068)", () => {
+  let testDishId: number
+  let unusedVariantId: number
+  let usedVariantId: number
+
+  beforeAll(async () => {
+    // Create test dish
+    const [dish] = await db
+      .insert(dishes)
+      .values({
+        name: "Test Dish for Delete Variant",
+        description: "Test dish",
+        price: 1000,
+        photoUrl: null,
+        isAvailable: true,
+      })
+      .returning()
+
+    testDishId = dish!.id
+
+    // Create unused variant
+    const [unusedVariant] = await db
+      .insert(dishVariants)
+      .values({
+        dishId: testDishId,
+        name: "Unused Variant",
+        price: 800,
+        displayOrder: 0,
+      })
+      .returning()
+
+    unusedVariantId = unusedVariant!.id
+
+    // Create used variant
+    const [usedVariant] = await db
+      .insert(dishVariants)
+      .values({
+        dishId: testDishId,
+        name: "Used Variant",
+        price: 1200,
+        displayOrder: 1,
+      })
+      .returning()
+
+    usedVariantId = usedVariant!.id
+
+    // Create a table for order
+    const [table] = await db
+      .insert(tables)
+      .values({
+        number: 999,
+        qrCode: "TEST-QR-999",
+        capacity: 4,
+      })
+      .returning()
+
+    // Create order with the used variant
+    const [order] = await db
+      .insert(orders)
+      .values({
+        tableId: table!.id,
+        status: "pending",
+        totalAmount: 1200,
+      })
+      .returning()
+
+    // Create order item with the variant
+    await db.insert(orderItems).values({
+      orderId: order!.id,
+      dishId: testDishId,
+      quantity: 1,
+      priceAtOrder: 1200,
+      variantId: usedVariantId,
+    })
+  })
+
+  test("Manager can delete unused variant", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    const result = await caller.dishes.deleteVariant({
+      variantId: unusedVariantId,
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.message).toContain("deleted successfully")
+
+    // Verify deletion
+    const variant = await db.query.dishVariants.findFirst({
+      where: (dishVariants, { eq }) => eq(dishVariants.id, unusedVariantId),
+    })
+    expect(variant).toBeUndefined()
+  })
+
+  test("Cannot delete variant used in orders", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    await expect(
+      caller.dishes.deleteVariant({
+        variantId: usedVariantId,
+      })
+    ).rejects.toThrow("Cannot delete variant that is used in orders")
+  })
+
+  test("Cannot delete non-existent variant", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "manager-1" },
+      role: "manager",
+    } as Context)
+
+    await expect(
+      caller.dishes.deleteVariant({
+        variantId: 99999,
+      })
+    ).rejects.toThrow("Variant ID 99999 does not exist")
+  })
+
+  test("Non-manager cannot delete variant", async () => {
+    const caller = appRouter.createCaller({
+      ...mockContext,
+      user: { id: "waiter-1" },
+      role: "waiter",
+    } as Context)
+
+    await expect(
+      caller.dishes.deleteVariant({
+        variantId: unusedVariantId,
+      })
+    ).rejects.toThrow()
+  })
+})
+
+/**
+ * T069-RED: Test for dishes.listVariants
+ * TDD Red Phase: This test should FAIL before implementation
+ * Contract: Get all variants for dish, ordered by displayOrder
+ */
+describe("Dishes Router - dishes.listVariants (T069)", () => {
+  let testDishId: number
+
+  beforeAll(async () => {
+    // Create test dish
+    const [dish] = await db
+      .insert(dishes)
+      .values({
+        name: "Test Dish for List Variants",
+        description: "Test dish",
+        price: 1000,
+        photoUrl: null,
+        isAvailable: true,
+      })
+      .returning()
+
+    testDishId = dish!.id
+
+    // Create multiple variants with different display orders
+    await db.insert(dishVariants).values([
+      {
+        dishId: testDishId,
+        name: "Large",
+        price: 1600,
+        displayOrder: 2,
+      },
+      {
+        dishId: testDishId,
+        name: "Small",
+        price: 800,
+        displayOrder: 0,
+      },
+      {
+        dishId: testDishId,
+        name: "Medium",
+        price: 1200,
+        displayOrder: 1,
+      },
+    ])
+  })
+
+  test("Public can list variants ordered by displayOrder", async () => {
+    const caller = appRouter.createCaller(mockContext)
+
+    const result = await caller.dishes.listVariants({
+      dishId: testDishId,
+    })
+
+    expect(result.variants).toBeDefined()
+    expect(result.variants.length).toBe(3)
+
+    // Check ordering by displayOrder
+    expect(result.variants[0]?.name).toBe("Small") // displayOrder: 0
+    expect(result.variants[1]?.name).toBe("Medium") // displayOrder: 1
+    expect(result.variants[2]?.name).toBe("Large") // displayOrder: 2
+
+    // Check price values
+    expect(result.variants[0]?.price).toBe(800)
+    expect(result.variants[1]?.price).toBe(1200)
+    expect(result.variants[2]?.price).toBe(1600)
+  })
+
+  test("Returns empty array for dish with no variants", async () => {
+    const caller = appRouter.createCaller(mockContext)
+
+    // Create dish without variants
+    const [dishNoVariants] = await db
+      .insert(dishes)
+      .values({
+        name: "Dish Without Variants",
+        description: "No variants",
+        price: 500,
+        photoUrl: null,
+        isAvailable: true,
+      })
+      .returning()
+
+    const result = await caller.dishes.listVariants({
+      dishId: dishNoVariants!.id,
+    })
+
+    expect(result.variants).toBeDefined()
+    expect(result.variants.length).toBe(0)
+  })
+
+  test("Throws error for non-existent dish", async () => {
+    const caller = appRouter.createCaller(mockContext)
+
+    await expect(
+      caller.dishes.listVariants({
+        dishId: 99999,
+      })
+    ).rejects.toThrow("Dish ID 99999 does not exist")
+  })
+})
+
+/**
+ * T070-RED: Test extending dishes.getDishDetails with variants
+ * Note: Implementation already done in T019, just verifying it works
+ */
+describe("Dishes Router - dishes.getDishDetails with variants (T070)", () => {
+  let testDishId: number
+
+  beforeAll(async () => {
+    // Create test ingredient
+    const [ingredient] = await db
+      .insert(ingredients)
+      .values({
+        name: "Test Ingredient for Variant Details",
+        unit: "kg",
+        quantity: 50,
+        minQuantity: 10,
+        costPerUnit: 300,
+      })
+      .returning()
+
+    // Create test dish
+    const [dish] = await db
+      .insert(dishes)
+      .values({
+        name: "Test Dish with Variants Details",
+        description: "Test dish",
+        price: 1000,
+        photoUrl: null,
+        isAvailable: true,
+      })
+      .returning()
+
+    testDishId = dish!.id
+
+    // Create recipe
+    await db.insert(recipes).values({
+      dishId: testDishId,
+      ingredientId: ingredient!.id,
+      quantityRequired: 2,
+    })
+
+    // Create variants
+    await db.insert(dishVariants).values([
+      {
+        dishId: testDishId,
+        name: "Small",
+        price: 700,
+        displayOrder: 0,
+      },
+      {
+        dishId: testDishId,
+        name: "Large",
+        price: 1300,
+        displayOrder: 1,
+      },
+    ])
+  })
+
+  test("getDishDetails includes variants array", async () => {
+    const caller = appRouter.createCaller(mockContext)
+
+    const result = await caller.dishes.getById({
+      dishId: testDishId,
+    })
+
+    expect(result).toBeDefined()
+    expect(result.variants).toBeDefined()
+    expect(result.variants.length).toBe(2)
+
+    // Check variant details
+    expect(result.variants[0]?.name).toBe("Small")
+    expect(result.variants[0]?.price).toBe(700)
+    expect(result.variants[1]?.name).toBe("Large")
+    expect(result.variants[1]?.price).toBe(1300)
+
+    // Verify ordering by displayOrder
+    expect(result.variants[0]?.displayOrder).toBe(0)
+    expect(result.variants[1]?.displayOrder).toBe(1)
   })
 })

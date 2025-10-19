@@ -135,6 +135,8 @@ export const ordersRouter = router({
                 ingredient: true,
               },
             },
+            // T071: Include variants for price calculation
+            dishVariants: true,
           },
         })
 
@@ -143,6 +145,22 @@ export const ordersRouter = router({
             code: "BAD_REQUEST",
             message: `Dish ID ${item.dishId} does not exist`,
           })
+        }
+
+        // T071: Get variant if specified
+        let variant = null
+        let basePrice = dish.price
+
+        if (item.variantId) {
+          variant = dish.dishVariants.find((v) => v.id === item.variantId)
+          if (!variant) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Variant ID ${item.variantId} does not exist for dish "${dish.name}"`,
+            })
+          }
+          // Use variant price instead of base dish price
+          basePrice = variant.price
         }
 
         // Check if dish is available
@@ -203,8 +221,9 @@ export const ordersRouter = router({
         }
 
         // T032: Calculate item total with modifiers
+        // T071: Use basePrice (either dish.price or variant.price)
         const modifierTotal = modifierObjects.reduce((sum, m) => sum + m.priceAdjustment, 0)
-        const itemPrice = dish.price + modifierTotal
+        const itemPrice = basePrice + modifierTotal
         const itemTotal = itemPrice * item.quantity
 
         // Add order item
@@ -214,7 +233,7 @@ export const ordersRouter = router({
             orderId,
             dishId: item.dishId,
             quantity: item.quantity,
-            priceAtOrder: dish.price,
+            priceAtOrder: basePrice, // T071: Store basePrice (dish or variant price)
             specialInstructions: item.specialInstructions,
             variantId: item.variantId,
             specialRequest: item.specialRequest,
@@ -624,6 +643,8 @@ export const ordersRouter = router({
           orderItems: {
             with: {
               dish: true,
+              // T073: Include variant for kitchen display
+              variant: true,
             },
           },
         },
@@ -659,6 +680,8 @@ export const ordersRouter = router({
         status: order.status as "Pending" | "InKitchen" | "ReadyToServe",
         items: order.orderItems.map((item) => ({
           dishName: item.dish.name,
+          // T073: Include variant name for kitchen (e.g., "Coffee (Large)")
+          variantName: item.variant?.name || null,
           quantity: item.quantity,
           specialInstructions: item.specialInstructions || null,
         })),
