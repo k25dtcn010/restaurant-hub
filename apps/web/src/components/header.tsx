@@ -17,6 +17,7 @@ export default function Header() {
     { to: "/kitchen", label: "Kitchen" },
     { to: "/serving", label: "Serving" },
     { to: "/inventory", label: "Inventory" },
+    { to: "/menu-management", label: "Menu" },
   ] as const
 
   return (

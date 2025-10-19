@@ -1,9 +1,10 @@
 import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
-import { auth } from "@/auth"
-import { db, dishes, eq, ingredients, orders, recipes, tables, user } from "@/db"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
+import { auth } from "@/auth"
+import { db, dishes, eq, ingredients, orders, recipes, tables, user } from "@/db"
+
 import { mockWsNotifier } from "../setup"
 
 /**
@@ -25,14 +26,26 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
   let waiterContext: Context
 
   beforeAll(async () => {
-    // Find or create waiter user from seed data
-    const waiterUser = await db.query.user.findFirst({
+    // Find or create waiter user
+    let waiterUser = await db.query.user.findFirst({
       where: (user, { eq }) => eq(user.email, "waiter@restauranthub.com"),
     })
 
     if (!waiterUser) {
-      throw new Error("Waiter user not found in database. Run seed script first.")
-    }
+      const [newUser] = await db
+        .insert(user)
+        .values({
+          id: "waiter-test-001",
+          email: "waiter@restauranthub.com",
+          name: "Test Waiter",
+          role: "Waiter",
+          emailVerified: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning()
+      waiterUser = newUser
+    }</parameter>
 
     waiterUserId = waiterUser.id
 
@@ -67,19 +80,77 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
       wsNotifier: mockWsNotifier,
     }
 
-    // Get test data from seed
-    const existingTable = await db.query.tables.findFirst({
+    // Get or create test data
+    let existingTable = await db.query.tables.findFirst({
       where: (tables, { eq }) => eq(tables.number, 1),
     })
-    const existingIngredient = await db.query.ingredients.findFirst({
+    if (!existingTable) {
+      const [newTable] = await db
+        .insert(tables)
+        .values({
+          number: 1,
+          qrCode: "https://app.restauranthub.com/?table=1",
+          capacity: 4,
+          createdAt: new Date(),
+        })
+        .returning()
+      existingTable = newTable
+    }
+
+    let existingIngredient = await db.query.ingredients.findFirst({
       where: (ingredients, { eq }) => eq(ingredients.name, "Beef Patty"),
     })
-    const existingDish = await db.query.dishes.findFirst({
+    if (!existingIngredient) {
+      const [newIngredient] = await db
+        .insert(ingredients)
+        .values({
+          name: "Beef Patty",
+          quantity: 100,
+          unit: "pieces",
+          threshold: 10,
+          updatedAt: new Date(),
+        })
+        .returning()
+      existingIngredient = newIngredient
+    }
+
+    let existingDish = await db.query.dishes.findFirst({
       where: (dishes, { eq }) => eq(dishes.name, "Classic Cheeseburger"),
     })
+    if (!existingDish) {
+      const [newDish] = await db
+        .insert(dishes)
+        .values({
+          name: "Classic Cheeseburger",
+          description: "Juicy beef patty with cheese",
+          price: 1250,
+          photoUrl: null,
+          isAvailable: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning()
+      existingDish = newDish
 
-    if (!existingTable || !existingIngredient || !existingDish) {
-      throw new Error("Test data not found in database. Run seed script first.")
+      // Create recipe linking dish to ingredient
+      await db.insert(recipes).values({
+        dishId: existingDish.id,
+        ingredientId: existingIngredient.id,
+        quantityRequired: 1,
+      })
+    } else {
+      // Ensure recipe exists
+      const existingRecipe = await db.query.recipes.findFirst({
+        where: (r, { and, eq }) =>
+          and(eq(r.dishId, existingDish.id), eq(r.ingredientId, existingIngredient.id)),
+      })
+      if (!existingRecipe) {
+        await db.insert(recipes).values({
+          dishId: existingDish.id,
+          ingredientId: existingIngredient.id,
+          quantityRequired: 1,
+        })
+      }
     }
 
     testTableId = existingTable.id
@@ -135,13 +206,25 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
   })
 
   test("T075: authenticated manager can also create orders", async () => {
-    // Find manager user
-    const managerUser = await db.query.user.findFirst({
-      where: (user, { eq }) => eq(user.email, "admin@restauranthub.com"),
+    // Find or create manager user
+    let managerUser = await db.query.user.findFirst({
+      where: (u, { eq }) => eq(u.email, "admin@restauranthub.com"),
     })
 
     if (!managerUser) {
-      throw new Error("Manager user not found in database.")
+      const [newUser] = await db
+        .insert(user)
+        .values({
+          id: "admin-test-001",
+          email: "admin@restauranthub.com",
+          name: "Test Manager",
+          role: "Manager",
+          emailVerified: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning()
+      managerUser = newUser
     }
 
     const managerContext: Context = {
@@ -390,13 +473,25 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
   })
 
   test("T075: kitchen staff cannot create orders (access control)", async () => {
-    // Find kitchen staff user
-    const kitchenUser = await db.query.user.findFirst({
-      where: (user, { eq }) => eq(user.email, "chef@restauranthub.com"),
+    // Find or create kitchen staff user
+    let kitchenUser = await db.query.user.findFirst({
+      where: (u, { eq }) => eq(u.email, "chef@restauranthub.com"),
     })
 
     if (!kitchenUser) {
-      throw new Error("Kitchen staff user not found in database.")
+      const [newUser] = await db
+        .insert(user)
+        .values({
+          id: "chef-test-001",
+          email: "chef@restauranthub.com",
+          name: "Test Chef",
+          role: "KitchenStaff",
+          emailVerified: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning()
+      kitchenUser = newUser
     }
 
     const kitchenContext: Context = {
