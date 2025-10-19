@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import { ModifierSelector } from "@/components/modifier-selector"
 import type { SelectedModifier } from "@/components/modifier-selector"
+import { VariantSelector } from "@/components/variant-selector"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,6 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { useQuery } from "@tanstack/react-query"
+import { trpc } from "@/utils/trpc"
 
 /**
  * T040: DishCustomizationDialog Component  
@@ -18,13 +21,16 @@ import { Label } from "@/components/ui/label"
  * 
  * T042: Adds special request text input to dish customization
  * 
+ * T077-T079: Adds variant selection with pricing
+ * 
  * Features:
  * - Modal dialog for customizing dishes before adding to cart
+ * - Variant selection (T077-T078)
  * - Modifier selection via ModifierSelector component
  * - Special request text input (max 200 characters)
  * - Character counter for special request
  * - Validation before adding to cart
- * - Display total price including modifiers
+ * - Display total price including variants and modifiers (T079)
  */
 
 interface DishCustomizationDialogProps {
@@ -37,7 +43,13 @@ interface DishCustomizationDialogProps {
   }
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (dishId: number, quantity: number, modifiers: SelectedModifier[], specialRequest: string) => void
+  onAddToCart: (
+    dishId: number,
+    quantity: number,
+    modifiers: SelectedModifier[],
+    specialRequest: string,
+    variantId?: number
+  ) => void
   initialQuantity?: number
 }
 
@@ -52,15 +64,29 @@ export function DishCustomizationDialog({
   const [selectedModifiers, setSelectedModifiers] = useState<SelectedModifier[]>([])
   const [specialRequest, setSpecialRequest] = useState("")
   const [isValid, setIsValid] = useState(true)
+  // T077: Variant selection state
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null)
 
   const maxSpecialRequestLength = 200
 
+  // T077: Query variants for the dish
+  const { data: variantsData } = useQuery({
+    ...trpc.dishes.listVariants.queryOptions({ dishId: dish.id }),
+  })
+
+  const variants = variantsData?.variants || []
+
   const handleAdd = () => {
+    // T078: Validate variant selection if dish has variants
+    if (variants.length > 0 && !selectedVariantId) {
+      return
+    }
+
     if (!isValid) {
       return
     }
 
-    onAddToCart(dish.id, quantity, selectedModifiers, specialRequest.trim())
+    onAddToCart(dish.id, quantity, selectedModifiers, specialRequest.trim(), selectedVariantId || undefined)
     handleClose()
   }
 
@@ -70,17 +96,22 @@ export function DishCustomizationDialog({
     setSelectedModifiers([])
     setSpecialRequest("")
     setIsValid(true)
+    setSelectedVariantId(null)
     onClose()
   }
 
-  // Calculate total price
-  const basePrice = dish.price
+  // T079: Calculate total price with variant
+  const selectedVariant = variants.find((v: any) => v.id === selectedVariantId)
+  const basePrice = selectedVariant ? selectedVariant.price : dish.price
   const modifierTotal = selectedModifiers.reduce((sum, m) => sum + m.priceAdjustment, 0)
   const itemTotal = (basePrice + modifierTotal) * quantity
 
   const formatPrice = (priceInCents: number): string => {
     return `$${(priceInCents / 100).toFixed(2)}`
   }
+
+  // T078: Check if add to cart should be disabled
+  const isAddDisabled = !isValid || (variants.length > 0 && !selectedVariantId)
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -100,6 +131,16 @@ export function DishCustomizationDialog({
             <p className="text-sm text-muted-foreground">{dish.description}</p>
             <div className="text-lg font-semibold">{formatPrice(dish.price)}</div>
           </div>
+
+          {/* T077: Variant Selection */}
+          {variants.length > 0 && (
+            <VariantSelector
+              variants={variants}
+              selectedVariantId={selectedVariantId}
+              onSelect={setSelectedVariantId}
+              required={true}
+            />
+          )}
 
           {/* Modifier Selection */}
           <ModifierSelector
@@ -152,10 +193,12 @@ export function DishCustomizationDialog({
             </div>
           </div>
 
-          {/* Price Breakdown (T043) */}
+          {/* Price Breakdown (T043, T079) */}
           <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Base Price</span>
+              <span className="text-muted-foreground">
+                Base Price {selectedVariant && `(${selectedVariant.name})`}
+              </span>
               <span>{formatPrice(basePrice)}</span>
             </div>
             {selectedModifiers.length > 0 && (
@@ -189,7 +232,7 @@ export function DishCustomizationDialog({
           <Button type="button" variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="button" onClick={handleAdd} disabled={!isValid}>
+          <Button type="button" onClick={handleAdd} disabled={isAddDisabled}>
             Add to Cart
           </Button>
         </DialogFooter>

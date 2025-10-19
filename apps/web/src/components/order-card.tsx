@@ -23,6 +23,9 @@ import { queryClient, trpc, trpcClient } from "@/utils/trpc"
  * T073: Visual distinction between statuses with color coding
  * Acceptance: spec.md US2 Scenario 5
  * - Clear visual distinction between Pending, In Kitchen, and Ready to Serve
+ * 
+ * T080: Display variant name in kitchen order card
+ * Format: "Coffee (Medium) x2" instead of just "Coffee x2"
  */
 
 interface OrderItemModifier {
@@ -32,6 +35,7 @@ interface OrderItemModifier {
 
 interface OrderItem {
   dishName: string
+  variantName?: string | null // T080: Variant name (e.g., "Large", "Medium")
   quantity: number
   specialInstructions: string | null
   modifiers?: OrderItemModifier[] // T044: Add modifiers
@@ -184,7 +188,11 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">{item.quantity}x</span>
-                  <span>{item.dishName}</span>
+                  {/* T080: Display variant name if present */}
+                  <span>
+                    {item.dishName}
+                    {item.variantName && <span className="text-muted-foreground"> ({item.variantName})</span>}
+                  </span>
                 </div>
                 {/* T044: Display modifiers */}
                 {item.modifiers && item.modifiers.length > 0 && (
