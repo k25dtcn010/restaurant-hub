@@ -1,13 +1,14 @@
 import { beforeAll, describe, expect, test } from "bun:test"
-import { categories, db, dishes, dishCategories, eq } from "@/db"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
+import { categories, db, dishCategories, dishes, eq, ingredients } from "@/db"
+
 import { mockWsNotifier } from "../setup"
 
 /**
  * T065.1: Integration Test - Category Workflow End-to-End
- * 
+ *
  * Test Flow:
  * 1. Manager creates "Appetizers" category
  * 2. Manager creates "Spring Rolls" dish
@@ -15,7 +16,7 @@ import { mockWsNotifier } from "../setup"
  * 4. Customer views menu and sees "Spring Rolls" in "Appetizers" category
  * 5. Customer filters menu by "Appetizers" and sees "Spring Rolls"
  * 6. Customer filters by another category and doesn't see "Spring Rolls"
- * 
+ *
  * Following TDD approach per Constitution § I
  */
 
@@ -75,7 +76,7 @@ describe("T065.1: Category Workflow Integration Test", () => {
       displayOrder: 2,
       iconUrl: null,
     })
-    
+
     expect(result.name).toBe("Integration Test Main Course")
     otherCategoryId = result.id
   })
@@ -91,10 +92,21 @@ describe("T065.1: Category Workflow Integration Test", () => {
     }
 
     // Create dish with test recipe (we need at least one ingredient)
-    const ingredient = await db.query.ingredients.findFirst()
+    let ingredient = await db.query.ingredients.findFirst()
 
     if (!ingredient) {
-      throw new Error("No test ingredient available")
+      // Create a test ingredient if none exists
+      const [newIngredient] = await db
+        .insert(ingredients)
+        .values({
+          name: "Test Integration Vegetable",
+          quantity: 100,
+          unit: "kg",
+          threshold: 10,
+          updatedAt: new Date(),
+        })
+        .returning()
+      ingredient = newIngredient
     }
 
     const result = await caller.dishes.create({
@@ -159,10 +171,10 @@ describe("T065.1: Category Workflow Integration Test", () => {
     })
 
     // Check that Spring Rolls is in the list
-    const springRolls = result.find((d: any) => d.dishId === springRollsDishId)
+    const springRolls = result.find((d: any) => d.id === springRollsDishId)
 
     expect(springRolls).toBeTruthy()
-    expect(springRolls.dishName).toBe("Integration Test Spring Rolls")
+    expect(springRolls.name).toBe("Integration Test Spring Rolls")
   })
 
   test("Step 6: Customer lists dishes in other category and doesn't see 'Spring Rolls'", async () => {
@@ -171,7 +183,7 @@ describe("T065.1: Category Workflow Integration Test", () => {
     })
 
     // Spring Rolls should NOT be in Main Course category
-    const springRolls = result.find((d: any) => d.dishId === springRollsDishId)
+    const springRolls = result.find((d: any) => d.id === springRollsDishId)
 
     expect(springRolls).toBeUndefined()
   })

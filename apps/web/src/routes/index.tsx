@@ -7,8 +7,8 @@ import { toast } from "sonner"
 import { CategoryList } from "@/components/category-list"
 import { DishCustomizationDialog } from "@/components/dish-customization-dialog"
 import { MenuList } from "@/components/menu-list"
-import { OrderCart } from "@/components/order-cart"
 import type { SelectedModifier } from "@/components/modifier-selector"
+import { OrderCart } from "@/components/order-cart"
 import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
 /**
@@ -85,11 +85,10 @@ function HomeComponent() {
 
   // T062: Filter dishes by category if a category is selected
   const allDishes = dishesData?.dishes || []
-  const dishes = selectedCategoryId !== null && categoryDishesData
-    ? allDishes.filter((dish: any) => 
-        categoryDishesData.some((catDish: any) => catDish.dishId === dish.id)
-      )
-    : allDishes
+  const dishes =
+    selectedCategoryId !== null && categoryDishesData
+      ? allDishes.filter((dish) => categoryDishesData.some((catDish) => catDish.id === dish.id))
+      : allDishes
 
   // Handle opening customization dialog
   const handleOpenCustomization = (dishId: number) => {
@@ -253,7 +252,7 @@ function HomeComponent() {
             selectedCategoryId={selectedCategoryId}
             onSelectCategory={setSelectedCategoryId}
           />
-          
+
           <MenuList
             dishes={dishes as any}
             isLoading={isLoading}

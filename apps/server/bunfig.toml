@@ -1,2 +1,6 @@
 [test]
 preload = ["./tests/setup.ts"]
+coveragePathIgnorePatterns = [
+  "*.js",
+  "dist/**"
+]

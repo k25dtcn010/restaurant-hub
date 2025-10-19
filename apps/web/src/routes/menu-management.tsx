@@ -132,7 +132,9 @@ function RouteComponent() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Menu Management</h1>
-          <p className="text-muted-foreground mt-2">Manage dishes, recipes, modifiers, and categories</p>
+          <p className="text-muted-foreground mt-2">
+            Manage dishes, recipes, modifiers, and categories
+          </p>
         </div>
       </div>
 
@@ -159,75 +161,75 @@ function RouteComponent() {
 
           {/* Dishes Grid */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {dishes.map((dish: any) => (
-          <Card key={dish.id} className={!dish.isAvailable ? "opacity-60" : ""}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-lg">{dish.name}</CardTitle>
-                    {/* T060: Flag Badges */}
-                    {dish.isRecommended && (
-                      <span className="text-lg" title="Recommended">
-                        👍
-                      </span>
-                    )}
-                    {dish.isChefSpecial && (
-                      <span className="text-lg" title="Chef's Special">
-                        ⭐
-                      </span>
-                    )}
-                    {dish.orderPriority > 0 && (
-                      <Badge variant="outline" title="Kitchen Priority">
-                        P{dish.orderPriority}
-                      </Badge>
-                    )}
+            {dishes.map((dish: any) => (
+              <Card key={dish.id} className={!dish.isAvailable ? "opacity-60" : ""}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg">{dish.name}</CardTitle>
+                        {/* T060: Flag Badges */}
+                        {dish.isRecommended && (
+                          <span className="text-lg" title="Recommended">
+                            👍
+                          </span>
+                        )}
+                        {dish.isChefSpecial && (
+                          <span className="text-lg" title="Chef's Special">
+                            ⭐
+                          </span>
+                        )}
+                        {dish.orderPriority > 0 && (
+                          <Badge variant="outline" title="Kitchen Priority">
+                            P{dish.orderPriority}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(dish)}>
+                        Edit
+                      </Button>
+                      <Button
+                        variant={dish.isAvailable ? "destructive" : "default"}
+                        size="sm"
+                        onClick={() => handleToggleAvailability(dish.id, dish.isAvailable)}
+                        disabled={toggleAvailability.isPending}
+                      >
+                        {dish.isAvailable ? "Disable" : "Enable"}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleEdit(dish)}>
-                    Edit
-                  </Button>
-                  <Button
-                    variant={dish.isAvailable ? "destructive" : "default"}
-                    size="sm"
-                    onClick={() => handleToggleAvailability(dish.id, dish.isAvailable)}
-                    disabled={toggleAvailability.isPending}
-                  >
-                    {dish.isAvailable ? "Disable" : "Enable"}
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">{dish.description}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">${(dish.price / 100).toFixed(2)}</span>
-                <span
-                  className={`text-sm px-2 py-1 rounded ${
-                    dish.isAvailable
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-                  }`}
-                >
-                  {dish.isAvailable ? "Available" : "Disabled"}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">{dish.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold">${(dish.price / 100).toFixed(2)}</span>
+                    <span
+                      className={`text-sm px-2 py-1 rounded ${
+                        dish.isAvailable
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                      }`}
+                    >
+                      {dish.isAvailable ? "Available" : "Disabled"}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
 
-          {dishes.length === 0 && (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-muted-foreground mb-4">No dishes found</p>
-                <Button onClick={handleCreateNew}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Dish
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+            {dishes.length === 0 && (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <p className="text-muted-foreground mb-4">No dishes found</p>
+                  <Button onClick={handleCreateNew}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Dish
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
 
