@@ -6,6 +6,8 @@ import type { WebSocketNotifier } from "@/api/context"
 
 // Set environment variables BEFORE any imports
 process.env.NODE_ENV = "test"
+// Use separate test database to avoid polluting development database
+process.env.DATABASE_URL = "file:./local.test.db"
 
 console.log("📝 Test environment configured. DATABASE_URL:", process.env.DATABASE_URL)
 

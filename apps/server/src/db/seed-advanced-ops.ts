@@ -252,9 +252,12 @@ async function seedAdvancedOps() {
   const tomorrow = new Date(today)
   tomorrow.setDate(tomorrow.getDate() + 1)
 
+  // Helper to format date as YYYY-MM-DD
+  const formatDate = (date: Date): string => date.toISOString().split("T")[0] ?? ""
+
   const reservationsData: ReservationInsert[] = [
     {
-      date: tomorrow.toISOString().split("T")[0],
+      date: formatDate(tomorrow),
       time: "18:30",
       partySize: 4,
       customerName: "John Smith",
@@ -266,7 +269,7 @@ async function seedAdvancedOps() {
       declineReason: null,
     },
     {
-      date: tomorrow.toISOString().split("T")[0],
+      date: formatDate(tomorrow),
       time: "19:00",
       partySize: 2,
       customerName: "Alice Johnson",
@@ -278,7 +281,7 @@ async function seedAdvancedOps() {
       declineReason: null,
     },
     {
-      date: today.toISOString().split("T")[0],
+      date: formatDate(today),
       time: "12:00",
       partySize: 6,
       customerName: "Bob Williams",

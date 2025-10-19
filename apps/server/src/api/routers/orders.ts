@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
+
 import {
   eq,
   ingredients,
-  orderItems,
   orderItemModifiers,
+  orderItems,
   orders,
   orderStatusHistory,
   sql,
@@ -40,7 +41,7 @@ export const ordersRouter = router({
    * - Add to existing order if yes, create new if no
    * - Validate dishes exist and are available
    * - Do NOT reduce inventory yet (happens on submit)
-   * 
+   *
    * T020: Extended to accept variantId, specialRequest, and modifiers
    * Note: Modifier price calculation will be implemented in Phase 3
    */
@@ -384,7 +385,7 @@ export const ordersRouter = router({
             .where(eq(ingredients.id, ingredientId))
         }
 
-        // Update order status
+        // Update order status (stays as "Pending" after submit - indicates order is submitted to kitchen queue)
         await tx.update(orders).set({ status: "Pending" }).where(eq(orders.id, orderId))
 
         // Create status history entry
@@ -819,8 +820,7 @@ export const ordersRouter = router({
       const itemsWithModifiers = await Promise.all(
         order.orderItems.map(async (item) => {
           const itemModifiers = await db.query.orderItemModifiers.findMany({
-            where: (orderItemModifiers, { eq }) =>
-              eq(orderItemModifiers.orderItemId, item.id),
+            where: (orderItemModifiers, { eq }) => eq(orderItemModifiers.orderItemId, item.id),
           })
 
           return {

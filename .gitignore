@@ -48,6 +48,7 @@ coverage
 *.db-shm
 *.db-wal
 local.db
+local.test.db
 
 # Misc
 *.tgz

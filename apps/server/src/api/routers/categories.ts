@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import { z } from "zod"
+
 import { and, asc, categories, count, dishCategories, dishes, eq, inArray } from "@/db"
 
 import { managerOnlyProcedure, publicProcedure, router } from "../index"
@@ -164,7 +165,7 @@ export const categoriesRouter = router({
 
       const [updated] = await db
         .update(categories)
-        .set({ 
+        .set({
           isHidden: input.isHidden,
           updatedAt: new Date(),
         })
@@ -201,10 +202,7 @@ export const categoriesRouter = router({
 
       // Build the where condition
       const whereCondition = !input.includeHidden
-        ? and(
-            eq(dishCategories.categoryId, input.categoryId),
-            eq(dishes.isHidden, false)
-          )
+        ? and(eq(dishCategories.categoryId, input.categoryId), eq(dishes.isHidden, false))
         : eq(dishCategories.categoryId, input.categoryId)
 
       // Build query with join

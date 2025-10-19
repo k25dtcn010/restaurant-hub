@@ -5,4 +5,4 @@ linker = "isolated"
 coverage = true
 coverageThreshold = 80
 coverageDir = "coverage"
-preload = ["apps/server/tests/setup.ts"]
+preload = ["./apps/server/tests/setup.ts"]
