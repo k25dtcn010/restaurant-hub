@@ -4,9 +4,10 @@ import { TRPCClientError } from "@trpc/client"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
-import { MenuList } from "@/components/menu-list"
-import { OrderCart } from "@/components/order-cart"
-import { TableSelector } from "@/components/table-selector"
+import { MenuListColumn } from "@/components/menu-list-column"
+import { OrderCartColumn } from "@/components/order-cart-column"
+import { TableSelectorColumn } from "@/components/table-selector-column"
+import { Card, CardContent } from "@/components/ui/card"
 import { authClient } from "@/lib/auth-client"
 import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
@@ -23,6 +24,11 @@ import { queryClient, trpc, trpcClient } from "@/utils/trpc"
  * Plan Reference: plan.md Task 4.1 - Build staff order creation UI
  *
  * T088: Extended to allow staff to add hidden dishes with confirmation
+ *
+ * Updated with 3-column layout:
+ * - Left: Table selection with search
+ * - Center: Menu items with search (Radio Card style)
+ * - Right: Order cart
  */
 
 export const Route = createFileRoute("/staff-order")({
@@ -205,37 +211,51 @@ function RouteComponent() {
   const isLoading = tablesLoading || dishesLoading
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Staff Order Creation</h1>
-        <p className="text-muted-foreground">Create orders on behalf of customers</p>
+    <div className="h-screen flex flex-col bg-background">
+      {/* Header */}
+      <div className="border-b px-6 py-4 bg-card shrink-0">
+        <h1 className="text-2xl font-bold tracking-tight">Staff Order Creation</h1>
+        <p className="text-sm text-muted-foreground">Create orders on behalf of customers</p>
       </div>
 
-      {/* Table Selection */}
-      <div className="mb-6">
-        <TableSelector
-          tables={tables}
-          isLoading={tablesLoading}
-          selectedTableId={selectedTableId}
-          onSelectTable={handleSelectTable}
-        />
-      </div>
+      {/* 3-Column Layout - 1:3:1 ratio */}
+      <div className="flex-1 grid grid-cols-5 gap-4 p-4 min-h-0 overflow-hidden">
+        {/* Left Column: Table Selection (1 part) */}
+        <div className="col-span-1 min-h-0">
+          <TableSelectorColumn
+            tables={tables}
+            isLoading={tablesLoading}
+            selectedTableId={selectedTableId}
+            onSelectTable={handleSelectTable}
+          />
+        </div>
 
-      {/* Menu and Cart - Only show when table is selected */}
-      {selectedTableId && (
-        <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
-          <div>
-            <MenuList
+        {/* Center Column: Menu Items (3 parts) */}
+        <div className="col-span-3 min-h-0">
+          {selectedTableId ? (
+            <MenuListColumn
               dishes={dishes as any}
               isLoading={dishesLoading}
               onAddToCart={handleAddToCart}
               cartItems={cartQuantities}
               requireHiddenConfirmation={true}
             />
-          </div>
+          ) : (
+            <Card className="h-full flex flex-col">
+              <CardContent className="flex-1 flex items-center justify-center text-center text-muted-foreground">
+                <div>
+                  <p className="font-medium mb-2">Select a table to browse menu</p>
+                  <p className="text-sm">Choose a table from the left to get started</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-          <div>
-            <OrderCart
+        {/* Right Column: Order Cart (1 part) */}
+        <div className="col-span-1 min-h-0">
+          {selectedTableId ? (
+            <OrderCartColumn
               items={cartItems}
               tableNumber={selectedTable?.number}
               isLoading={isLoading}
@@ -243,18 +263,18 @@ function RouteComponent() {
               onSubmit={handleSubmitOrder}
               isSubmitting={createOrderMutation.isPending || submitOrderMutation.isPending}
             />
-          </div>
+          ) : (
+            <Card className="h-full flex flex-col">
+              <CardContent className="flex-1 flex items-center justify-center text-center text-muted-foreground">
+                <div>
+                  <p className="font-medium mb-2">Your Order</p>
+                  <p className="text-sm">Cart will appear here once a table is selected</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
-      )}
-
-      {/* Prompt to select table */}
-      {!selectedTableId && !tablesLoading && (
-        <div className="mt-12 text-center">
-          <p className="text-lg text-muted-foreground">
-            Select a table above to start creating an order
-          </p>
-        </div>
-      )}
+      </div>
     </div>
   )
 }
