@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { dishes, eq, recipes } from "@learn-bettert/db"
+import { dishes, dishVariants, eq, recipes } from "@learn-bettert/db"
 
 import { managerOnlyProcedure, publicProcedure, router } from "../index"
 
@@ -431,6 +431,214 @@ export const dishesRouter = router({
       return {
         dishId,
         deleted: true,
+      }
+    }),
+
+  /**
+   * T066: dishes.createVariant - Add variant to dish
+   * Auth: Manager only
+   * 
+   * Business Logic:
+   * - Validate dish exists
+   * - Create variant with name, price, displayOrder
+   * - Return created variant ID and details
+   */
+  createVariant: managerOnlyProcedure
+    .input(
+      z.object({
+        dishId: z.number().int().positive(),
+        name: z.string().max(100),
+        price: z.number().int().min(0),
+        displayOrder: z.number().int().min(0).optional().default(0),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { db } = ctx
+      const { dishId, name, price, displayOrder } = input
+
+      // Validate dish exists
+      const dish = await db.query.dishes.findFirst({
+        where: (dishes, { eq }) => eq(dishes.id, dishId),
+      })
+
+      if (!dish) {
+        throw new Error(`Dish ID ${dishId} does not exist`)
+      }
+
+      // Create variant
+      const [variant] = await db
+        .insert(dishVariants)
+        .values({
+          dishId,
+          name,
+          price,
+          displayOrder,
+        })
+        .returning()
+
+      if (!variant) {
+        throw new Error("Failed to create variant")
+      }
+
+      return {
+        variantId: variant.id,
+        name: variant.name,
+        price: variant.price,
+        displayOrder: variant.displayOrder,
+      }
+    }),
+
+  /**
+   * T067: dishes.updateVariant - Update variant fields
+   * Auth: Manager only
+   * 
+   * Business Logic:
+   * - Validate variant exists
+   * - Update provided fields (name, price, displayOrder)
+   * - Return updated variant details
+   */
+  updateVariant: managerOnlyProcedure
+    .input(
+      z.object({
+        variantId: z.number().int().positive(),
+        name: z.string().max(100).optional(),
+        price: z.number().int().min(0).optional(),
+        displayOrder: z.number().int().min(0).optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { db } = ctx
+      const { variantId, name, price, displayOrder } = input
+
+      // Validate variant exists
+      const variant = await db.query.dishVariants.findFirst({
+        where: (dishVariants, { eq }) => eq(dishVariants.id, variantId),
+      })
+
+      if (!variant) {
+        throw new Error(`Variant ID ${variantId} does not exist`)
+      }
+
+      // Build update object
+      const updates: any = {}
+      const updatedFields: string[] = []
+
+      if (name !== undefined) {
+        updates.name = name
+        updatedFields.push("name")
+      }
+      if (price !== undefined) {
+        updates.price = price
+        updatedFields.push("price")
+      }
+      if (displayOrder !== undefined) {
+        updates.displayOrder = displayOrder
+        updatedFields.push("displayOrder")
+      }
+
+      // Perform update if there are changes
+      if (Object.keys(updates).length > 0) {
+        await db.update(dishVariants).set(updates).where(eq(dishVariants.id, variantId))
+      }
+
+      return {
+        variantId,
+        updatedFields,
+        updatedAt: new Date(),
+      }
+    }),
+
+  /**
+   * T068: dishes.deleteVariant - Delete variant if not used in orders
+   * Auth: Manager only
+   * 
+   * Business Logic:
+   * - Validate variant exists
+   * - Check if variant is used in any order items
+   * - If used, throw error (cannot delete)
+   * - If not used, delete variant
+   */
+  deleteVariant: managerOnlyProcedure
+    .input(
+      z.object({
+        variantId: z.number().int().positive(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { db } = ctx
+      const { variantId } = input
+
+      // Validate variant exists
+      const variant = await db.query.dishVariants.findFirst({
+        where: (dishVariants, { eq }) => eq(dishVariants.id, variantId),
+      })
+
+      if (!variant) {
+        throw new Error(`Variant ID ${variantId} does not exist`)
+      }
+
+      // Check if variant is used in any order items
+      const orderItems = await db.query.orderItems.findMany({
+        where: (orderItems, { eq }) => eq(orderItems.variantId, variantId),
+        limit: 1,
+      })
+
+      if (orderItems.length > 0) {
+        throw new Error(
+          `Cannot delete variant: it is used in existing orders. Consider creating a new variant instead.`
+        )
+      }
+
+      // Delete variant
+      await db.delete(dishVariants).where(eq(dishVariants.id, variantId))
+
+      return {
+        variantId,
+        deleted: true,
+      }
+    }),
+
+  /**
+   * T069: dishes.listVariants - Get all variants for dish
+   * Auth: Public
+   * 
+   * Business Logic:
+   * - Validate dish exists
+   * - Return all variants ordered by displayOrder
+   */
+  listVariants: publicProcedure
+    .input(
+      z.object({
+        dishId: z.number().int().positive(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const { db } = ctx
+      const { dishId } = input
+
+      // Validate dish exists
+      const dish = await db.query.dishes.findFirst({
+        where: (dishes, { eq }) => eq(dishes.id, dishId),
+      })
+
+      if (!dish) {
+        throw new Error(`Dish ID ${dishId} does not exist`)
+      }
+
+      // Get all variants ordered by displayOrder
+      const variants = await db.query.dishVariants.findMany({
+        where: (dishVariants, { eq }) => eq(dishVariants.dishId, dishId),
+        orderBy: (dishVariants, { asc }) => [asc(dishVariants.displayOrder)],
+      })
+
+      return {
+        variants: variants.map((v) => ({
+          id: v.id,
+          dishId: v.dishId,
+          name: v.name,
+          price: v.price,
+          displayOrder: v.displayOrder,
+        })),
       }
     }),
 })
