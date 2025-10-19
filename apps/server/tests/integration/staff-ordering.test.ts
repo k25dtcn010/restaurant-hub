@@ -2,7 +2,6 @@ import { beforeAll, beforeEach, describe, expect, test } from "bun:test"
 
 import type { Context } from "@/api/context"
 import { appRouter } from "@/api/routers"
-import { auth } from "@/auth"
 import { db, dishes, eq, ingredients, orders, recipes, tables, user } from "@/db"
 
 import { mockWsNotifier } from "../setup"
@@ -45,7 +44,7 @@ describe("Staff-Assisted Ordering - T075 & T076", () => {
         })
         .returning()
       waiterUser = newUser
-    }</parameter>
+    }
 
     waiterUserId = waiterUser.id
 

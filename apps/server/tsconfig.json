@@ -12,5 +12,5 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   },
-  "exclude": ["dist"]
+  "exclude": ["dist", "tests"]
 }

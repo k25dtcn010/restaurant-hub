@@ -27,10 +27,7 @@ async function initializeTestDatabase() {
     })
 
     // Read and execute migration file
-    const migrationPath = join(
-      projectRoot,
-      "apps/server/src/db/migrations/0000_sloppy_the_spike.sql"
-    )
+    const migrationPath = join(projectRoot, "apps/server/src/db/migrations/0000_modern_morlun.sql")
     const migrationSql = readFileSync(migrationPath, "utf-8")
 
     // Split by statement-breakpoint and execute each statement

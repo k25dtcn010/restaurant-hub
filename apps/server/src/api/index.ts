@@ -104,3 +104,17 @@ export const waiterProcedure = protectedProcedure.use(({ ctx, next }) => {
   }
   return next({ ctx })
 })
+
+/**
+ * Staff or Manager procedure - requires Staff or Manager role
+ * Access Control Matrix: View and manage reservations
+ */
+export const staffOrManagerProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.role !== "Staff" && ctx.role !== "Manager") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Staff or Manager access required",
+    })
+  }
+  return next({ ctx })
+})

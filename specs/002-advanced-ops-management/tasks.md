@@ -929,23 +929,23 @@
 
 **Backend: Operating Hours** _(Contract: `contracts/reservations-router.md` | Data: `data-model.md` § 5.1)_
 
-- [ ] T089 [P] [US5] Implement reservations.getOperatingHours procedure
+- [X] T089 [P] [US5] Implement reservations.getOperatingHours procedure
   - **Returns**: Array of `{ dayOfWeek: 0-6, openTime, closeTime, isClosed: boolean }`
   - **Query**: `SELECT * FROM operatingHours ORDER BY dayOfWeek`
 
-- [ ] T090 [P] [US5] Implement reservations.updateOperatingHours procedure
+- [X] T090 [P] [US5] Implement reservations.updateOperatingHours procedure
   - **Auth**: Manager only
   - **Input**: Array of operating hours for all 7 days
   - **Validation**: openTime < closeTime, valid time format (HH:MM)
 
-- [ ] T091 [US5] Create Zod validation helper for reservation time checks
+- [X] T091 [US5] Create Zod validation helper for reservation time checks
   - **Function**: `isWithinOperatingHours(date, time)` → boolean
   - **Logic**: Check if requested time falls within operating hours for that day of week
   - **Used By**: T092 (create reservation)
 
 **Backend: Reservation Lifecycle** _(Contract: `contracts/reservations-router.md` | Data: `data-model.md` § 5.2)_
 
-- [ ] T092-T099: Reservation procedures (TDD: RED-GREEN-REFACTOR)
+- [X] T092-T099: Reservation procedures (TDD: RED-GREEN-REFACTOR)
   - **T092**: `reservations.create` - Public access, rate-limited (5/IP/hour), validates operating hours
   - **T093**: `reservations.list` - Staff view with filters (status, dateFrom, dateTo)
   - **T094**: `reservations.confirm` - Assign tables, check conflicts (no double-booking)
