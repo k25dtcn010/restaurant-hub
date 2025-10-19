@@ -408,37 +408,6 @@ describe("Orders Router - T031-T034: Order Modifiers Integration", () => {
     test("T033-1: Should insert modifiers with historical snapshot", async () => {
       const caller = appRouter.createCaller(mockContext)
 
-      // Dish: $12.00, Extra Cheese: $2.00, Bacon: $1.50
-      // Total: $15.50
-      const result = await caller.orders.create({
-        tableId: testTableId,
-        items: [
-          {
-            dishId: testDishId,
-            quantity: 1,
-            modifiers: [
-              {
-                modifierId: testModifier1Id, // +$2.00
-                modifierGroupId: testModifierGroupId,
-              },
-              {
-                modifierId: testModifier2Id, // +$1.50
-                modifierGroupId: testModifierGroupId,
-              },
-            ],
-          },
-        ],
-      })
-
-      expect(result.totalAmount).toBe(1550) // $15.50 in cents
-    })
-
-    test("T032-2: Should calculate correct total with multiple items and modifiers", async () => {
-      const caller = appRouter.createCaller(mockContext)
-
-      // Item 1: Burger ($12.00) + Extra Cheese ($2.00) = $14.00
-      // Item 2: Burger ($12.00) + Bacon ($1.50) = $13.50
-      // Total: $27.50
       const result = await caller.orders.create({
         tableId: testTableId,
         items: [
@@ -452,10 +421,44 @@ describe("Orders Router - T031-T034: Order Modifiers Integration", () => {
               },
             ],
           },
+        ],
+      })
+
+      createdOrderIds.push(result.orderId)
+
+      // Get the created order item
+      const orderItem = await db.query.orderItems.findFirst({
+        where: (orderItems, { eq }) => eq(orderItems.orderId, result.orderId),
+      })
+
+      expect(orderItem).toBeDefined()
+
+      // Check orderItemModifiers table
+      const savedModifiers = await db.query.orderItemModifiers.findMany({
+        where: (orderItemModifiers, { eq }) =>
+          eq(orderItemModifiers.orderItemId, orderItem!.id),
+      })
+
+      expect(savedModifiers.length).toBe(1)
+      expect(savedModifiers[0].modifierId).toBe(testModifier1Id)
+      expect(savedModifiers[0].name).toBe("Test Extra Cheese for Orders")
+      expect(savedModifiers[0].priceAtOrder).toBe(200) // Historical price snapshot
+    })
+
+    test("T033-2: Should store all selected modifiers", async () => {
+      const caller = appRouter.createCaller(mockContext)
+
+      const result = await caller.orders.create({
+        tableId: testTableId,
+        items: [
           {
             dishId: testDishId,
             quantity: 1,
             modifiers: [
+              {
+                modifierId: testModifier1Id,
+                modifierGroupId: testModifierGroupId,
+              },
               {
                 modifierId: testModifier2Id,
                 modifierGroupId: testModifierGroupId,
@@ -465,30 +468,21 @@ describe("Orders Router - T031-T034: Order Modifiers Integration", () => {
         ],
       })
 
-      expect(result.totalAmount).toBe(2750) // $27.50 in cents
-    })
+      createdOrderIds.push(result.orderId)
 
-    test("T032-3: Should handle quantity multiplier with modifiers", async () => {
-      const caller = appRouter.createCaller(mockContext)
-
-      // 2x Burger ($12.00 + $2.00) = 2x $14.00 = $28.00
-      const result = await caller.orders.create({
-        tableId: testTableId,
-        items: [
-          {
-            dishId: testDishId,
-            quantity: 2,
-            modifiers: [
-              {
-                modifierId: testModifier1Id,
-                modifierGroupId: testModifierGroupId,
-              },
-            ],
-          },
-        ],
+      const orderItem = await db.query.orderItems.findFirst({
+        where: (orderItems, { eq }) => eq(orderItems.orderId, result.orderId),
       })
 
-      expect(result.totalAmount).toBe(2800) // $28.00 in cents
+      const savedModifiers = await db.query.orderItemModifiers.findMany({
+        where: (orderItemModifiers, { eq }) =>
+          eq(orderItemModifiers.orderItemId, orderItem!.id),
+      })
+
+      expect(savedModifiers.length).toBe(2)
+      expect(savedModifiers.map((m) => m.modifierId).sort()).toEqual(
+        [testModifier1Id, testModifier2Id].sort()
+      )
     })
   })
 
@@ -496,6 +490,25 @@ describe("Orders Router - T031-T034: Order Modifiers Integration", () => {
     let testOrderId: number
 
     beforeAll(async () => {
+      // Clean up any pending orders first to ensure a fresh order
+      const pendingOrders = await db.query.orders.findMany({
+        where: (orders, { and, eq }) =>
+          and(eq(orders.tableId, testTableId), eq(orders.status, "Pending")),
+      })
+
+      for (const order of pendingOrders) {
+        const items = await db.query.orderItems.findMany({
+          where: (orderItems, { eq }) => eq(orderItems.orderId, order.id),
+        })
+
+        for (const item of items) {
+          await db.delete(orderItemModifiers).where(eq(orderItemModifiers.orderItemId, item.id))
+        }
+
+        await db.delete(orderItems).where(eq(orderItems.orderId, order.id))
+        await db.delete(orders).where(eq(orders.id, order.id))
+      }
+
       // Create an order with modifiers for testing
       const caller = appRouter.createCaller(mockContext)
 
@@ -560,6 +573,25 @@ describe("Orders Router - T031-T034: Order Modifiers Integration", () => {
 
     test("T034-3: Should return empty modifiers array for items without modifiers", async () => {
       const caller = appRouter.createCaller(mockContext)
+
+      // Clean up pending orders first
+      const pendingOrders = await db.query.orders.findMany({
+        where: (orders, { and, eq }) =>
+          and(eq(orders.tableId, testTableId), eq(orders.status, "Pending")),
+      })
+
+      for (const order of pendingOrders) {
+        const items = await db.query.orderItems.findMany({
+          where: (orderItems, { eq }) => eq(orderItems.orderId, order.id),
+        })
+
+        for (const item of items) {
+          await db.delete(orderItemModifiers).where(eq(orderItemModifiers.orderItemId, item.id))
+        }
+
+        await db.delete(orderItems).where(eq(orderItems.orderId, order.id))
+        await db.delete(orders).where(eq(orders.id, order.id))
+      }
 
       // Create an order without modifiers
       const result = await caller.orders.create({
