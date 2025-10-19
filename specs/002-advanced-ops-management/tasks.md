@@ -1049,7 +1049,7 @@
   - **Testing**: Create `packages/api/tests/routers/shifts.test.ts`
   - **Data Model**: Uses `shifts` and `shiftStaff` tables (see `data-model.md` § 6.1, 6.2)
 
-- [ ] T120 [US6] Update orders.createOrder to auto-tag with active shift
+- [X] T120 [US6] Update orders.createOrder to auto-tag with active shift
   - **File**: `packages/api/src/routers/orders.ts`
   - **Logic**: Query `shifts WHERE endTime IS NULL LIMIT 1`, set order.shiftId
   - **Note**: shiftId column already added in T009
@@ -1114,10 +1114,10 @@
 
 **Validation Tasks for User Story 6:**
 
-- [ ] T132.1 [US6] Integration test: Shift lifecycle end-to-end
+- [X] T132.1 [US6] Integration test: Shift lifecycle end-to-end
   - **Test**: Start shift → orders auto-tagged → end shift → summary correct
-- [ ] T132.2 [US6] Test: Staff management mid-shift works correctly
-- [ ] T132.3 [US6] Test coverage: 80% for shifts router
+- [X] T132.2 [US6] Test: Staff management mid-shift works correctly
+- [X] T132.3 [US6] Test coverage: 80% for shifts router
 
 **Checkpoint**: Complete shift lifecycle - start → auto-tagging → end with summary
 
