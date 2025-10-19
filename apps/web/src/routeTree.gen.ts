@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StaffOrderRouteImport } from './routes/staff-order'
+import { Route as ShiftsRouteImport } from './routes/shifts'
 import { Route as ServingRouteImport } from './routes/serving'
 import { Route as PaymentHistoryRouteImport } from './routes/payment-history'
 import { Route as PaymentRouteImport } from './routes/payment'
@@ -23,6 +24,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const StaffOrderRoute = StaffOrderRouteImport.update({
   id: '/staff-order',
   path: '/staff-order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShiftsRoute = ShiftsRouteImport.update({
+  id: '/shifts',
+  path: '/shifts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServingRoute = ServingRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/payment': typeof PaymentRoute
   '/payment-history': typeof PaymentHistoryRoute
   '/serving': typeof ServingRoute
+  '/shifts': typeof ShiftsRoute
   '/staff-order': typeof StaffOrderRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/payment': typeof PaymentRoute
   '/payment-history': typeof PaymentHistoryRoute
   '/serving': typeof ServingRoute
+  '/shifts': typeof ShiftsRoute
   '/staff-order': typeof StaffOrderRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/payment': typeof PaymentRoute
   '/payment-history': typeof PaymentHistoryRoute
   '/serving': typeof ServingRoute
+  '/shifts': typeof ShiftsRoute
   '/staff-order': typeof StaffOrderRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/payment'
     | '/payment-history'
     | '/serving'
+    | '/shifts'
     | '/staff-order'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/payment'
     | '/payment-history'
     | '/serving'
+    | '/shifts'
     | '/staff-order'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/payment'
     | '/payment-history'
     | '/serving'
+    | '/shifts'
     | '/staff-order'
   fileRoutesById: FileRoutesById
 }
@@ -157,6 +169,7 @@ export interface RootRouteChildren {
   PaymentRoute: typeof PaymentRoute
   PaymentHistoryRoute: typeof PaymentHistoryRoute
   ServingRoute: typeof ServingRoute
+  ShiftsRoute: typeof ShiftsRoute
   StaffOrderRoute: typeof StaffOrderRoute
 }
 
@@ -167,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/staff-order'
       fullPath: '/staff-order'
       preLoaderRoute: typeof StaffOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shifts': {
+      id: '/shifts'
+      path: '/shifts'
+      fullPath: '/shifts'
+      preLoaderRoute: typeof ShiftsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/serving': {
@@ -245,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   PaymentRoute: PaymentRoute,
   PaymentHistoryRoute: PaymentHistoryRoute,
   ServingRoute: ServingRoute,
+  ShiftsRoute: ShiftsRoute,
   StaffOrderRoute: StaffOrderRoute,
 }
 export const routeTree = rootRouteImport
