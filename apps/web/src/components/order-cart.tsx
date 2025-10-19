@@ -3,6 +3,7 @@ import { ShoppingCart, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Spinner } from "@/components/ui/spinner"
 
 /**
  * T056: OrderCart Component
@@ -112,8 +113,20 @@ export function OrderCart({
               <p className="text-2xl font-bold">${(totalAmount / 100).toFixed(2)}</p>
             </div>
           </div>
-          <Button className="w-full" size="lg" onClick={onSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit Order"}
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2" />
+                Submitting...
+              </>
+            ) : (
+              "Submit Order"
+            )}
           </Button>
         </CardFooter>
       )}

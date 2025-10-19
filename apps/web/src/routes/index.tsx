@@ -4,11 +4,10 @@ import { TRPCClientError } from "@trpc/client"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
-import { CategoryList } from "@/components/category-list"
-import { DishCustomizationDialog } from "@/components/dish-customization-dialog"
-import { MenuList } from "@/components/menu-list"
-import type { SelectedModifier } from "@/components/modifier-selector"
+import { HomeHeader } from "@/components/home-header"
+import { MenuItemsSection } from "@/components/menu-items-section"
 import { OrderCart } from "@/components/order-cart"
+import type { CartItem, SelectedModifier } from "@/types/home-type"
 import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
 /**
@@ -29,26 +28,10 @@ export const Route = createFileRoute("/")({
   },
 })
 
-interface CartItem {
-  dishId: number
-  dishName: string
-  quantity: number
-  priceAtOrder: number
-  modifiers?: SelectedModifier[]
-  specialRequest?: string
-}
-
 function HomeComponent() {
   const { table } = Route.useSearch()
   const [cart, setCart] = useState<Map<number, CartItem>>(new Map())
-  const [customizingDish, setCustomizingDish] = useState<{
-    id: number
-    name: string
-    description: string
-    price: number
-    photoUrl: string | null
-  } | null>(null)
-  // T062: Category filtering state
+  const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
 
   // T087: Fetch dishes - exclude hidden dishes from customer view
@@ -58,12 +41,6 @@ function HomeComponent() {
       includeHidden: false,
     })
   )
-
-  // T062: Fetch dishes for selected category
-  const { data: categoryDishesData } = useQuery({
-    ...trpc.categories.listDishes.queryOptions({ categoryId: selectedCategoryId || 0 }),
-    enabled: selectedCategoryId !== null,
-  })
 
   // Fetch table info if table ID is provided - only when table is set
   const tableQueryEnabled = !!table
@@ -84,26 +61,32 @@ function HomeComponent() {
     mutationFn: (variables: { orderId: number }) => trpcClient.orders.submit.mutate(variables),
   })
 
-  // T062: Filter dishes by category if a category is selected
+  // T062: Filter dishes by category
   const allDishes = dishesData?.dishes || []
-  const dishes =
-    selectedCategoryId !== null && categoryDishesData
-      ? allDishes.filter((dish) => categoryDishesData.some((catDish) => catDish.id === dish.id))
-      : allDishes
 
-  // Handle opening customization dialog
-  const handleOpenCustomization = (dishId: number) => {
-    const dish = dishes.find((d: any) => d.id === dishId)
-    if (!dish) return
+  // Filter by search query and category
+  const filteredDishes = useMemo(() => {
+    let items = allDishes
 
-    setCustomizingDish({
-      id: dish.id,
-      name: dish.name,
-      description: dish.description,
-      price: dish.price,
-      photoUrl: dish.photoUrl,
-    })
-  }
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      items = items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query)
+      )
+    }
+
+    return items
+  }, [allDishes, searchQuery])
+
+  // Group items by category (will group by dish id as default category)
+  const groupedItems = useMemo(() => {
+    // Group all filtered dishes under a single category
+    return {
+      "All Dishes": filteredDishes,
+    }
+  }, [filteredDishes])
 
   // Handle adding items to cart with modifiers and special request (T040, T042, T043)
   const handleAddToCartWithCustomization = (
@@ -122,11 +105,11 @@ function HomeComponent() {
       return
     }
 
-    const dish = dishes.find((d: { id: number; name: string; price: number }) => d.id === dishId)
+    const dish = allDishes.find((d: any) => d.id === dishId)
     if (!dish) return
 
     // Calculate price including modifiers (T043)
-    const modifierTotal = modifiers.reduce((sum, m) => sum + m.priceAdjustment, 0)
+    const modifierTotal = modifiers.reduce((sum, m) => sum + (m.priceAdjustment || 0), 0)
     const totalPrice = dish.price + modifierTotal
 
     setCart((prev) => {
@@ -143,18 +126,8 @@ function HomeComponent() {
     })
   }
 
-  // Simple cart handler for MenuList (opens customization dialog)
-  const handleAddToCart = (dishId: number, quantity: number) => {
-    if (quantity === 0) {
-      handleAddToCartWithCustomization(dishId, 0, [], "")
-    } else {
-      // Open customization dialog instead of adding directly
-      handleOpenCustomization(dishId)
-    }
-  }
-
   const handleRemoveItem = (dishId: number) => {
-    handleAddToCart(dishId, 0)
+    handleAddToCartWithCustomization(dishId, 0, [], "")
   }
 
   // Handle order submission
@@ -220,6 +193,7 @@ function HomeComponent() {
         toast.error("Failed to submit order. Please try again.")
       }
       console.error("Order submission error:", error)
+      throw error
     }
   }
 
@@ -233,55 +207,62 @@ function HomeComponent() {
   }, [cart])
 
   const isLoading = dishesLoading || (tableQueryEnabled && tableLoading)
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {table ? `Table ${table} - Menu` : "Restaurant Menu"}
-        </h1>
-        {tableData && (
-          <p className="text-muted-foreground">Capacity: {tableData.capacity} people</p>
-        )}
-        {!table && <p className="text-muted-foreground">Scan a QR code at your table to order</p>}
-      </div>
+    <div className="flex flex-col min-h-screen bg-background">
+      {/* Header */}
+      <HomeHeader
+        tableNumber={table}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        cartItems={cartItems}
+        onOpenCartDrawer={() => setIsCartDrawerOpen(true)}
+      />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
-        <div>
-          {/* T061, T062: Category browsing and filtering */}
-          <CategoryList
-            selectedCategoryId={selectedCategoryId}
-            onSelectCategory={setSelectedCategoryId}
-          />
-
-          <MenuList
-            dishes={dishes as any}
+      {/* Main Content - Full Width */}
+      <main className="flex-1">
+        <div className="container mx-auto px-4 py-6">
+          {/* Menu Items */}
+          <MenuItemsSection
+            groupedItems={groupedItems}
+            selectedCategory={null}
             isLoading={isLoading}
-            onAddToCart={handleAddToCart}
             cartItems={cartQuantities}
+            onAddToCart={handleAddToCartWithCustomization}
           />
         </div>
+      </main>
 
-        <div>
-          <OrderCart
-            items={cartItems}
-            tableNumber={table}
-            isLoading={isLoading}
-            onRemoveItem={handleRemoveItem}
-            onSubmit={handleSubmitOrder}
-            isSubmitting={createOrderMutation.isPending || submitOrderMutation.isPending}
-          />
+      {/* Cart Drawer - Mobile Optimized */}
+      {isCartDrawerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50">
+          <div className="absolute bottom-0 left-0 right-0 bg-background rounded-t-lg max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom">
+            <div className="sticky top-0 border-b border-border bg-background p-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Order Summary</h2>
+              <button
+                onClick={() => setIsCartDrawerOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6">
+              <OrderCart
+                items={cartItems}
+                tableNumber={table}
+                isLoading={isLoading}
+                onRemoveItem={handleRemoveItem}
+                onSubmit={async () => {
+                  await handleSubmitOrder()
+                  setIsCartDrawerOpen(false)
+                }}
+                isSubmitting={createOrderMutation.isPending || submitOrderMutation.isPending}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Dish Customization Dialog (T040) */}
-      {customizingDish && (
-        <DishCustomizationDialog
-          dish={customizingDish}
-          isOpen={true}
-          onClose={() => setCustomizingDish(null)}
-          onAddToCart={handleAddToCartWithCustomization}
-        />
       )}
     </div>
   )
