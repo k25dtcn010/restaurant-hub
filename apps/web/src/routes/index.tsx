@@ -4,8 +4,10 @@ import { TRPCClientError } from "@trpc/client"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import { DishCustomizationDialog } from "@/components/dish-customization-dialog"
 import { MenuList } from "@/components/menu-list"
 import { OrderCart } from "@/components/order-cart"
+import type { SelectedModifier } from "@/components/modifier-selector"
 import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
 /**
@@ -31,11 +33,20 @@ interface CartItem {
   dishName: string
   quantity: number
   priceAtOrder: number
+  modifiers?: SelectedModifier[]
+  specialRequest?: string
 }
 
 function HomeComponent() {
   const { table } = Route.useSearch()
   const [cart, setCart] = useState<Map<number, CartItem>>(new Map())
+  const [customizingDish, setCustomizingDish] = useState<{
+    id: number
+    name: string
+    description: string
+    price: number
+    photoUrl: string | null
+  } | null>(null)
 
   // Fetch dishes
   const { data: dishesData, isLoading: dishesLoading } = useQuery(
@@ -65,8 +76,27 @@ function HomeComponent() {
 
   const dishes = dishesData?.dishes || []
 
-  // Handle adding/removing items from cart
-  const handleAddToCart = (dishId: number, quantity: number) => {
+  // Handle opening customization dialog
+  const handleOpenCustomization = (dishId: number) => {
+    const dish = dishes.find((d: any) => d.id === dishId)
+    if (!dish) return
+
+    setCustomizingDish({
+      id: dish.id,
+      name: dish.name,
+      description: dish.description,
+      price: dish.price,
+      photoUrl: dish.photoUrl,
+    })
+  }
+
+  // Handle adding items to cart with modifiers and special request (T040, T042, T043)
+  const handleAddToCartWithCustomization = (
+    dishId: number,
+    quantity: number,
+    modifiers: SelectedModifier[],
+    specialRequest: string
+  ) => {
     if (quantity === 0) {
       // Remove from cart
       setCart((prev) => {
@@ -80,16 +110,32 @@ function HomeComponent() {
     const dish = dishes.find((d: { id: number; name: string; price: number }) => d.id === dishId)
     if (!dish) return
 
+    // Calculate price including modifiers (T043)
+    const modifierTotal = modifiers.reduce((sum, m) => sum + m.priceAdjustment, 0)
+    const totalPrice = dish.price + modifierTotal
+
     setCart((prev) => {
       const newCart = new Map(prev)
       newCart.set(dishId, {
         dishId,
         dishName: dish.name,
         quantity,
-        priceAtOrder: dish.price,
+        priceAtOrder: totalPrice,
+        modifiers,
+        specialRequest,
       })
       return newCart
     })
+  }
+
+  // Simple cart handler for MenuList (opens customization dialog)
+  const handleAddToCart = (dishId: number, quantity: number) => {
+    if (quantity === 0) {
+      handleAddToCartWithCustomization(dishId, 0, [], "")
+    } else {
+      // Open customization dialog instead of adding directly
+      handleOpenCustomization(dishId)
+    }
   }
 
   const handleRemoveItem = (dishId: number) => {
@@ -113,6 +159,12 @@ function HomeComponent() {
       const items = Array.from(cart.values()).map((item) => ({
         dishId: item.dishId,
         quantity: item.quantity,
+        // T040, T042: Include modifiers and special request
+        modifiers: item.modifiers?.map((m) => ({
+          modifierId: m.modifierId,
+          modifierGroupId: m.modifierGroupId,
+        })),
+        specialRequest: item.specialRequest,
       }))
 
       const createResult = await createOrderMutation.mutateAsync({
@@ -200,6 +252,16 @@ function HomeComponent() {
           />
         </div>
       </div>
+
+      {/* Dish Customization Dialog (T040) */}
+      {customizingDish && (
+        <DishCustomizationDialog
+          dish={customizingDish}
+          isOpen={true}
+          onClose={() => setCustomizingDish(null)}
+          onAddToCart={handleAddToCartWithCustomization}
+        />
+      )}
     </div>
   )
 }

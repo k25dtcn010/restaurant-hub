@@ -531,7 +531,7 @@
 
 **Frontend: Customer - Modifier Selection**
 
-- [ ] T039 [P] [US1] Create modifier selector component for customer ordering
+- [X] T039 [P] [US1] Create modifier selector component for customer ordering
   - **File**: `apps/web/src/components/modifier-selector.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Customer: Order with Modifiers"
   - **DEPENDS ON**: T030-GREEN (needs getByDish to load modifiers)
@@ -550,7 +550,7 @@
   - **UI Components**: Use shadcn/ui Checkbox, RadioGroup, Badge, Alert
   - **Test**: View "Cheeseburger" → see "Toppings" group → select 2 modifiers → verify total updates
 
-- [ ] T040 [US1] Integrate modifier selection into dish detail/order flow
+- [X] T040 [US1] Integrate modifier selection into dish detail/order flow
   - **File**: Likely in dish detail view or order cart component
   - **DEPENDS ON**: T039 (modifier selector component must exist)
   - **Implementation**:
@@ -559,7 +559,7 @@
     - Pass modifiers to createOrder mutation (T031)
   - **Test**: Add "Cheeseburger" to cart → modifier selector appears → select modifiers → add to cart
 
-- [ ] T041 [US1] Implement min/max selection validation in modifier selector
+- [X] T041 [US1] Implement min/max selection validation in modifier selector
   - **File**: `apps/web/src/components/modifier-selector.tsx`
   - **DEPENDS ON**: T039 (component must exist)
   - **Validation Logic**:
@@ -574,7 +574,7 @@
   - **UI**: Disable "Add to Order" button if `!isValid`, show error messages per group
   - **Test**: Try selecting 4 toppings when max=3 → see error → can't submit until deselect to 3
 
-- [ ] T042 [US1] Add special request text input to dish customization
+- [X] T042 [US1] Add special request text input to dish customization
   - **File**: Same as T040 (dish detail/order flow)
   - **Features**:
     - **Text Area**: Max 200 characters, placeholder "Any special requests? (e.g., no pickles, extra lettuce)"
@@ -584,7 +584,7 @@
   - **State**: Store in order item alongside modifiers
   - **Test**: Enter "No pickles, extra lettuce" → verify shows in order summary
 
-- [ ] T043 [US1] Update order total calculation to include modifier prices
+- [X] T043 [US1] Update order total calculation to include modifier prices
   - **File**: Order cart component or checkout view
   - **DEPENDS ON**: T039, T040 (selected modifiers must be tracked)
   - **Calculation Logic**:
