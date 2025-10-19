@@ -4,9 +4,11 @@ import { Plus, RefreshCw } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
+import { CategoryManager } from "@/components/category-manager"
 import { DishEditor } from "@/components/dish-editor"
 import { ModifierGroupEditor } from "@/components/modifier-group-editor"
 import { ModifierManager } from "@/components/modifier-manager"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -140,6 +142,7 @@ function RouteComponent() {
       <Tabs defaultValue="dishes" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="dishes">Dishes</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="modifiers">Modifiers</TabsTrigger>
         </TabsList>
 
@@ -160,7 +163,27 @@ function RouteComponent() {
           <Card key={dish.id} className={!dish.isAvailable ? "opacity-60" : ""}>
             <CardHeader>
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{dish.name}</CardTitle>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-lg">{dish.name}</CardTitle>
+                    {/* T060: Flag Badges */}
+                    {dish.isRecommended && (
+                      <span className="text-lg" title="Recommended">
+                        👍
+                      </span>
+                    )}
+                    {dish.isChefSpecial && (
+                      <span className="text-lg" title="Chef's Special">
+                        ⭐
+                      </span>
+                    )}
+                    {dish.orderPriority > 0 && (
+                      <Badge variant="outline" title="Kitchen Priority">
+                        P{dish.orderPriority}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(dish)}>
                     Edit
@@ -206,6 +229,10 @@ function RouteComponent() {
             </Card>
           )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="categories">
+          <CategoryManager />
         </TabsContent>
 
         <TabsContent value="modifiers">

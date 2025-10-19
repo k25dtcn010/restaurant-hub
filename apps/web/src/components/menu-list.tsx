@@ -22,6 +22,9 @@ interface Dish {
   photoUrl: string | null
   isAvailable: boolean
   createdAt: Date
+  // T063-T064: Flag fields for customer display
+  isRecommended?: boolean
+  isChefSpecial?: boolean
 }
 
 interface MenuListProps {
@@ -71,7 +74,20 @@ export function MenuList({ dishes, isLoading, onAddToCart, cartItems }: MenuList
           <Card key={dish.id} className={isUnavailable ? "opacity-60" : ""}>
             <CardHeader>
               <div className="flex items-start justify-between gap-2">
-                <CardTitle className="text-lg">{dish.name}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-lg">{dish.name}</CardTitle>
+                  {/* T063-T064: Display flag badges to customers */}
+                  {dish.isRecommended && (
+                    <span className="text-lg" title="Recommended">
+                      👍
+                    </span>
+                  )}
+                  {dish.isChefSpecial && (
+                    <span className="text-lg" title="Chef's Special">
+                      ⭐
+                    </span>
+                  )}
+                </div>
                 {isUnavailable && (
                   <Badge variant="destructive" className="shrink-0">
                     Unavailable

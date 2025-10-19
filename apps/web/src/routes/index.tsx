@@ -4,6 +4,7 @@ import { TRPCClientError } from "@trpc/client"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import { CategoryList } from "@/components/category-list"
 import { DishCustomizationDialog } from "@/components/dish-customization-dialog"
 import { MenuList } from "@/components/menu-list"
 import { OrderCart } from "@/components/order-cart"
@@ -47,6 +48,8 @@ function HomeComponent() {
     price: number
     photoUrl: string | null
   } | null>(null)
+  // T062: Category filtering state
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
 
   // Fetch dishes
   const { data: dishesData, isLoading: dishesLoading } = useQuery(
@@ -54,6 +57,12 @@ function HomeComponent() {
       includeDisabled: false,
     })
   )
+
+  // T062: Fetch dishes for selected category
+  const { data: categoryDishesData } = useQuery({
+    ...trpc.categories.listDishes.queryOptions({ categoryId: selectedCategoryId || 0 }),
+    enabled: selectedCategoryId !== null,
+  })
 
   // Fetch table info if table ID is provided - only when table is set
   const tableQueryEnabled = !!table
@@ -74,7 +83,13 @@ function HomeComponent() {
     mutationFn: (variables: { orderId: number }) => trpcClient.orders.submit.mutate(variables),
   })
 
-  const dishes = dishesData?.dishes || []
+  // T062: Filter dishes by category if a category is selected
+  const allDishes = dishesData?.dishes || []
+  const dishes = selectedCategoryId !== null && categoryDishesData
+    ? allDishes.filter((dish: any) => 
+        categoryDishesData.some((catDish: any) => catDish.dishId === dish.id)
+      )
+    : allDishes
 
   // Handle opening customization dialog
   const handleOpenCustomization = (dishId: number) => {
@@ -233,6 +248,12 @@ function HomeComponent() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
         <div>
+          {/* T061, T062: Category browsing and filtering */}
+          <CategoryList
+            selectedCategoryId={selectedCategoryId}
+            onSelectCategory={setSelectedCategoryId}
+          />
+          
           <MenuList
             dishes={dishes as any}
             isLoading={isLoading}

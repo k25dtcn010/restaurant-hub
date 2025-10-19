@@ -191,11 +191,15 @@ export const dishesRouter = router({
             quantityRequired: z.number().positive(),
           })
         ),
+        // T052: Add flag fields to create procedure
+        isRecommended: z.boolean().optional().default(false),
+        isChefSpecial: z.boolean().optional().default(false),
+        orderPriority: z.number().int().min(0).max(100).optional().default(0),
       })
     )
     .mutation(async ({ input, ctx }) => {
       const { db } = ctx
-      const { name, description, price, photoUrl, recipe } = input
+      const { name, description, price, photoUrl, recipe, isRecommended, isChefSpecial, orderPriority } = input
 
       // Validate all ingredient IDs exist
       for (const item of recipe) {
@@ -216,6 +220,10 @@ export const dishesRouter = router({
           price,
           photoUrl: photoUrl ?? null,
           isAvailable: true,
+          // T052: Add flag fields to insert
+          isRecommended,
+          isChefSpecial,
+          orderPriority,
         })
         .returning()
 
