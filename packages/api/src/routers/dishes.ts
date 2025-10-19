@@ -243,6 +243,8 @@ export const dishesRouter = router({
    * dishes.update - Update dish details
    * Auth: Manager only
    * Contract: dishes-router.md Procedure 4
+   * 
+   * T052: Extended with flag fields (isRecommended, isChefSpecial, orderPriority)
    */
   update: managerOnlyProcedure
     .input(
@@ -260,11 +262,15 @@ export const dishesRouter = router({
             })
           )
           .optional(),
+        // T052: Add flag fields with validation
+        isRecommended: z.boolean().optional(),
+        isChefSpecial: z.boolean().optional(),
+        orderPriority: z.number().int().min(0).max(100).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
       const { db } = ctx
-      const { dishId, name, description, price, photoUrl, recipe } = input
+      const { dishId, name, description, price, photoUrl, recipe, isRecommended, isChefSpecial, orderPriority } = input
 
       const dish = await db.query.dishes.findFirst({
         where: (dishes, { eq }) => eq(dishes.id, dishId),
@@ -292,6 +298,19 @@ export const dishesRouter = router({
       if (photoUrl !== undefined) {
         updates.photoUrl = photoUrl
         updatedFields.push("photoUrl")
+      }
+      // T052: Add flag field updates
+      if (isRecommended !== undefined) {
+        updates.isRecommended = isRecommended
+        updatedFields.push("isRecommended")
+      }
+      if (isChefSpecial !== undefined) {
+        updates.isChefSpecial = isChefSpecial
+        updatedFields.push("isChefSpecial")
+      }
+      if (orderPriority !== undefined) {
+        updates.orderPriority = orderPriority
+        updatedFields.push("orderPriority")
       }
 
       if (Object.keys(updates).length > 0) {
