@@ -600,7 +600,7 @@
 
 **Frontend: Kitchen - Display Modifiers**
 
-- [ ] T044 [US1] Update kitchen order card to display modifiers
+- [X] T044 [US1] Update kitchen order card to display modifiers
   - **File**: `apps/web/src/components/order-card.tsx`
   - **Quickstart Reference**: See `quickstart.md` § A "Kitchen: View Order with Modifiers"
   - **DEPENDS ON**: T034 (getOrderDetails must return modifiers)
@@ -614,7 +614,7 @@
   - **tRPC**: Uses existing `api.orders.getOrderDetails.useQuery()` which now includes modifiers
   - **Test**: Create order with modifiers → kitchen sees modifiers listed under dish name
 
-- [ ] T045 [US1] Display special request text in kitchen order card
+- [X] T045 [US1] Display special request text in kitchen order card
   - **File**: `apps/web/src/components/order-card.tsx`
   - **DEPENDS ON**: T034 (getOrderDetails must return specialRequest)
   - **Display Format**:

@@ -25,10 +25,17 @@ import { queryClient, trpc, trpcClient } from "@/utils/trpc"
  * - Clear visual distinction between Pending, In Kitchen, and Ready to Serve
  */
 
+interface OrderItemModifier {
+  name: string
+  priceAtOrder: number
+}
+
 interface OrderItem {
   dishName: string
   quantity: number
   specialInstructions: string | null
+  modifiers?: OrderItemModifier[] // T044: Add modifiers
+  specialRequest?: string // T045: Explicitly named special request field
 }
 
 interface Order {
@@ -179,10 +186,31 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
                   <span className="font-semibold">{item.quantity}x</span>
                   <span>{item.dishName}</span>
                 </div>
-                {item.specialInstructions && (
-                  <p className="text-sm text-muted-foreground italic ml-8">
-                    Note: {item.specialInstructions}
-                  </p>
+                {/* T044: Display modifiers */}
+                {item.modifiers && item.modifiers.length > 0 && (
+                  <div className="ml-8 mt-1 space-y-0.5">
+                    {item.modifiers.map((modifier, modIndex) => (
+                      <div key={modIndex} className="text-sm text-muted-foreground">
+                        <span className="mr-2">+</span>
+                        <span>{modifier.name}</span>
+                        {modifier.priceAtOrder !== 0 && (
+                          <span className="ml-2">
+                            ({modifier.priceAtOrder > 0 ? "+" : ""}$
+                            {(modifier.priceAtOrder / 100).toFixed(2)})
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* T045: Display special request with distinct styling */}
+                {(item.specialRequest || item.specialInstructions) && (
+                  <div className="ml-8 mt-2 flex items-start gap-2 p-2 bg-amber-50 dark:bg-amber-950 border-l-2 border-amber-500 rounded">
+                    <span className="text-lg">📝</span>
+                    <p className="text-sm font-medium text-amber-900 dark:text-amber-200 italic">
+                      {item.specialRequest || item.specialInstructions}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
