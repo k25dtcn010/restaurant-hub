@@ -5,6 +5,7 @@ import {
   ErrorComponent,
   HeadContent,
   Outlet,
+  useLocation,
   useRouterState,
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
@@ -193,11 +194,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "learn-bettert",
+        title: "restaurant-hub",
       },
       {
         name: "description",
-        content: "learn-bettert is a web application",
+        content: "restaurant-hub is a web application",
       },
     ],
     links: [
@@ -213,6 +214,10 @@ function RootComponent() {
   const isFetching = useRouterState({
     select: (s) => s.isLoading,
   })
+  const location = useLocation()
+  
+  // Hide header on home page (root path)
+  const showHeader = location.pathname !== "/"
 
   return (
     <ErrorBoundary>
@@ -224,7 +229,7 @@ function RootComponent() {
         storageKey="vite-ui-theme"
       >
         <div className="grid grid-rows-[auto_1fr] h-svh">
-          <Header />
+          {showHeader && <Header />}
           {isFetching ? <Loader /> : <Outlet />}
         </div>
         <Toaster richColors />

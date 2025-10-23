@@ -4,6 +4,7 @@ import { MapPin, QrCode, Search, ShoppingCart, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { CartItem } from '../types/home-type'
+import { Link } from '@tanstack/react-router'
 
 interface HomeHeaderProps {
   tableNumber?: number
@@ -37,9 +38,8 @@ export function HomeHeader({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <div
-              className={`flex-shrink-0 w-8 h-8 rounded-full ${
-                tableNumber ? 'bg-primary' : 'bg-red-500'
-              } flex items-center justify-center`}
+              className={`flex-shrink-0 w-8 h-8 rounded-full ${tableNumber ? 'bg-primary' : 'bg-red-500'
+                } flex items-center justify-center`}
             >
               {tableNumber ? (
                 <QrCode className="w-4 h-4 text-white" />
@@ -77,9 +77,11 @@ export function HomeHeader({
               )}
             </Button>
 
-            <Button variant="ghost" size="icon">
-              <User className="w-5 h-5" />
-            </Button>
+            <Link to="/dashboard">
+              <Button variant="ghost" size="icon">
+                <User className="w-5 h-5" />
+              </Button>
+            </Link>
           </div>
         </div>
 

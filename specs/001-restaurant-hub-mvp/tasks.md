@@ -739,4 +739,4 @@ Implementation steps:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
-- All file paths are relative to repository root (c:\personal\learn-bettert\)
+- All file paths are relative to repository root (c:\personal\restaurant-hub\)

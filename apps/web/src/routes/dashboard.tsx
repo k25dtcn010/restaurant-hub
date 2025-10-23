@@ -198,12 +198,6 @@ function RouteComponent() {
           </CardContent>
         </Card>
       </div>
-
-      <div className="flex justify-center">
-        <Button variant="outline" onClick={() => authClient.signOut()}>
-          Sign Out
-        </Button>
-      </div>
     </div>
   )
 }

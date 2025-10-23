@@ -18,7 +18,7 @@ export function LanguageToggle() {
   return (
     <Button variant="ghost" size="icon" onClick={toggleLanguage} title="Change Language">
       <Globe className="h-5 w-5" />
-      <span className="sr-only">Toggle language</span>
+      <span className="sr-only">Toggle language ({i18n.language})</span>
     </Button>
   )
 }

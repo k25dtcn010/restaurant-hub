@@ -32,7 +32,7 @@ Before starting, ensure you have:
 ```bash
 # Clone the repository (if not already done)
 git clone <repository-url>
-cd learn-bettert
+cd restaurant-hub
 
 # Checkout feature branch
 git checkout 001-restaurant-hub-mvp
@@ -143,7 +143,7 @@ bun run dev
 ### Monorepo Structure
 
 ```
-learn-bettert/
+restaurant-hub/
 ├── apps/
 │   ├── server/          # Backend: Hono + tRPC + WebSocket
 │   └── web/             # Frontend: React + TanStack Router

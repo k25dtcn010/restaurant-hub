@@ -1,5 +1,5 @@
 {
-  "name": "learn-bettert",
+  "name": "restaurant-hub",
   "private": true,
   "type": "module",
   "workspaces": {
@@ -24,21 +24,14 @@
     "dev:native": "bun run --filter native dev",
     "dev:web": "bun run --filter web dev",
     "dev:server": "bun run --filter server dev",
-    "db:push": "bun run --filter @learn-bettert/server db:push",
-    "db:studio": "bun run --filter @learn-bettert/server db:studio",
-    "db:generate": "bun run --filter @learn-bettert/server db:generate",
-    "db:migrate": "bun run --filter @learn-bettert/server db:migrate",
-    "db:seed": "bun run --filter @learn-bettert/server db:seed",
+    "db:push": "bun run --filter @restaurant-hub/server db:push",
+    "db:studio": "bun run --filter @restaurant-hub/server db:studio",
+    "db:generate": "bun run --filter @restaurant-hub/server db:generate",
+    "db:migrate": "bun run --filter @restaurant-hub/server db:migrate",
+    "db:seed": "bun run --filter @restaurant-hub/server db:seed",
     "format": "prettier --write ."
   },
   "packageManager": "bun@1.3.0",
-  "dependencies": {
-    "@dnd-kit/core": "6.1.0",
-    "@dnd-kit/sortable": "8.0.0",
-    "@dnd-kit/utilities": "3.2.2",
-    "dotenv": "^17.2.2",
-    "zod": "^4.1.11"
-  },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
     "@types/bun": "^1.2.6",
