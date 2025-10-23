@@ -169,13 +169,13 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              {t("navigation.reservations")}
+              {t("dashboard.reservations.title")}
             </CardTitle>
-            <CardDescription>Manage table reservations</CardDescription>
+            <CardDescription>{t("dashboard.reservations.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link to="/reservations-management">Go to Reservations</Link>
+              <Link to="/reservations-management">{t("dashboard.reservations.button")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -185,14 +185,14 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UtensilsCrossed className="h-5 w-5" />
-              {t("navigation.menu")}
+              {t("dashboard.menuBrowse.title")}
             </CardTitle>
-            <CardDescription>View restaurant menu</CardDescription>
+            <CardDescription>{t("dashboard.menuBrowse.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline" className="w-full">
               <Link to="/" search={{ table: undefined }}>
-                View Menu
+                {t("dashboard.menuBrowse.button")}
               </Link>
             </Button>
           </CardContent>

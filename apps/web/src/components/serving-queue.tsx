@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { Clock, DollarSign, RefreshCw, Wifi, WifiOff } from "lucide-react"
 import { useCallback, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { useWebSocket } from "@/hooks/use-websocket"
@@ -58,6 +59,7 @@ interface ServingQueueProps {
 }
 
 export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
+  const { t } = useTranslation()
   const [isConnected, setIsConnected] = useState(false)
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null)
 
@@ -78,10 +80,10 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
           )
         },
       })
-      toast.success("Order status updated successfully")
+      toast.success(t("serving.orderCard.statusUpdated"))
     },
     onError: (error: Error) => {
-      toast.error("Failed to update order status", {
+      toast.error(t("serving.orderCard.updateFailed"), {
         description: error.message,
       })
     },
@@ -198,39 +200,39 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <p className="text-sm text-muted-foreground">
-            {readyOrders.length} ready • {servedOrders.length} served
+            {readyOrders.length} {t("serving.servingQueue.ready")} • {servedOrders.length} {t("serving.servingQueue.served")}
           </p>
           <Badge variant={isConnected ? "default" : "secondary"} className="gap-1">
             {isConnected ? (
               <>
                 <Wifi className="h-3 w-3" />
-                Live
+                {t("serving.servingQueue.live")}
               </>
             ) : (
               <>
                 <WifiOff className="h-3 w-3" />
-                Offline
+                {t("serving.servingQueue.offline")}
               </>
             )}
           </Badge>
         </div>
         <Button onClick={onRefresh} variant="outline" size="sm">
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {t("serving.servingQueue.refresh")}
         </Button>
       </div>
 
       {/* Ready to Serve Section */}
       <div className="space-y-3">
         <h2 className="text-xl font-semibold flex items-center gap-2">
-          Ready to Serve
+          {t("serving.servingQueue.readySection.title")}
           <Badge variant="default">{readyOrders.length}</Badge>
         </h2>
 
         {readyOrders.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No orders ready to serve
+              {t("serving.servingQueue.readySection.noOrders")}
             </CardContent>
           </Card>
         ) : (
@@ -244,15 +246,15 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <CardTitle className="flex items-center gap-2">
-                        Table {order.tableNumber}
+                        {t("serving.orderCard.table", { number: order.tableNumber })}
                         <Badge variant="default" className="bg-green-600">
-                          Ready
+                          {t("serving.orderCard.ready")}
                         </Badge>
                       </CardTitle>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
                         <span className={order.waitTime > 10 ? "text-red-600 font-semibold" : ""}>
-                          Waiting {order.waitTime} {order.waitTime === 1 ? "minute" : "minutes"}
+                          {t("serving.orderCard.waiting", { minutes: order.waitTime })}
                         </span>
                       </div>
                     </div>
@@ -260,7 +262,7 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
                       <div className="text-sm font-semibold">
                         ${(order.totalAmount / 100).toFixed(2)}
                       </div>
-                      <div className="text-xs text-muted-foreground">Order #{order.id}</div>
+                      <div className="text-xs text-muted-foreground">{t("serving.orderCard.orderId", { id: order.id })}</div>
                     </div>
                   </div>
                 </CardHeader>
@@ -284,21 +286,21 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
                       className="flex-1"
                       variant="default"
                     >
-                      Mark as Served
+                      {t("serving.orderCard.markAsServed")}
                     </Button>
                     <Button
                       onClick={() => handleToggleDetails(order.id)}
                       variant="outline"
                       size="sm"
                     >
-                      {expandedOrderId === order.id ? "Hide" : "View"} Details
+                      {expandedOrderId === order.id ? t("serving.orderCard.hideDetails") : t("serving.orderCard.viewDetails")}
                     </Button>
                   </div>
 
                   {/* T093: Status History */}
                   {expandedOrderId === order.id && orderDetails && (
                     <div className="mt-4 pt-4 border-t space-y-2">
-                      <h4 className="font-semibold text-sm">Status History</h4>
+                      <h4 className="font-semibold text-sm">{t("serving.orderCard.statusHistory")}</h4>
                       <div className="space-y-2">
                         {orderDetails.statusHistory.map((entry: any, idx: number) => (
                           <div
@@ -325,14 +327,14 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
       {/* Served Section */}
       <div className="space-y-3">
         <h2 className="text-xl font-semibold flex items-center gap-2">
-          Served
+          {t("serving.servingQueue.servedSection.title")}
           <Badge variant="secondary">{servedOrders.length}</Badge>
         </h2>
 
         {servedOrders.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No served orders
+              {t("serving.servingQueue.servedSection.noOrders")}
             </CardContent>
           </Card>
         ) : (
@@ -343,12 +345,12 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <CardTitle className="flex items-center gap-2">
-                        Table {order.tableNumber}
+                        {t("serving.orderCard.table", { number: order.tableNumber })}
                         <Badge variant="secondary" className="bg-blue-600 text-white">
-                          Served
+                          {t("serving.orderCard.served")}
                         </Badge>
                       </CardTitle>
-                      <div className="text-xs text-muted-foreground">Order #{order.id}</div>
+                      <div className="text-xs text-muted-foreground">{t("serving.orderCard.orderId", { id: order.id })}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-semibold">
@@ -377,12 +379,12 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
                       className="flex-1"
                       variant="default"
                     >
-                      Mark as Completed
+                      {t("serving.orderCard.markAsCompleted")}
                     </Button>
                     <Button asChild variant="outline" className="flex-1">
                       <Link to="/payment" search={{ orderId: order.id }}>
                         <DollarSign className="mr-2 h-4 w-4" />
-                        Process Payment
+                        {t("serving.orderCard.processPayment")}
                       </Link>
                     </Button>
                     <Button
@@ -390,14 +392,14 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
                       variant="outline"
                       size="sm"
                     >
-                      {expandedOrderId === order.id ? "Hide" : "View"} Details
+                      {expandedOrderId === order.id ? t("serving.orderCard.hideDetails") : t("serving.orderCard.viewDetails")}
                     </Button>
                   </div>
 
                   {/* T093: Status History */}
                   {expandedOrderId === order.id && orderDetails && (
                     <div className="mt-4 pt-4 border-t space-y-2">
-                      <h4 className="font-semibold text-sm">Status History</h4>
+                      <h4 className="font-semibold text-sm">{t("serving.orderCard.statusHistory")}</h4>
                       <div className="space-y-2">
                         {orderDetails.statusHistory.map((entry: any, idx: number) => (
                           <div
@@ -425,9 +427,9 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
       {orders.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-lg text-muted-foreground mb-2">No orders to serve</p>
+            <p className="text-lg text-muted-foreground mb-2">{t("serving.servingQueue.noOrders")}</p>
             <p className="text-sm text-muted-foreground">
-              Orders marked as ready by the kitchen will appear here
+              {t("serving.servingQueue.noOrdersMessage")}
             </p>
           </CardContent>
         </Card>

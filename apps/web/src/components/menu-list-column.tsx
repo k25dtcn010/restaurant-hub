@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Search, Tag } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { MenuItemCard } from "@/components/menu-item-card"
 import { Badge } from "@/components/ui/badge"
@@ -56,6 +57,7 @@ export function MenuListColumn({
   cartItems,
   requireHiddenConfirmation,
 }: MenuListColumnProps) {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategories, setSelectedCategories] = useState<Set<number>>(new Set())
 
@@ -159,10 +161,10 @@ export function MenuListColumn({
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>Menu</CardTitle>
+          <CardTitle>{t("staffOrder.menuList.title")}</CardTitle>
         </CardHeader>
         <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">No dishes available at the moment.</p>
+          <p className="text-muted-foreground">{t("staffOrder.menuList.noItemsFound")}.</p>
         </CardContent>
       </Card>
     )
@@ -173,15 +175,15 @@ export function MenuListColumn({
       <CardHeader className="border-b pb-3 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-lg">Menu</CardTitle>
-            <CardDescription className="text-xs">Select items to add to order</CardDescription>
+            <CardTitle className="text-lg">{t("staffOrder.menuList.title")}</CardTitle>
+            <CardDescription className="text-xs">{t("staffOrder.menuList.description")}</CardDescription>
           </div>
 
           {/* Search bar */}
           <div className="relative w-48">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search menu..."
+              placeholder={t("staffOrder.menuList.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 h-9 text-sm"
@@ -205,7 +207,7 @@ export function MenuListColumn({
                         onCheckedChange={() => toggleCategory(-1)}
                         className="-ml-6 -translate-x-1 rounded-full transition-all duration-100 ease-linear data-[state=checked]:ml-0 data-[state=checked]:translate-x-0"
                       />
-                      <FieldTitle>All</FieldTitle>
+                      <FieldTitle>{t("staffOrder.menuList.all")}</FieldTitle>
                     </Field>
                   </FieldLabel>
 

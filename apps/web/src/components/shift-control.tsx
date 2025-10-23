@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { AlertCircle, Clock, PlayCircle, StopCircle, Users } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -44,6 +45,7 @@ interface ShiftControlProps {
 }
 
 export function ShiftControl({ onShiftChange }: ShiftControlProps) {
+  const { t } = useTranslation()
   const [startDialogOpen, setStartDialogOpen] = useState(false)
   const [endDialogOpen, setEndDialogOpen] = useState(false)
   const [shiftType, setShiftType] = useState<"Breakfast" | "Lunch" | "Dinner" | "Custom">("Lunch")
@@ -70,7 +72,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
     { id: "3", name: "Bob Johnson" },
   ]
 
-  const activeShift: ActiveShift | null = (activeShifts?.[0] as unknown as ActiveShift) || null
+  const activeShift: ActiveShift | null = ((activeShifts as any)?.[0] as unknown as ActiveShift) || null
 
   // Start shift mutation
   const startShiftMutation = useMutation({
@@ -81,14 +83,14 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
       notes?: string
     }) => trpcClient.shifts.start.mutate(data as any),
     onSuccess: () => {
-      toast.success("Shift started successfully")
+      toast.success(t("shiftControl.startShiftSuccess"))
       setStartDialogOpen(false)
       resetStartForm()
       refetchActiveShifts()
       onShiftChange?.()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to start shift: ${error.message}`)
+      toast.error(t("shiftControl.startShiftFailed", { error: error.message }))
     },
   })
 
@@ -96,13 +98,13 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
   const endShiftMutation = useMutation({
     mutationFn: (data: { id: number; notes?: string }) => trpcClient.shifts.end.mutate(data),
     onSuccess: () => {
-      toast.success("Shift ended successfully")
+      toast.success(t("shiftControl.endShiftSuccess"))
       setEndDialogOpen(false)
       refetchActiveShifts()
       onShiftChange?.()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to end shift: ${error.message}`)
+      toast.error(t("shiftControl.endShiftFailed", { error: error.message }))
     },
   })
 
@@ -115,7 +117,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
 
   const handleStartShift = () => {
     if (shiftType === "Custom" && !customTypeName) {
-      toast.error("Custom shift type name is required")
+      toast.error(t("shiftControl.customShiftNameRequired"))
       return
     }
 
@@ -151,7 +153,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Shift Control
+            {t("shiftControl.title")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -172,17 +174,17 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <Badge variant="default" className="mb-2">
-                    Active: {activeShift.shiftType}
+                    {t("shiftControl.currentStatus", { type: activeShift.shiftType })}
                   </Badge>
                   <p className="text-sm text-muted-foreground">
-                    Duration: {formatDuration(activeShift.duration)}
+                    {t("shiftControl.duration")}: {formatDuration(activeShift.duration)}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Orders: {activeShift.currentOrderCount}
+                    {t("shiftControl.orders")}: {activeShift.currentOrderCount}
                   </p>
                   {activeShift.staff.length > 0 && (
                     <p className="text-sm text-muted-foreground">
-                      Staff:{" "}
+                      {t("shiftControl.staff")}:{" "}
                       {activeShift.staff.map((s: ActiveShift["staff"][0]) => s.name).join(", ")}
                     </p>
                   )}
@@ -194,8 +196,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Warning: This shift has been active for {formatDuration(activeShift.duration)}.
-                    Consider ending it soon.
+                    {t("shiftControl.longShiftWarning", { duration: formatDuration(activeShift.duration) })}
                   </AlertDescription>
                 </Alert>
               )}
@@ -206,15 +207,15 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
                 className="w-full"
               >
                 <StopCircle className="mr-2 h-4 w-4" />
-                End Shift
+                {t("shiftControl.endShiftButton")}
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">No active shift</p>
+              <p className="text-sm text-muted-foreground">{t("shiftControl.noActiveShift")}</p>
               <Button onClick={() => setStartDialogOpen(true)} className="w-full">
                 <PlayCircle className="mr-2 h-4 w-4" />
-                Start Shift
+                {t("shiftControl.startShiftButton")}
               </Button>
             </div>
           )}
@@ -225,16 +226,16 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
       <Dialog open={startDialogOpen} onOpenChange={setStartDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Start New Shift</DialogTitle>
+            <DialogTitle>{t("shiftControl.startNewShiftTitle")}</DialogTitle>
             <DialogDescription>
-              Select shift type and assign staff members to begin tracking.
+              {t("shiftControl.startNewShiftDescription")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             {/* Shift Type Selection */}
             <div className="space-y-2">
-              <Label>Shift Type</Label>
+              <Label>{t("shiftControl.shiftTypeLabel")}</Label>
               <div className="grid grid-cols-2 gap-2">
                 {(["Breakfast", "Lunch", "Dinner", "Custom"] as const).map((type) => (
                   <Button
@@ -253,12 +254,12 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
             {/* Custom Type Name (if Custom selected) */}
             {shiftType === "Custom" && (
               <div className="space-y-2">
-                <Label htmlFor="customTypeName">Custom Shift Name</Label>
+                <Label htmlFor="customTypeName">{t("shiftControl.customShiftNameLabel")}</Label>
                 <Input
                   id="customTypeName"
                   value={customTypeName}
                   onChange={(e) => setCustomTypeName(e.target.value)}
-                  placeholder="e.g., Happy Hour, Late Night"
+                  placeholder={t("shiftControl.customShiftNamePlaceholder")}
                   maxLength={50}
                 />
               </div>
@@ -266,7 +267,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
 
             {/* Staff Selection */}
             <div className="space-y-2">
-              <Label>Assign Staff (Optional)</Label>
+              <Label>{t("shiftControl.assignStaffLabel")}</Label>
               <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
                 {mockStaff.map((staff) => (
                   <div key={staff.id} className="flex items-center space-x-2">
@@ -291,12 +292,12 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes">{t("shiftControl.notesLabel")}</Label>
               <Input
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any notes about this shift..."
+                placeholder={t("shiftControl.notesPlaceholder")}
                 maxLength={500}
               />
             </div>
@@ -310,7 +311,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
               onClick={handleStartShift}
               disabled={startShiftMutation.isPending || (shiftType === "Custom" && !customTypeName)}
             >
-              {startShiftMutation.isPending ? "Starting..." : "Start Shift"}
+              {startShiftMutation.isPending ? t("shiftControl.startingText") : t("shiftControl.startShiftButton")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -320,9 +321,9 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
       <Dialog open={endDialogOpen} onOpenChange={setEndDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>End Shift</DialogTitle>
+            <DialogTitle>{t("shiftControl.endShiftTitle")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to end this shift? A summary will be generated.
+              {t("shiftControl.endShiftDescription")}
             </DialogDescription>
           </DialogHeader>
 
@@ -330,20 +331,20 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
             <div className="space-y-4">
               <div className="rounded-md bg-muted p-4 space-y-2">
                 <div className="flex justify-between">
-                  <span className="font-medium">Shift Type:</span>
+                  <span className="font-medium">{t("shiftControl.shiftTypeSummary")}</span>
                   <span>{activeShift.shiftType}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Duration:</span>
+                  <span className="font-medium">{t("shiftControl.durationSummary")}</span>
                   <span>{formatDuration(activeShift.duration)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Orders:</span>
+                  <span className="font-medium">{t("shiftControl.ordersSummary")}</span>
                   <span>{activeShift.currentOrderCount}</span>
                 </div>
                 {activeShift.staff.length > 0 && (
                   <div>
-                    <span className="font-medium">Staff:</span>
+                    <span className="font-medium">{t("shiftControl.staffSummary")}</span>
                     <div className="text-sm text-muted-foreground mt-1">
                       {activeShift.staff.map((s: ActiveShift["staff"][0]) => s.name).join(", ")}
                     </div>
@@ -356,19 +357,18 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    This shift has been active for {formatDuration(activeShift.duration)}. Are you
-                    sure you want to end it now?
+                    {t("shiftControl.longShiftWarningEnd", { duration: formatDuration(activeShift.duration) })}
                   </AlertDescription>
                 </Alert>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="end-notes">Final Notes (Optional)</Label>
+                <Label htmlFor="end-notes">{t("shiftControl.finalNotesLabel")}</Label>
                 <Input
                   id="end-notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add any closing notes..."
+                  placeholder={t("shiftControl.finalNotesPlaceholder")}
                   maxLength={500}
                 />
               </div>
@@ -384,7 +384,7 @@ export function ShiftControl({ onShiftChange }: ShiftControlProps) {
               onClick={handleEndShift}
               disabled={endShiftMutation.isPending}
             >
-              {endShiftMutation.isPending ? "Ending..." : "End Shift"}
+              {endShiftMutation.isPending ? t("shiftControl.endingText") : t("shiftControl.endShiftButton")}
             </Button>
           </DialogFooter>
         </DialogContent>

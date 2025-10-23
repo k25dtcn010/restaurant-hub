@@ -1,4 +1,5 @@
 import { ShoppingCart, Trash2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -36,6 +37,7 @@ export function OrderCartColumn({
   onSubmit,
   isSubmitting,
 }: OrderCartColumnProps) {
+  const { t } = useTranslation()
   const totalAmount = items.reduce((sum, item) => sum + item.priceAtOrder * item.quantity, 0)
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
 
@@ -57,10 +59,10 @@ export function OrderCartColumn({
       <CardHeader className="border-b pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <ShoppingCart className="h-5 w-5" />
-          Order
+          {t("staffOrder.orderCart.title")}
           {tableNumber && (
             <Badge variant="outline" className="ml-auto text-sm">
-              Table {tableNumber}
+              {t("staffOrder.orderCart.table")} {tableNumber}
             </Badge>
           )}
         </CardTitle>
@@ -70,8 +72,8 @@ export function OrderCartColumn({
         {items.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground p-4">
             <ShoppingCart className="mb-2 h-12 w-12 opacity-50" />
-            <p className="text-sm">Your cart is empty</p>
-            <p className="text-xs">Add items from the menu</p>
+            <p className="text-sm">{t("staffOrder.orderCart.cartEmpty")}</p>
+            <p className="text-xs">{t("staffOrder.orderCart.addItems")}</p>
           </div>
         ) : (
           <ScrollArea className="h-full w-full">
@@ -111,16 +113,16 @@ export function OrderCartColumn({
         <CardFooter className="flex-col gap-3 border-t p-4">
           <div className="w-full space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal</span>
+              <span className="text-muted-foreground">{t("staffOrder.orderCart.subtotal")}</span>
               <span>${(totalAmount / 100).toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between border-t pt-2">
-              <div className="font-medium">Total ({totalItems} items)</div>
+              <div className="font-medium">{t("staffOrder.orderCart.total")} ({totalItems} {t("staffOrder.orderCart.items")})</div>
               <div className="text-xl font-bold">${(totalAmount / 100).toFixed(2)}</div>
             </div>
           </div>
           <Button className="w-full" size="lg" onClick={onSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit Order"}
+            {isSubmitting ? t("staffOrder.orderCart.submitting") : t("staffOrder.orderCart.submitOrder")}
           </Button>
         </CardFooter>
       )}

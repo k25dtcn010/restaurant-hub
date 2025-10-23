@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next"
+
 import { IngredientRow } from "./ingredient-row"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 
@@ -31,17 +33,18 @@ interface InventoryTableProps {
 }
 
 export function InventoryTable({ ingredients }: InventoryTableProps) {
+  const { t } = useTranslation()
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[40%]">Ingredient</TableHead>
-            <TableHead className="text-right">Current Stock</TableHead>
-            <TableHead className="text-right">Threshold</TableHead>
-            <TableHead className="text-right">Status</TableHead>
-            <TableHead className="w-[140px]">Used In</TableHead>
-            <TableHead className="w-[100px] text-right">Actions</TableHead>
+            <TableHead className="w-[40%]">{t("inventory.table.ingredient")}</TableHead>
+            <TableHead className="text-right">{t("inventory.table.currentStock")}</TableHead>
+            <TableHead className="text-right">{t("inventory.table.threshold")}</TableHead>
+            <TableHead className="text-right">{t("inventory.table.status")}</TableHead>
+            <TableHead className="w-[140px]">{t("inventory.table.usedIn")}</TableHead>
+            <TableHead className="w-[100px] text-right">{t("inventory.table.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

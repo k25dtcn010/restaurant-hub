@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { TRPCClientError } from "@trpc/client"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { MenuListColumn } from "@/components/menu-list-column"
@@ -64,6 +65,7 @@ interface CartItem {
 }
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const routeContext = Route.useRouteContext()
   const session = routeContext.session
 
@@ -137,12 +139,12 @@ function RouteComponent() {
   // Handle order submission
   const handleSubmitOrder = async () => {
     if (!selectedTableId) {
-      toast.error("Please select a table first.")
+      toast.error(t("staffOrder.errors.noTable"))
       return
     }
 
     if (cart.size === 0) {
-      toast.error("Cart is empty. Add items before submitting.")
+      toast.error(t("staffOrder.errors.emptyCart"))
       return
     }
 
@@ -165,7 +167,9 @@ function RouteComponent() {
 
       // Success!
       toast.success(
-        createResult.isNew ? "Order submitted to kitchen!" : "Items added to existing order!"
+        createResult.isNew
+          ? t("staffOrder.success.newOrder")
+          : t("staffOrder.success.addedToExisting")
       )
 
       // Clear cart but keep table selected for next order
@@ -193,7 +197,7 @@ function RouteComponent() {
       if (error instanceof TRPCClientError) {
         toast.error(error.message)
       } else {
-        toast.error("Failed to submit order. Please try again.")
+        toast.error(t("staffOrder.errors.submitFailed"))
       }
       console.error("Order submission error:", error)
     }
@@ -214,8 +218,8 @@ function RouteComponent() {
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
       <div className="border-b px-6 py-4 bg-card shrink-0">
-        <h1 className="text-2xl font-bold tracking-tight">Staff Order Creation</h1>
-        <p className="text-sm text-muted-foreground">Create orders on behalf of customers</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("staffOrder.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("staffOrder.subtitle")}</p>
       </div>
 
       {/* 3-Column Layout - 1:3:1 ratio */}
@@ -244,8 +248,8 @@ function RouteComponent() {
             <Card className="h-full flex flex-col">
               <CardContent className="flex-1 flex items-center justify-center text-center text-muted-foreground">
                 <div>
-                  <p className="font-medium mb-2">Select a table to browse menu</p>
-                  <p className="text-sm">Choose a table from the left to get started</p>
+                  <p className="font-medium mb-2">{t("staffOrder.selectTablePrompt.title")}</p>
+                  <p className="text-sm">{t("staffOrder.selectTablePrompt.description")}</p>
                 </div>
               </CardContent>
             </Card>
@@ -267,8 +271,8 @@ function RouteComponent() {
             <Card className="h-full flex flex-col">
               <CardContent className="flex-1 flex items-center justify-center text-center text-muted-foreground">
                 <div>
-                  <p className="font-medium mb-2">Your Order</p>
-                  <p className="text-sm">Cart will appear here once a table is selected</p>
+                  <p className="font-medium mb-2">{t("staffOrder.cartPrompt.title")}</p>
+                  <p className="text-sm">{t("staffOrder.cartPrompt.description")}</p>
                 </div>
               </CardContent>
             </Card>

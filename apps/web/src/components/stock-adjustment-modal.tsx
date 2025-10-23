@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { queryClient, trpcClient } from "@/utils/trpc"
@@ -39,6 +40,7 @@ export function StockAdjustmentModal({
   open,
   onOpenChange,
 }: StockAdjustmentModalProps) {
+  const { t } = useTranslation()
   const [adjustment, setAdjustment] = useState<string>("")
   const [reason, setReason] = useState<string>("")
 
@@ -46,7 +48,7 @@ export function StockAdjustmentModal({
   const adjustStockMutation = useMutation({
     mutationFn: (variables: { ingredientId: number; adjustment: number; reason?: string }) =>
       trpcClient.inventory.adjustStock.mutate(variables),
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       // Invalidate inventory queries to refetch data
       queryClient.invalidateQueries({
         predicate: (query) => {
@@ -55,13 +57,18 @@ export function StockAdjustmentModal({
           return Array.isArray(queryKey) && queryKey[0] === "inventory" && queryKey[1] === "getAll"
         },
       })
-      toast.success("Stock adjusted successfully", {
-        description: `${ingredient.name}: ${data.oldQuantity} → ${data.newQuantity} ${ingredient.unit}`,
+      toast.success(t("inventory.stockAdjustmentModal.successMessage"), {
+        description: t("inventory.stockAdjustmentModal.successDescription", {
+          name: ingredient.name,
+          oldQuantity: data.oldQuantity,
+          newQuantity: data.newQuantity,
+          unit: ingredient.unit,
+        }),
       })
       handleClose()
     },
     onError: (error: Error) => {
-      toast.error("Failed to adjust stock", {
+      toast.error(t("inventory.stockAdjustmentModal.errorMessage"), {
         description: error.message,
       })
     },
@@ -78,8 +85,8 @@ export function StockAdjustmentModal({
 
     const adjustmentValue = parseFloat(adjustment)
     if (isNaN(adjustmentValue) || adjustmentValue === 0) {
-      toast.error("Invalid adjustment", {
-        description: "Please enter a non-zero number",
+      toast.error(t("inventory.stockAdjustmentModal.invalidAdjustment"), {
+        description: t("inventory.stockAdjustmentModal.invalidAdjustmentDescription"),
       })
       return
     }
@@ -87,8 +94,12 @@ export function StockAdjustmentModal({
     // Calculate new quantity for validation
     const newQuantity = ingredient.quantity + adjustmentValue
     if (newQuantity < 0) {
-      toast.error("Invalid adjustment", {
-        description: `Adjustment would result in negative quantity: ${ingredient.quantity} + ${adjustmentValue} = ${newQuantity}`,
+      toast.error(t("inventory.stockAdjustmentModal.negativeQuantity"), {
+        description: t("inventory.stockAdjustmentModal.negativeQuantityDescription", {
+          oldQuantity: ingredient.quantity,
+          adjustment: adjustmentValue,
+          newQuantity: newQuantity,
+        }),
       })
       return
     }
@@ -108,29 +119,29 @@ export function StockAdjustmentModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Adjust Stock: {ingredient.name}</DialogTitle>
+          <DialogTitle>{t("inventory.stockAdjustmentModal.title", { name: ingredient.name })}</DialogTitle>
           <DialogDescription>
-            Update the quantity of this ingredient. Use positive numbers to add stock, negative
-            numbers to reduce stock.
+            {t("inventory.stockAdjustmentModal.description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Current Stock</Label>
+              <Label>{t("inventory.stockAdjustmentModal.currentStock")}</Label>
               <div className="text-2xl font-bold">
                 {ingredient.quantity} {ingredient.unit}
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="adjustment">
-                Adjustment <span className="text-muted-foreground">(+/-)</span>
+                {t("inventory.stockAdjustmentModal.adjustment")}{" "}
+                <span className="text-muted-foreground">{t("inventory.stockAdjustmentModal.adjustmentHint")}</span>
               </Label>
               <Input
                 id="adjustment"
                 type="number"
                 step="0.01"
-                placeholder="e.g., +10 or -5"
+                placeholder={t("inventory.stockAdjustmentModal.adjustmentPlaceholder")}
                 value={adjustment}
                 onChange={(e) => setAdjustment(e.target.value)}
                 required
@@ -138,23 +149,26 @@ export function StockAdjustmentModal({
             </div>
             {adjustment && !isNaN(parseFloat(adjustment)) && (
               <div className="space-y-2">
-                <Label>New Stock</Label>
+                <Label>{t("inventory.stockAdjustmentModal.newStock")}</Label>
                 <div className={`text-2xl font-bold ${newQuantity < 0 ? "text-destructive" : ""}`}>
                   {newQuantity} {ingredient.unit}
                   {newQuantity < ingredient.threshold && (
-                    <span className="text-sm text-destructive ml-2">(Below threshold)</span>
+                    <span className="text-sm text-destructive ml-2">
+                      {t("inventory.stockAdjustmentModal.belowThreshold")}
+                    </span>
                   )}
                 </div>
               </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="reason">
-                Reason <span className="text-muted-foreground">(optional)</span>
+                {t("inventory.stockAdjustmentModal.reason")}{" "}
+                <span className="text-muted-foreground">{t("inventory.stockAdjustmentModal.reasonHint")}</span>
               </Label>
               <Input
                 id="reason"
                 type="text"
-                placeholder="e.g., Restocking, Spillage, etc."
+                placeholder={t("inventory.stockAdjustmentModal.reasonPlaceholder")}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
               />
@@ -167,10 +181,12 @@ export function StockAdjustmentModal({
               onClick={handleClose}
               disabled={adjustStockMutation.isPending}
             >
-              Cancel
+              {t("inventory.stockAdjustmentModal.cancel")}
             </Button>
             <Button type="submit" disabled={adjustStockMutation.isPending}>
-              {adjustStockMutation.isPending ? "Adjusting..." : "Adjust Stock"}
+              {adjustStockMutation.isPending
+                ? t("inventory.stockAdjustmentModal.adjusting")
+                : t("inventory.stockAdjustmentModal.adjustStockButton")}
             </Button>
           </DialogFooter>
         </form>

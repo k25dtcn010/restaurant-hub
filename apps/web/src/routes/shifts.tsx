@@ -128,13 +128,13 @@ function RouteComponent() {
     mutationFn: (data: { shiftId: number; staffIds: string[] }) =>
       trpcClient.shifts.addStaff.mutate(data as any),
     onSuccess: () => {
-      toast.success("Staff added successfully")
+      toast.success(t("shifts.staffAssignmentSuccess"))
       setEditStaffShiftId(null)
       setSelectedStaffIds([])
       refetchActiveShifts()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to add staff: ${error.message}`)
+      toast.error(t("shifts.staffAssignmentFailed", { error: error.message }))
     },
   })
 
@@ -143,11 +143,11 @@ function RouteComponent() {
     mutationFn: (data: { shiftId: number; staffIds: string[] }) =>
       trpcClient.shifts.removeStaff.mutate(data as any),
     onSuccess: () => {
-      toast.success("Staff removed successfully")
+      toast.success(t("shifts.staffRemovalSuccess"))
       refetchActiveShifts()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to remove staff: ${error.message}`)
+      toast.error(t("shifts.staffRemovalFailed", { error: error.message }))
     },
   })
 
@@ -173,7 +173,7 @@ function RouteComponent() {
 
   const handleAddStaff = (shiftId: number) => {
     if (selectedStaffIds.length === 0) {
-      toast.error("Please select at least one staff member")
+      toast.error(t("shifts.selectStaffError"))
       return
     }
 
@@ -184,7 +184,7 @@ function RouteComponent() {
   }
 
   const handleRemoveStaff = (shiftId: number, staffId: string) => {
-    if (confirm("Remove this staff member from the shift?")) {
+    if (confirm(t("shifts.removeStaffConfirm"))) {
       removeStaffMutation.mutate({
         shiftId,
         staffIds: [staffId],
@@ -195,9 +195,9 @@ function RouteComponent() {
   return (
     <div className="container mx-auto p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Shift Management</h1>
+        <h1 className="text-3xl font-bold mb-2">{t("shifts.title")}</h1>
         <p className="text-lg text-muted-foreground">
-          Track and manage operational shifts and staff assignments
+          {t("shifts.subtitle")}
         </p>
       </div>
 
@@ -210,8 +210,8 @@ function RouteComponent() {
           {/* T131: Tab Navigation */}
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "active" | "history")}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="active">Active Shifts</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="active">{t("shifts.activeTab")}</TabsTrigger>
+              <TabsTrigger value="history">{t("shifts.historyTab")}</TabsTrigger>
             </TabsList>
 
             {/* T127: Active Shifts Tab */}
@@ -221,7 +221,7 @@ function RouteComponent() {
                   <Skeleton className="h-48 w-full" />
                   <Skeleton className="h-48 w-full" />
                 </div>
-              ) : activeShifts && activeShifts.length > 0 ? (
+              ) : (activeShifts as any) && (activeShifts as any[]).length > 0 ? (
                 <div className="space-y-4">
                   {(activeShifts as ActiveShift[]).map((shift) => (
                     <Card key={shift.id}>
@@ -231,23 +231,23 @@ function RouteComponent() {
                             <Clock className="h-5 w-5" />
                             {shift.shiftType}
                           </CardTitle>
-                          <Badge variant="default">Active</Badge>
+                          <Badge variant="default">{t("shifts.active")}</Badge>
                         </div>
-                        <CardDescription>Started {formatDateTime(shift.startTime)}</CardDescription>
+                        <CardDescription>{t("shifts.startedAt")} {formatDateTime(shift.startTime)}</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-muted-foreground" />
                             <div>
-                              <p className="text-sm font-medium">Duration</p>
+                              <p className="text-sm font-medium">{t("shifts.duration")}</p>
                               <p className="text-lg font-bold">{formatDuration(shift.duration)}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                             <div>
-                              <p className="text-sm font-medium">Orders</p>
+                              <p className="text-sm font-medium">{t("shifts.orders")}</p>
                               <p className="text-lg font-bold">{shift.currentOrderCount}</p>
                             </div>
                           </div>
@@ -260,7 +260,7 @@ function RouteComponent() {
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-sm font-medium flex items-center gap-2">
                               <Users className="h-4 w-4" />
-                              Staff ({shift.staff.length})
+                              {t("shifts.staffWithCount", { count: shift.staff.length })}
                             </h4>
                             <Button
                               size="sm"
@@ -268,7 +268,7 @@ function RouteComponent() {
                               onClick={() => setEditStaffShiftId(shift.id)}
                             >
                               <Plus className="h-3 w-3 mr-1" />
-                              Add Staff
+                              {t("shifts.addStaffButton")}
                             </Button>
                           </div>
 
@@ -291,7 +291,7 @@ function RouteComponent() {
                               ))}
                             </div>
                           ) : (
-                            <p className="text-sm text-muted-foreground">No staff assigned</p>
+                            <p className="text-sm text-muted-foreground">{t("shifts.noStaffAssigned")}</p>
                           )}
                         </div>
                       </CardContent>
@@ -301,9 +301,9 @@ function RouteComponent() {
               ) : (
                 <Card>
                   <CardContent className="py-8 text-center">
-                    <p className="text-muted-foreground">No active shifts</p>
+                    <p className="text-muted-foreground">{t("shifts.noActiveShifts")}</p>
                     <p className="text-sm text-muted-foreground mt-2">
-                      Start a shift using the control panel on the left
+                      {t("shifts.noActiveShiftsMessage")}
                     </p>
                   </CardContent>
                 </Card>
@@ -315,12 +315,12 @@ function RouteComponent() {
               {/* History Filters */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Filters</CardTitle>
+                  <CardTitle className="text-lg">{t("shifts.filters")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="startDate">Start Date</Label>
+                      <Label htmlFor="startDate">{t("shifts.startDate")}</Label>
                       <Input
                         id="startDate"
                         type="date"
@@ -329,7 +329,7 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="endDate">End Date</Label>
+                      <Label htmlFor="endDate">{t("shifts.endDate")}</Label>
                       <Input
                         id="endDate"
                         type="date"
@@ -338,7 +338,7 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Shift Type</Label>
+                      <Label>{t("shifts.shiftType")}</Label>
                       <div className="grid grid-cols-2 gap-2">
                         <Button
                           type="button"
@@ -346,7 +346,7 @@ function RouteComponent() {
                           variant={filterShiftType === "" ? "default" : "outline"}
                           onClick={() => setFilterShiftType("")}
                         >
-                          All
+                          {t("shifts.all")}
                         </Button>
                         {(["Breakfast", "Lunch", "Dinner", "Custom"] as const).map((type) => (
                           <Button
@@ -356,14 +356,14 @@ function RouteComponent() {
                             variant={filterShiftType === type ? "default" : "outline"}
                             onClick={() => setFilterShiftType(type)}
                           >
-                            {type}
+                            {t(`shifts.${type.toLowerCase()}`)}
                           </Button>
                         ))}
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Button onClick={() => refetchHistory()} className="w-full">
-                        Apply Filters
+                        {t("shifts.applyFilters")}
                       </Button>
                       <Button
                         variant="outline"
@@ -375,7 +375,7 @@ function RouteComponent() {
                         }}
                         className="w-full"
                       >
-                        Clear Filters
+                        {t("shifts.clearFilters")}
                       </Button>
                     </div>
                   </div>
@@ -388,7 +388,7 @@ function RouteComponent() {
                   <Skeleton className="h-48 w-full" />
                   <Skeleton className="h-48 w-full" />
                 </div>
-              ) : shiftHistory && shiftHistory.length > 0 ? (
+              ) : (shiftHistory as any) && (shiftHistory as any[]).length > 0 ? (
                 <div className="space-y-4">
                   {(shiftHistory as ShiftHistory[]).map((shift) => {
                     const duration = shift.endTime
@@ -407,7 +407,7 @@ function RouteComponent() {
                               <Calendar className="h-5 w-5" />
                               {shift.shiftType}
                             </CardTitle>
-                            <Badge variant="secondary">Completed</Badge>
+                            <Badge variant="secondary">{t("shifts.completed")}</Badge>
                           </div>
                           <CardDescription>
                             {formatDateTime(shift.startTime)} -{" "}
@@ -419,21 +419,21 @@ function RouteComponent() {
                             <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4 text-muted-foreground" />
                               <div>
-                                <p className="text-sm font-medium">Duration</p>
+                                <p className="text-sm font-medium">{t("shifts.duration")}</p>
                                 <p className="text-lg font-bold">{formatDuration(duration)}</p>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                               <div>
-                                <p className="text-sm font-medium">Orders</p>
+                                <p className="text-sm font-medium">{t("shifts.orders")}</p>
                                 <p className="text-lg font-bold">{shift.totalOrders}</p>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <DollarSign className="h-4 w-4 text-muted-foreground" />
                               <div>
-                                <p className="text-sm font-medium">Revenue</p>
+                                <p className="text-sm font-medium">{t("shifts.revenue")}</p>
                                 <p className="text-lg font-bold">
                                   {formatCurrency(shift.totalRevenue)}
                                 </p>
@@ -442,7 +442,7 @@ function RouteComponent() {
                             <div className="flex items-center gap-2">
                               <Users className="h-4 w-4 text-muted-foreground" />
                               <div>
-                                <p className="text-sm font-medium">Staff</p>
+                                <p className="text-sm font-medium">{t("shifts.staff")}</p>
                                 <p className="text-lg font-bold">{shift.staff.length}</p>
                               </div>
                             </div>
@@ -451,7 +451,7 @@ function RouteComponent() {
                           {shift.staff.length > 0 && (
                             <div className="mt-4">
                               <p className="text-sm text-muted-foreground">
-                                Staff:{" "}
+                                {t("shifts.staff")}:{" "}
                                 {shift.staff
                                   .map((staff: ActiveShift["staff"][0]) => staff.name)
                                   .join(", ")}
@@ -466,9 +466,9 @@ function RouteComponent() {
               ) : (
                 <Card>
                   <CardContent className="py-8 text-center">
-                    <p className="text-muted-foreground">No shift history found</p>
+                    <p className="text-muted-foreground">{t("shifts.noHistoryFound")}</p>
                     <p className="text-sm text-muted-foreground mt-2">
-                      Try adjusting your filters or start some shifts
+                      {t("shifts.noHistoryMessage")}
                     </p>
                   </CardContent>
                 </Card>
@@ -482,8 +482,8 @@ function RouteComponent() {
       <Dialog open={editStaffShiftId !== null} onOpenChange={() => setEditStaffShiftId(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Add Staff to Shift</DialogTitle>
-            <DialogDescription>Select staff members to add to this shift</DialogDescription>
+            <DialogTitle>{t("shifts.addStaffDialogTitle")}</DialogTitle>
+            <DialogDescription>{t("shifts.addStaffDialogDescription")}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-2">
@@ -511,13 +511,13 @@ function RouteComponent() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditStaffShiftId(null)}>
-              Cancel
+              {t("shifts.cancel")}
             </Button>
             <Button
               onClick={() => editStaffShiftId && handleAddStaff(editStaffShiftId)}
               disabled={addStaffMutation.isPending || selectedStaffIds.length === 0}
             >
-              {addStaffMutation.isPending ? "Adding..." : "Add Staff"}
+              {addStaffMutation.isPending ? t("shifts.adding") : t("shifts.addStaffButton")}
             </Button>
           </DialogFooter>
         </DialogContent>

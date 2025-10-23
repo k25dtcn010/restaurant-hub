@@ -1,5 +1,6 @@
 import { RefreshCw, Wifi, WifiOff } from "lucide-react"
 import { useCallback, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { useWebSocket } from "@/hooks/use-websocket"
@@ -51,6 +52,7 @@ interface OrdersBoardProps {
 }
 
 export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
+  const { t } = useTranslation()
   const [isConnected, setIsConnected] = useState(false)
 
   /**
@@ -151,25 +153,25 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
   // Column configuration
   const columns = [
     {
-      title: "Pending",
+      title: t("kitchen.columns.pending.title"),
       status: "Pending" as const,
       orders: pendingOrders,
       color: "yellow",
-      description: "Orders waiting to be started",
+      description: t("kitchen.columns.pending.description"),
     },
     {
-      title: "In Kitchen",
+      title: t("kitchen.columns.inKitchen.title"),
       status: "InKitchen" as const,
       orders: inKitchenOrders,
       color: "blue",
-      description: "Currently being prepared",
+      description: t("kitchen.columns.inKitchen.description"),
     },
     {
-      title: "Ready to Serve",
+      title: t("kitchen.columns.readyToServe.title"),
       status: "ReadyToServe" as const,
       orders: readyOrders,
       color: "green",
-      description: "Ready for pickup",
+      description: t("kitchen.columns.readyToServe.description"),
     },
   ]
 
@@ -179,25 +181,25 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <p className="text-sm text-muted-foreground">
-            {orders.length} active {orders.length === 1 ? "order" : "orders"}
+            {t("kitchen.ordersBoard.activeOrders", { count: orders.length })}
           </p>
           <Badge variant={isConnected ? "default" : "secondary"} className="gap-1">
             {isConnected ? (
               <>
                 <Wifi className="h-3 w-3" />
-                Live
+                {t("kitchen.ordersBoard.live")}
               </>
             ) : (
               <>
                 <WifiOff className="h-3 w-3" />
-                Offline
+                {t("kitchen.ordersBoard.offline")}
               </>
             )}
           </Badge>
         </div>
         <Button onClick={onRefresh} variant="outline" size="sm">
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {t("kitchen.ordersBoard.refresh")}
         </Button>
       </div>
 
@@ -223,7 +225,7 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
               {column.orders.length === 0 ? (
                 <Card>
                   <CardContent className="py-8 text-center text-muted-foreground">
-                    No orders in {column.title.toLowerCase()}
+                    {t("kitchen.columns.noOrders", { column: column.title.toLowerCase() })}
                   </CardContent>
                 </Card>
               ) : (
@@ -240,9 +242,9 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
       {orders.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-lg text-muted-foreground mb-2">No active orders</p>
+            <p className="text-lg text-muted-foreground mb-2">{t("kitchen.ordersBoard.noActiveOrders")}</p>
             <p className="text-sm text-muted-foreground">
-              New orders will appear here automatically
+              {t("kitchen.ordersBoard.noActiveOrdersMessage")}
             </p>
           </CardContent>
         </Card>

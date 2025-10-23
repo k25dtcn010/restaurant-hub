@@ -68,9 +68,9 @@ function RouteComponent() {
   const lowStockCount = inventoryData?.ingredients.filter((i) => i.isLowStock).length || 0
 
   const handleRefresh = async () => {
-    toast.info("Refreshing inventory...")
+    toast.info(t("inventory.refreshing"))
     await refetch()
-    toast.success("Inventory refreshed")
+    toast.success(t("inventory.refreshed"))
   }
 
   return (
@@ -105,20 +105,20 @@ function RouteComponent() {
       {/* Inventory table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Ingredients</CardTitle>
+          <CardTitle>{t("inventory.allIngredients")}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-muted-foreground">Loading inventory...</span>
+              <span className="ml-2 text-muted-foreground">{t("inventory.loading")}</span>
             </div>
           ) : error ? (
             <div className="text-center py-8 text-destructive">
-              Error loading inventory: {error.message}
+              {t("inventory.error", { message: error.message })}
             </div>
           ) : !inventoryData || inventoryData.ingredients.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">No ingredients found</div>
+            <div className="text-center py-8 text-muted-foreground">{t("inventory.noIngredients")}</div>
           ) : (
             <InventoryTable ingredients={inventoryData.ingredients} />
           )}

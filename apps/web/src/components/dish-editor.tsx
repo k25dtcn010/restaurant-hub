@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Plus, Trash2, X } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -49,6 +50,7 @@ interface SelectedModifier {
 }
 
 export function DishEditor({ dish, onClose }: DishEditorProps) {
+  const { t } = useTranslation()
   const isEditing = dish !== null
 
   // Form state
@@ -118,9 +120,9 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
   })
 
   useEffect(() => {
-    if (dishDetails?.recipe) {
+    if ((dishDetails as any)?.recipe) {
       setRecipe(
-        dishDetails.recipe.map((r: any) => ({
+        ((dishDetails as any).recipe as any[]).map((r: any) => ({
           ingredientId: r.ingredientId,
           quantityRequired: r.quantityRequired,
         }))
@@ -128,9 +130,9 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
     }
     // T075: Set hasVariants based on existing variants
     if (
-      dishDetails?.variants &&
-      Array.isArray(dishDetails.variants) &&
-      dishDetails.variants.length > 0
+      (dishDetails as any)?.variants &&
+      Array.isArray((dishDetails as any).variants) &&
+      ((dishDetails as any).variants as any[]).length > 0
     ) {
       setHasVariants(true)
     }
@@ -138,17 +140,20 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
   // Load existing modifier assignments
   useEffect(() => {
-    if (dishModifiers && dishModifiers.length > 0) {
-      const modifiers: SelectedModifier[] = []
-      dishModifiers.forEach((group: any) => {
-        group.modifiers.forEach((modifier: any) => {
-          modifiers.push({
-            modifierId: modifier.id,
-            modifierGroupId: group.group.id,
+    const modList = dishModifiers as any
+    if (modList && Array.isArray(modList) && modList.length > 0) {
+      const modifiersArray: SelectedModifier[] = []
+      modList.forEach((group: any) => {
+        if (group.modifiers && Array.isArray(group.modifiers)) {
+          group.modifiers.forEach((modifier: any) => {
+            modifiersArray.push({
+              modifierId: modifier.id,
+              modifierGroupId: group.group.id,
+            })
           })
-        })
+        }
       })
-      setSelectedModifiers(modifiers)
+      setSelectedModifiers(modifiersArray)
     }
   }, [dishModifiers])
 
@@ -161,7 +166,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
       photoUrl: string | null
       recipe: RecipeItem[]
     }) => trpcClient.dishes.create.mutate(variables),
-    onSuccess: async (data) => {
+    onSuccess: async (data: any) => {
       // T058: Assign categories after dish creation
       if (selectedCategories.length > 0) {
         try {
@@ -191,11 +196,13 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
           })
         }
       }
-      toast.success("Dish created successfully")
+      toast.success(t("menuManagement.dishForm.createdSuccess"))
       onClose(true)
     },
     onError: (error: Error) => {
-      toast.error(`Failed to create dish: ${error.message}`)
+      toast.error(t("menuManagement.dishForm.createdFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -238,11 +245,13 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
           }
         }
       }
-      toast.success("Dish updated successfully")
+      toast.success(t("menuManagement.dishForm.updatedSuccess"))
       onClose(true)
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update dish: ${error.message}`)
+      toast.error(t("menuManagement.dishForm.updatedFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -251,19 +260,19 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
     // Validation
     if (!name.trim()) {
-      toast.error("Dish name is required")
+      toast.error(t("menuManagement.dishForm.validationError"))
       return
     }
     if (!description.trim()) {
-      toast.error("Description is required")
+      toast.error(t("menuManagement.dishForm.validationError"))
       return
     }
     if (!price || parseFloat(price) <= 0) {
-      toast.error("Valid price is required")
+      toast.error(t("menuManagement.dishForm.priceError"))
       return
     }
     if (recipe.length === 0) {
-      toast.error("At least one ingredient is required")
+      toast.error(t("menuManagement.dishForm.validationError"))
       return
     }
 
@@ -272,7 +281,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
     // Parse order priority (T059)
     const priorityValue = parseInt(orderPriority) || 0
     if (priorityValue < 0 || priorityValue > 100) {
-      toast.error("Order priority must be between 0 and 100")
+      toast.error(t("menuManagement.dishForm.validationError"))
       return
     }
 
@@ -307,7 +316,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
   }
 
   const handleAddRecipeItem = () => {
-    const availableIngredients = inventoryData?.ingredients || []
+    const availableIngredients = (inventoryData as any)?.ingredients || []
     if (availableIngredients.length === 0) {
       toast.error("No ingredients available. Please add ingredients first.")
       return
@@ -361,13 +370,13 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
     )
   }
 
-  const ingredients = inventoryData?.ingredients || []
+  const ingredients = (inventoryData as any)?.ingredients || []
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{isEditing ? "Edit Dish" : "Create New Dish"}</CardTitle>
+          <CardTitle>{isEditing ? t("menuManagement.dishForm.editTitle") : t("menuManagement.dishForm.newTitle")}</CardTitle>
           <Button variant="ghost" size="icon" onClick={() => onClose(false)}>
             <X className="h-4 w-4" />
           </Button>
@@ -376,12 +385,12 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
           <CardContent className="space-y-4">
             {/* Name */}
             <div className="space-y-2">
-              <Label htmlFor="name">Dish Name *</Label>
+              <Label htmlFor="name">{t("menuManagement.dishForm.dishNameRequired")}</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Margherita Pizza"
+                placeholder={t("menuManagement.dishForm.dishNamePlaceholder")}
                 maxLength={100}
                 required
               />
@@ -389,12 +398,12 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
+              <Label htmlFor="description">{t("menuManagement.dishForm.descriptionRequired")}</Label>
               <textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe the dish..."
+                placeholder={t("menuManagement.dishForm.descriptionPlaceholder")}
                 maxLength={500}
                 required
                 className="w-full min-h-[100px] px-3 py-2 border border-input bg-background rounded-md"
@@ -403,7 +412,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
             {/* Price */}
             <div className="space-y-2">
-              <Label htmlFor="price">Price ($) *</Label>
+              <Label htmlFor="price">{t("menuManagement.dishForm.priceRequired")}</Label>
               <Input
                 id="price"
                 type="number"
@@ -411,34 +420,34 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                 min="0"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                placeholder="15.00"
+                placeholder={t("menuManagement.dishForm.pricePlaceholder")}
                 required
               />
             </div>
 
             {/* Photo URL */}
             <div className="space-y-2">
-              <Label htmlFor="photoUrl">Photo URL (optional)</Label>
+              <Label htmlFor="photoUrl">{t("menuManagement.dishForm.photoUrlOptional")}</Label>
               <Input
                 id="photoUrl"
                 type="url"
                 value={photoUrl}
                 onChange={(e) => setPhotoUrl(e.target.value)}
-                placeholder="https://example.com/dish.jpg"
+                placeholder={t("menuManagement.dishForm.photoUrlPlaceholder")}
               />
             </div>
 
             {/* T059: Dish Flags */}
             <div className="space-y-4 border rounded-md p-4">
-              <Label className="text-base font-semibold">Dish Flags & Priority</Label>
+              <Label className="text-base font-semibold">{t("menuManagement.dishForm.dishFlagsAndPriority")}</Label>
 
               {/* Recommended Toggle */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="isRecommended" className="cursor-pointer">
-                    Recommended 👍
+                    {t("menuManagement.dishForm.recommendedLabel")}
                   </Label>
-                  <p className="text-xs text-muted-foreground">Show thumbs-up badge to customers</p>
+                  <p className="text-xs text-muted-foreground">{t("menuManagement.dishForm.recommendedDesc")}</p>
                 </div>
                 <Checkbox
                   id="isRecommended"
@@ -451,9 +460,9 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="isChefSpecial" className="cursor-pointer">
-                    Chef's Special ⭐
+                    {t("menuManagement.dishForm.chefSpecialLabel")}
                   </Label>
-                  <p className="text-xs text-muted-foreground">Show star badge to customers</p>
+                  <p className="text-xs text-muted-foreground">{t("menuManagement.dishForm.chefSpecialDesc")}</p>
                 </div>
                 <Checkbox
                   id="isChefSpecial"
@@ -464,7 +473,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
               {/* Order Priority */}
               <div className="space-y-2">
-                <Label htmlFor="orderPriority">Kitchen Priority (0-100)</Label>
+                <Label htmlFor="orderPriority">{t("menuManagement.dishForm.kitchenPriorityLabel")}</Label>
                 <Input
                   id="orderPriority"
                   type="number"
@@ -472,10 +481,10 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                   max="100"
                   value={orderPriority}
                   onChange={(e) => setOrderPriority(e.target.value)}
-                  placeholder="0"
+                  placeholder={t("menuManagement.dishForm.kitchenPriorityPlaceholder")}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Higher priority dishes appear first in kitchen queue (0 = normal, 100 = highest)
+                  {t("menuManagement.dishForm.kitchenPriorityDesc")}
                 </p>
               </div>
             </div>
@@ -483,16 +492,16 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
             {/* Recipe */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <Label>Recipe *</Label>
+                <Label>{t("menuManagement.dishForm.recipeRequired")}</Label>
                 <Button type="button" variant="outline" size="sm" onClick={handleAddRecipeItem}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Ingredient
+                  {t("menuManagement.dishForm.addRecipeItem")}
                 </Button>
               </div>
 
               {recipe.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  No ingredients added yet. Click "Add Ingredient" to start.
+                  {t("menuManagement.dishForm.recipeEmpty")}
                 </p>
               )}
 
@@ -502,7 +511,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                   return (
                     <div key={index} className="flex gap-2 items-end">
                       <div className="flex-1">
-                        <Label className="text-xs">Ingredient</Label>
+                        <Label className="text-xs">{t("menuManagement.dishForm.ingredient")}</Label>
                         <select
                           value={item.ingredientId}
                           onChange={(e) =>
@@ -518,7 +527,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                         </select>
                       </div>
                       <div className="w-32">
-                        <Label className="text-xs">Quantity ({ingredient?.unit || "unit"})</Label>
+                        <Label className="text-xs">{t("menuManagement.dishForm.quantityLabel", { unit: ingredient?.unit || "unit" })}</Label>
                         <Input
                           type="number"
                           step="0.1"
@@ -549,15 +558,15 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
             {/* T058: Category Assignment */}
             <div className="space-y-2">
-              <Label>Categories</Label>
-              {!allCategories || allCategories.length === 0 ? (
+              <Label>{t("menuManagement.dishForm.categories")}</Label>
+              {!(allCategories as any) || (allCategories as any[]).length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No categories available. Create categories in the Categories tab first.
+                  {t("menuManagement.dishForm.noCategoriesAvailable")}
                 </p>
               ) : (
                 <div className="border rounded-md p-4">
                   <div className="grid grid-cols-2 gap-2">
-                    {allCategories.map((category: any) => (
+                    {((allCategories as any[]) || []).map((category: any) => (
                       <div key={category.id} className="flex items-center space-x-2">
                         <Checkbox
                           id={`category-${category.id}`}
@@ -588,25 +597,25 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
             {/* Modifier Assignment */}
             <div className="space-y-2">
-              <Label>Available Modifiers</Label>
-              {!modifierGroups || modifierGroups.length === 0 ? (
+              <Label>{t("menuManagement.dishForm.availableModifiers")}</Label>
+              {!(modifierGroups as any) || (modifierGroups as any[]).length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No modifier groups available. Create modifier groups in the Modifiers tab first.
+                  {t("menuManagement.dishForm.noModifierGroupsAvailable")}
                 </p>
               ) : (
                 <div className="space-y-4 border rounded-md p-4">
-                  {modifierGroups.map((group: any) => {
+                  {((modifierGroups as any[]) || []).map((group: any) => {
                     const groupModifiers =
-                      allModifiers?.filter(
+                      (allModifiers as any)?.filter(
                         (mod: any) =>
-                          dishModifiers
+                          (dishModifiers as any)
                             ?.find((dg: any) => dg.group?.id === group.id)
                             ?.modifiers?.some((m: any) => m.id === mod.id) ||
                           selectedModifiers.some((sm) => sm.modifierGroupId === group.id)
                       ) || []
 
                     const availableModifiersForGroup =
-                      allModifiers?.filter((mod: any) =>
+                      (allModifiers as any)?.filter((mod: any) =>
                         selectedModifiers.some(
                           (sm) => sm.modifierId === mod.id && sm.modifierGroupId === group.id
                         )
@@ -616,7 +625,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
                       <div key={group.id} className="space-y-2">
                         <div className="font-medium text-sm">{group.name}</div>
                         <div className="grid grid-cols-2 gap-2 pl-4">
-                          {allModifiers?.map((modifier: any) => (
+                          {((allModifiers as any) || []).map((modifier: any) => (
                             <div key={modifier.id} className="flex items-center space-x-2">
                               <Checkbox
                                 id={`modifier-${group.id}-${modifier.id}`}
@@ -651,9 +660,9 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="has-variants">Has Variants</Label>
+                  <Label htmlFor="has-variants">{t("menuManagement.dishForm.hasVariants")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Enable size/option variants (e.g., Small, Medium, Large)
+                    {t("menuManagement.dishForm.hasVariantsDesc")}
                   </p>
                 </div>
                 <Switch
@@ -668,7 +677,7 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
               {hasVariants && isEditing && dish && (
                 <VariantEditor
                   dishId={dish.id}
-                  variants={variantsData?.variants || []}
+                  variants={(variantsData as any)?.variants || []}
                   onVariantsChange={() => {
                     refetchVariants()
                     queryClient.invalidateQueries({ queryKey: ["dishes", "getById"] })
@@ -678,22 +687,21 @@ export function DishEditor({ dish, onClose }: DishEditorProps) {
 
               {hasVariants && !isEditing && (
                 <p className="text-sm text-muted-foreground border rounded-md p-4">
-                  Save this dish first to manage variants. Variants can only be added to existing
-                  dishes.
+                  {t("menuManagement.dishForm.variantsSaveFirst")}
                 </p>
               )}
             </div>
           </CardContent>
           <CardFooter className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onClose(false)}>
-              Cancel
+              {t("menuManagement.dishForm.cancel")}
             </Button>
             <Button type="submit" disabled={createDish.isPending || updateDish.isPending}>
               {createDish.isPending || updateDish.isPending
-                ? "Saving..."
+                ? t("menuManagement.dishForm.savingText")
                 : isEditing
-                  ? "Update Dish"
-                  : "Create Dish"}
+                  ? t("menuManagement.dishForm.updateDishButton")
+                  : t("menuManagement.dishForm.createDishButton")}
             </Button>
           </CardFooter>
         </form>

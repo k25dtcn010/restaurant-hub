@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Edit, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -47,6 +48,7 @@ interface ModifierFormData {
 }
 
 export function ModifierManager() {
+  const { t } = useTranslation()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingModifier, setEditingModifier] = useState<{
     id: number
@@ -74,13 +76,15 @@ export function ModifierManager() {
   const createModifier = useMutation({
     mutationFn: (data: ModifierFormData) => trpcClient.modifiers.create.mutate(data),
     onSuccess: () => {
-      toast.success("Modifier created successfully")
+      toast.success(t("menuManagement.modifierForm.createdSuccess"))
       setIsDialogOpen(false)
       resetForm()
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to create modifier: ${error.message}`)
+      toast.error(t("menuManagement.modifierForm.createdFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -89,13 +93,15 @@ export function ModifierManager() {
     mutationFn: (data: { id: number } & Partial<ModifierFormData>) =>
       trpcClient.modifiers.update.mutate(data),
     onSuccess: () => {
-      toast.success("Modifier updated successfully")
+      toast.success(t("menuManagement.modifierForm.updatedSuccess"))
       setIsDialogOpen(false)
       resetForm()
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update modifier: ${error.message}`)
+      toast.error(t("menuManagement.modifierForm.updatedFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -103,12 +109,14 @@ export function ModifierManager() {
   const deleteModifier = useMutation({
     mutationFn: (id: number) => trpcClient.modifiers.delete.mutate({ id }),
     onSuccess: () => {
-      toast.success("Modifier deleted successfully")
+      toast.success(t("menuManagement.modifierForm.deletedSuccess"))
       setDeleteConfirmId(null)
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to delete modifier: ${error.message}`)
+      toast.error(t("menuManagement.modifierForm.deletedFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -142,13 +150,13 @@ export function ModifierManager() {
 
     // Validation
     if (!name.trim()) {
-      toast.error("Name is required")
+      toast.error(t("menuManagement.modifierForm.validationError"))
       return
     }
 
     const priceAdjustmentValue = parseFloat(priceAdjustment)
     if (isNaN(priceAdjustmentValue)) {
-      toast.error("Price adjustment must be a valid number")
+      toast.error(t("menuManagement.modifierForm.validationError"))
       return
     }
 
@@ -195,10 +203,10 @@ export function ModifierManager() {
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Modifiers</CardTitle>
+          <CardTitle>{t("menuManagement.modifierForm.title")}</CardTitle>
           <Button onClick={handleOpenCreateDialog}>
             <Plus className="h-4 w-4 mr-2" />
-            Create Modifier
+            {t("menuManagement.addModifier")}
           </Button>
         </div>
       </CardHeader>
@@ -223,28 +231,28 @@ export function ModifierManager() {
               ))}
             </div>
           </div>
-        ) : !modifiers || modifiers.length === 0 ? (
+        ) : !modifiers || (modifiers as any[]).length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No modifiers found. Create your first modifier to get started.
+            {t("menuManagement.modifierForm.validationError")}
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Price Adjustment</TableHead>
+                <TableHead>{t("menuManagement.modifierForm.name")}</TableHead>
+                <TableHead>{t("menuManagement.modifierForm.priceAdjustment")}</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-right">{t("menuManagement.categoryForm.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {modifiers.map((modifier) => (
+              {(modifiers as any[]).map((modifier: any) => (
                 <TableRow key={modifier.id}>
                   <TableCell className="font-medium">{modifier.name}</TableCell>
                   <TableCell>{formatPrice(modifier.priceAdjustment)}</TableCell>
                   <TableCell>
                     <Badge variant={modifier.isAvailable ? "default" : "secondary"}>
-                      {modifier.isAvailable ? "Available" : "Unavailable"}
+                      {modifier.isAvailable ? t("menuManagement.available") : t("menuManagement.unavailable")}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -273,11 +281,13 @@ export function ModifierManager() {
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>{editingModifier ? "Edit Modifier" : "Create Modifier"}</DialogTitle>
+              <DialogTitle>
+                {editingModifier ? t("menuManagement.modifierForm.update") : t("menuManagement.modifierForm.create")}
+              </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t("menuManagement.modifierForm.name")}</Label>
                 <Input
                   id="name"
                   value={name}
@@ -287,7 +297,7 @@ export function ModifierManager() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="price">Price Adjustment ($)</Label>
+                <Label htmlFor="price">{t("menuManagement.modifierForm.priceAdjustment")} ($)</Label>
                 <Input
                   id="price"
                   type="number"
@@ -302,16 +312,16 @@ export function ModifierManager() {
                 </p>
               </div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="available">Available</Label>
+                <Label htmlFor="available">{t("menuManagement.modifierForm.isAvailable")}</Label>
                 <Switch id="available" checked={isAvailable} onCheckedChange={setIsAvailable} />
               </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
+                {t("menuManagement.modifierForm.cancel")}
               </Button>
               <Button type="submit" disabled={createModifier.isPending || updateModifier.isPending}>
-                {editingModifier ? "Update" : "Create"}
+                {editingModifier ? t("menuManagement.modifierForm.update") : t("menuManagement.modifierForm.create")}
               </Button>
             </DialogFooter>
           </form>
@@ -322,22 +332,21 @@ export function ModifierManager() {
       <Dialog open={deleteConfirmId !== null} onOpenChange={() => setDeleteConfirmId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Modifier</DialogTitle>
+            <DialogTitle>{t("menuManagement.modifierForm.deleteConfirm")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete this modifier? This action cannot be undone. If the
-            modifier is assigned to dishes, the deletion will fail.
+            {t("menuManagement.modifierForm.deleteConfirmMessage")}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
-              Cancel
+              {t("menuManagement.modifierForm.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDelete}
               disabled={deleteModifier.isPending}
             >
-              Delete
+              {t("menuManagement.modifierForm.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,5 +1,6 @@
 import { AlertTriangle, Check, Edit, Eye } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { IngredientData } from "./inventory-table"
 import { StockAdjustmentModal } from "./stock-adjustment-modal"
@@ -26,6 +27,7 @@ interface IngredientRowProps {
 }
 
 export function IngredientRow({ ingredient }: IngredientRowProps) {
+  const { t } = useTranslation()
   const [showAdjustModal, setShowAdjustModal] = useState(false)
   const [showThresholdModal, setShowThresholdModal] = useState(false)
   const [showDishesDialog, setShowDishesDialog] = useState(false)
@@ -68,12 +70,12 @@ export function IngredientRow({ ingredient }: IngredientRowProps) {
           {ingredient.isLowStock ? (
             <Badge variant="destructive" className="gap-1">
               <AlertTriangle className="h-3 w-3" />
-              Low Stock
+              {t("inventory.table.lowStock")}
             </Badge>
           ) : (
             <Badge variant="secondary" className="gap-1">
               <Check className="h-3 w-3" />
-              In Stock
+              {t("inventory.table.inStock")}
             </Badge>
           )}
         </TableCell>
@@ -83,13 +85,12 @@ export function IngredientRow({ ingredient }: IngredientRowProps) {
               <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8">
                   <Eye className="h-4 w-4 mr-1" />
-                  {ingredient.usedInDishes.length}{" "}
-                  {ingredient.usedInDishes.length === 1 ? "dish" : "dishes"}
+                  {t("inventory.table.dishes", { count: ingredient.usedInDishes.length })}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Dishes using {ingredient.name}</DialogTitle>
+                  <DialogTitle>{t("inventory.modal.dishesUsing", { name: ingredient.name })}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-2">
                   {ingredient.usedInDishes.map((dish) => (
@@ -107,12 +108,12 @@ export function IngredientRow({ ingredient }: IngredientRowProps) {
               </DialogContent>
             </Dialog>
           ) : (
-            <span className="text-sm text-muted-foreground">Not used</span>
+            <span className="text-sm text-muted-foreground">{t("inventory.table.notUsed")}</span>
           )}
         </TableCell>
         <TableCell className="text-right">
           <Button variant="outline" size="sm" onClick={() => setShowAdjustModal(true)}>
-            Adjust
+            {t("inventory.table.adjust")}
           </Button>
         </TableCell>
       </TableRow>

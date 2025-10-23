@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
 import { CheckCircle2, ChefHat, Clock } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -81,6 +82,7 @@ const cardBorderStyles = {
 }
 
 export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
+  const { t } = useTranslation()
   // Mutation for updating order status
   const updateStatusMutation = useMutation({
     mutationFn: (variables: {
@@ -104,7 +106,7 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
       onStatusUpdate?.()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update order: ${error.message}`)
+      toast.error(t("kitchen.orderCard.updateFailed", { error: error.message }))
     },
   })
 
@@ -142,13 +144,13 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
   const getStatusButton = () => {
     if (order.status === "Pending") {
       return {
-        label: "Start Cooking",
+        label: t("kitchen.orderCard.startCooking"),
         icon: <ChefHat className="mr-2 h-4 w-4" />,
       }
     }
     if (order.status === "InKitchen") {
       return {
-        label: "Mark Ready",
+        label: t("kitchen.orderCard.markReady"),
         icon: <CheckCircle2 className="mr-2 h-4 w-4" />,
       }
     }
@@ -161,13 +163,13 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
     <Card className={`transition-all hover:shadow-md ${borderStyle}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold">Table {order.tableNumber}</CardTitle>
+          <CardTitle className="text-lg font-bold">{t("kitchen.orderCard.table", { number: order.tableNumber })}</CardTitle>
           <Badge className={statusStyle.className}>
             {order.status === "InKitchen"
-              ? "In Kitchen"
+              ? t("kitchen.orderCard.inKitchen")
               : order.status === "ReadyToServe"
-                ? "Ready to Serve"
-                : order.status}
+                ? t("kitchen.orderCard.readyToServe")
+                : t("kitchen.orderCard.pending")}
           </Badge>
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -176,7 +178,7 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
             <span>{formatTime(order.createdAt)}</span>
           </div>
           <span className={order.waitTime > 15 ? "text-orange-600 font-semibold" : ""}>
-            {order.waitTime} min ago
+            {t("kitchen.orderCard.timeAgo", { minutes: order.waitTime })}
           </span>
         </div>
       </CardHeader>
@@ -201,7 +203,7 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
                   <div className="ml-8 mt-1 space-y-0.5">
                     {item.modifiers.map((modifier, modIndex) => (
                       <div key={modIndex} className="text-sm text-muted-foreground">
-                        <span className="mr-2">+</span>
+                        <span className="mr-2">{t("kitchen.orderCard.modifierPlus")}</span>
                         <span>{modifier.name}</span>
                         {modifier.priceAtOrder !== 0 && (
                           <span className="ml-2">
@@ -236,7 +238,7 @@ export function OrderCard({ order, onStatusUpdate }: OrderCardProps) {
             variant={order.status === "Pending" ? "default" : "default"}
           >
             {updateStatusMutation.isPending ? (
-              <>Loading...</>
+              <>{t("kitchen.orderCard.loading")}</>
             ) : (
               <>
                 {statusButton.icon}

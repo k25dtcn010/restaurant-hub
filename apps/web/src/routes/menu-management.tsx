@@ -112,7 +112,7 @@ function RouteComponent() {
       return { previousDishes }
     },
     onSuccess: () => {
-      toast.success("Dish availability updated")
+      toast.success(t("menuManagement.availabilityUpdated"))
     },
     onError: (error: Error, _variables, context) => {
       // Rollback on error
@@ -122,7 +122,9 @@ function RouteComponent() {
           context.previousDishes
         )
       }
-      toast.error(`Failed to update availability: ${error.message}`)
+      toast.error(t("menuManagement.availabilityFailed"), {
+        description: error.message,
+      })
     },
     onSettled: () => {
       // Always refetch after error or success to ensure sync
@@ -162,7 +164,7 @@ function RouteComponent() {
       return { previousDishes }
     },
     onSuccess: () => {
-      toast.success("Dish visibility updated")
+      toast.success(t("menuManagement.visibilityUpdated"))
     },
     onError: (error: Error, _variables, context) => {
       // Rollback on error
@@ -172,7 +174,9 @@ function RouteComponent() {
           context.previousDishes
         )
       }
-      toast.error(`Failed to update visibility: ${error.message}`)
+      toast.error(t("menuManagement.visibilityFailed"), {
+        description: error.message,
+      })
     },
     onSettled: () => {
       // Always refetch after error or success to ensure sync
@@ -242,7 +246,7 @@ function RouteComponent() {
         <div>
           <h1 className="text-3xl font-bold">{t("menuManagement.title")}</h1>
           <p className="text-muted-foreground mt-2">
-            Manage dishes, recipes, modifiers, and categories
+            {t("menuManagement.subtitle")}
           </p>
         </div>
       </div>
@@ -271,7 +275,7 @@ function RouteComponent() {
           {/* T086: Hidden Items Quick-Access Section */}
           {hiddenDishes.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">Hidden Items</h2>
+              <h2 className="text-xl font-semibold mb-4">{t("menuManagement.hiddenItems")}</h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {hiddenDishes.map((dish: any) => (
                   <Card key={dish.id} className="opacity-50 border-dashed">
@@ -282,7 +286,7 @@ function RouteComponent() {
                             <CardTitle className="text-lg">{dish.name}</CardTitle>
                             {/* T085: Hidden badge */}
                             <Badge variant="secondary" className="bg-gray-500 text-white">
-                              Hidden
+                              {t("menuManagement.hidden")}
                             </Badge>
                           </div>
                         </div>
@@ -298,10 +302,10 @@ function RouteComponent() {
                           size="sm"
                           onClick={() => handleToggleVisibility(dish.id)}
                           disabled={toggleVisibility.isPending}
-                          title="Show to customers"
+                          title={t("menuManagement.showToCustomers")}
                         >
                           <Eye className="h-4 w-4 mr-2" />
-                          Show
+                          {t("menuManagement.show")}
                         </Button>
                       </div>
                     </CardContent>
@@ -313,7 +317,7 @@ function RouteComponent() {
 
           {/* Visible Dishes Grid */}
           <div className="mb-6">
-            {visibleDishes.length > 0 && <h2 className="text-xl font-semibold mb-4">Menu Items</h2>}
+            {visibleDishes.length > 0 && <h2 className="text-xl font-semibold mb-4">{t("menuManagement.menuItems")}</h2>}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {visibleDishes.map((dish: any) => (
                 <Card key={dish.id} className={!dish.isAvailable ? "opacity-60" : ""}>
@@ -324,17 +328,17 @@ function RouteComponent() {
                           <CardTitle className="text-lg">{dish.name}</CardTitle>
                           {/* T060: Flag Badges */}
                           {dish.isRecommended && (
-                            <span className="text-lg" title="Recommended">
+                            <span className="text-lg" title={t("menuManagement.recommended")}>
                               👍
                             </span>
                           )}
                           {dish.isChefSpecial && (
-                            <span className="text-lg" title="Chef's Special">
+                            <span className="text-lg" title={t("menuManagement.chefSpecial")}>
                               ⭐
                             </span>
                           )}
                           {dish.orderPriority > 0 && (
-                            <Badge variant="outline" title="Kitchen Priority">
+                            <Badge variant="outline" title={t("menuManagement.kitchenPriority")}>
                               P{dish.orderPriority}
                             </Badge>
                           )}
@@ -346,7 +350,7 @@ function RouteComponent() {
                         size="icon"
                         onClick={() => handleToggleVisibility(dish.id)}
                         disabled={toggleVisibility.isPending}
-                        title={dish.isHidden ? "Show to customers" : "Hide from customers"}
+                        title={dish.isHidden ? t("menuManagement.showToCustomers") : t("menuManagement.hideFromCustomers")}
                       >
                         {dish.isHidden ? (
                           <EyeOff className="h-4 w-4" />
@@ -369,7 +373,7 @@ function RouteComponent() {
                             : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
                         }`}
                       >
-                        {dish.isAvailable ? "Available" : "Disabled"}
+                        {dish.isAvailable ? t("menuManagement.available") : t("menuManagement.disabled")}
                       </span>
                     </div>
                     <div className="flex gap-2">
@@ -379,7 +383,7 @@ function RouteComponent() {
                         onClick={() => handleEdit(dish)}
                         className="flex-1"
                       >
-                        Edit
+                        {t("menuManagement.edit")}
                       </Button>
                       <Button
                         variant={dish.isAvailable ? "destructive" : "default"}
@@ -388,7 +392,7 @@ function RouteComponent() {
                         disabled={toggleAvailability.isPending}
                         className="flex-1"
                       >
-                        {dish.isAvailable ? "Disable" : "Enable"}
+                        {dish.isAvailable ? t("menuManagement.disable") : t("menuManagement.enable")}
                       </Button>
                     </div>
                   </CardContent>
@@ -398,10 +402,10 @@ function RouteComponent() {
               {visibleDishes.length === 0 && (
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
-                    <p className="text-muted-foreground mb-4">No dishes found</p>
+                    <p className="text-muted-foreground mb-4">{t("menuManagement.noDishesFound")}</p>
                     <Button onClick={handleCreateNew}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Dish
+                      {t("menuManagement.createYourFirstDish")}
                     </Button>
                   </CardContent>
                 </Card>

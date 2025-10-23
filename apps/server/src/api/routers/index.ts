@@ -8,6 +8,7 @@ import { paymentsRouter } from "./payments"
 import { reservationsRouter } from "./reservations"
 import { shiftsRouter } from "./shifts"
 import { tablesRouter } from "./tables"
+import { usersRouter } from "./users"
 
 /**
  * Main tRPC application router - aggregates all sub-routers

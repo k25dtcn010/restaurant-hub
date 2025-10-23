@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Edit, GripVertical, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -46,6 +47,7 @@ interface ModifierGroupFormData {
 }
 
 export function ModifierGroupEditor() {
+  const { t } = useTranslation()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingGroup, setEditingGroup] = useState<{
     id: number
@@ -75,13 +77,15 @@ export function ModifierGroupEditor() {
   const createGroup = useMutation({
     mutationFn: (data: ModifierGroupFormData) => trpcClient.modifiers.createGroup.mutate(data),
     onSuccess: () => {
-      toast.success("Modifier group created successfully")
+      toast.success(t("menuManagement.modifierGroup.createdSuccess"))
       setIsDialogOpen(false)
       resetForm()
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to create group: ${error.message}`)
+      toast.error(t("menuManagement.modifierGroup.createdFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -90,13 +94,15 @@ export function ModifierGroupEditor() {
     mutationFn: (data: { id: number } & Partial<ModifierGroupFormData>) =>
       trpcClient.modifiers.updateGroup.mutate(data),
     onSuccess: () => {
-      toast.success("Modifier group updated successfully")
+      toast.success(t("menuManagement.modifierGroup.updatedSuccess"))
       setIsDialogOpen(false)
       resetForm()
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update group: ${error.message}`)
+      toast.error(t("menuManagement.modifierGroup.updatedFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -104,12 +110,14 @@ export function ModifierGroupEditor() {
   const deleteGroup = useMutation({
     mutationFn: (id: number) => trpcClient.modifiers.deleteGroup.mutate({ id }),
     onSuccess: () => {
-      toast.success("Modifier group deleted successfully")
+      toast.success(t("menuManagement.modifierGroup.deletedSuccess"))
       setDeleteConfirmId(null)
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to delete group: ${error.message}`)
+      toast.error(t("menuManagement.modifierGroup.deletedFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -124,7 +132,7 @@ export function ModifierGroupEditor() {
   const handleOpenCreateDialog = () => {
     resetForm()
     // Set default displayOrder to next available number
-    const nextOrder = groups ? groups.length + 1 : 1
+    const nextOrder = groups ? (groups as any[]).length + 1 : 1
     setDisplayOrder(nextOrder.toString())
     setIsDialogOpen(true)
   }
@@ -149,7 +157,7 @@ export function ModifierGroupEditor() {
 
     // Validation
     if (!name.trim()) {
-      toast.error("Name is required")
+      toast.error(t("menuManagement.modifierGroup.validationNameRequired"))
       return
     }
 
@@ -158,23 +166,23 @@ export function ModifierGroupEditor() {
     const order = parseInt(displayOrder)
 
     if (isNaN(order) || order < 0) {
-      toast.error("Display order must be a non-negative number")
+      toast.error(t("menuManagement.modifierGroup.validationOrderRequired"))
       return
     }
 
     if (min !== undefined && isNaN(min)) {
-      toast.error("Min selections must be a valid number")
+      toast.error(t("menuManagement.modifierGroup.validationMinNumber"))
       return
     }
 
     if (max !== undefined && isNaN(max)) {
-      toast.error("Max selections must be a valid number")
+      toast.error(t("menuManagement.modifierGroup.validationMaxNumber"))
       return
     }
 
     // Validate min <= max
     if (min !== undefined && max !== undefined && min > max) {
-      toast.error("Min selections cannot be greater than max selections")
+      toast.error(t("menuManagement.modifierGroup.validationMinMax"))
       return
     }
 
@@ -207,48 +215,50 @@ export function ModifierGroupEditor() {
     max: number | null | undefined
   ): string => {
     if ((min === null || min === undefined) && (max === null || max === undefined)) {
-      return "No limits"
+      return t("menuManagement.modifierGroup.noLimits")
     }
     if (min != null && max != null) {
-      return `${min}-${max}`
+      return t("menuManagement.modifierGroup.rangeConstraint", { min, max })
     }
     if (min != null) {
-      return `Min: ${min}`
+      return t("menuManagement.modifierGroup.minConstraint", { min })
     }
-    return `Max: ${max}`
+    return t("menuManagement.modifierGroup.maxConstraint", { max })
   }
 
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Modifier Groups</CardTitle>
+          <CardTitle>{t("menuManagement.modifierGroup.title")}</CardTitle>
           <Button onClick={handleOpenCreateDialog}>
             <Plus className="h-4 w-4 mr-2" />
-            Create Group
+            {t("menuManagement.modifierGroup.create")}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading groups...</div>
-        ) : !groups || groups.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No modifier groups found. Create your first group to get started.
+            {t("menuManagement.modifierGroup.loadingGroups")}
+          </div>
+        ) : !groups || (groups as any[]).length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            {t("menuManagement.modifierGroup.noGroups")}
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12"></TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Selection Limits</TableHead>
-                <TableHead>Order</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t("menuManagement.modifierGroup.name")}</TableHead>
+                <TableHead>{t("menuManagement.modifierGroup.selectionLimits")}</TableHead>
+                <TableHead>{t("menuManagement.modifierGroup.displayOrder")}</TableHead>
+                <TableHead className="text-right">{t("menuManagement.categoryForm.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {groups.map((group) => (
+              {(groups as any[]).map((group: any) => (
                 <TableRow key={group.id}>
                   <TableCell>
                     <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
@@ -281,12 +291,12 @@ export function ModifierGroupEditor() {
           <form onSubmit={handleSubmit}>
             <DialogHeader>
               <DialogTitle>
-                {editingGroup ? "Edit Modifier Group" : "Create Modifier Group"}
+                {editingGroup ? t("menuManagement.modifierGroup.update") : t("menuManagement.modifierGroup.create")}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t("menuManagement.modifierGroup.name")}</Label>
                 <Input
                   id="name"
                   value={name}
@@ -296,49 +306,49 @@ export function ModifierGroupEditor() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="minSelections">Min Selections (optional)</Label>
+                <Label htmlFor="minSelections">{t("menuManagement.modifierGroup.minSelections")}</Label>
                 <Input
                   id="minSelections"
                   type="number"
                   min="0"
                   value={minSelections}
                   onChange={(e) => setMinSelections(e.target.value)}
-                  placeholder="Leave empty for no minimum"
+                  placeholder={t("menuManagement.modifierGroup.minPlaceholder")}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="maxSelections">Max Selections (optional)</Label>
+                <Label htmlFor="maxSelections">{t("menuManagement.modifierGroup.maxSelections")}</Label>
                 <Input
                   id="maxSelections"
                   type="number"
                   min="0"
                   value={maxSelections}
                   onChange={(e) => setMaxSelections(e.target.value)}
-                  placeholder="Leave empty for no maximum"
+                  placeholder={t("menuManagement.modifierGroup.maxPlaceholder")}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="displayOrder">Display Order</Label>
+                <Label htmlFor="displayOrder">{t("menuManagement.modifierGroup.displayOrder")}</Label>
                 <Input
                   id="displayOrder"
                   type="number"
                   min="0"
                   value={displayOrder}
                   onChange={(e) => setDisplayOrder(e.target.value)}
-                  placeholder="e.g., 1, 2, 3"
+                  placeholder={t("menuManagement.modifierGroup.displayOrderPlaceholder")}
                   required
                 />
                 <p className="text-sm text-muted-foreground">
-                  Groups will be displayed in ascending order
+                  {t("menuManagement.modifierGroup.displayOrderHint")}
                 </p>
               </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
+                {t("menuManagement.modifierGroup.cancel")}
               </Button>
               <Button type="submit" disabled={createGroup.isPending || updateGroup.isPending}>
-                {editingGroup ? "Update" : "Create"}
+                {editingGroup ? t("menuManagement.modifierGroup.update") : t("menuManagement.modifierGroup.create")}
               </Button>
             </DialogFooter>
           </form>
@@ -349,18 +359,17 @@ export function ModifierGroupEditor() {
       <Dialog open={deleteConfirmId !== null} onOpenChange={() => setDeleteConfirmId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Modifier Group</DialogTitle>
+            <DialogTitle>{t("menuManagement.modifierGroup.deleteConfirm")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete this modifier group? This action cannot be undone. If
-            the group is assigned to dishes, the deletion will fail.
+            {t("menuManagement.modifierGroup.deleteConfirmMessage")}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
-              Cancel
+              {t("menuManagement.modifierGroup.cancel")}
             </Button>
             <Button variant="destructive" onClick={confirmDelete} disabled={deleteGroup.isPending}>
-              Delete
+              {t("menuManagement.modifierGroup.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,5 +1,6 @@
 import { Search } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -44,6 +45,7 @@ export function TableSelectorColumn({
   selectedTableId,
   onSelectTable,
 }: TableSelectorColumnProps) {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState("")
 
   const filteredTables = useMemo(() => {
@@ -75,10 +77,10 @@ export function TableSelectorColumn({
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>Select Table</CardTitle>
+          <CardTitle>{t("staffOrder.tableSelector.title")}</CardTitle>
         </CardHeader>
         <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">No tables available.</p>
+          <p className="text-muted-foreground">{t("staffOrder.tableSelector.noTablesAvailable")}</p>
         </CardContent>
       </Card>
     )
@@ -87,14 +89,14 @@ export function TableSelectorColumn({
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="border-b pb-3">
-        <CardTitle className="text-lg mb-1">Select Table</CardTitle>
+        <CardTitle className="text-lg mb-1">{t("staffOrder.tableSelector.title")}</CardTitle>
         <CardDescription className="text-xs mb-3">
-          Choose which table you're creating an order for
+          {t("staffOrder.tableSelector.description")}
         </CardDescription>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search tables..."
+            placeholder={t("staffOrder.tableSelector.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -110,7 +112,7 @@ export function TableSelectorColumn({
                 <RadioGroup value={selectedTableId?.toString() || ""}>
                   {filteredTables.length === 0 ? (
                     <div className="py-8 text-center text-muted-foreground text-sm">
-                      <p>No tables match your search</p>
+                      <p>{t("staffOrder.tableSelector.noTablesMatch")}</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -126,12 +128,12 @@ export function TableSelectorColumn({
                                 Table {table.number}{" "}
                                 {table.hasActiveOrder && (
                                   <Badge variant="secondary" className="shrink-0 text-xs">
-                                    In Use
+                                    {t("staffOrder.tableSelector.inUse")}
                                   </Badge>
                                 )}
                               </FieldTitle>
                               <FieldDescription className="text-sm">
-                                <div>{table.capacity} seats</div>
+                                <div>{table.capacity} {t("staffOrder.tableSelector.seats")}</div>
                               </FieldDescription>
                             </FieldContent>
                             <RadioGroupItem

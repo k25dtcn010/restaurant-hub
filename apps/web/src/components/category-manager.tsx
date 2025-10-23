@@ -11,6 +11,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Edit, Eye, EyeOff, GripVertical, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -73,10 +74,12 @@ function SortableRow({
   category,
   onEdit,
   onToggleVisibility,
+  t,
 }: {
   category: Category
   onEdit: (category: Category) => void
   onToggleVisibility: (id: number, currentIsHidden: boolean) => void
+  t: any
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: category.id,
@@ -101,20 +104,22 @@ function SortableRow({
           <span className="font-medium">{category.name}</span>
           {category.isHidden && (
             <Badge variant="secondary" className="ml-2">
-              Hidden
+              {t("menuManagement.categoryForm.hidden")}
             </Badge>
           )}
         </div>
       </TableCell>
       <TableCell className="text-center">{category.displayOrder}</TableCell>
       <TableCell className="text-center">
-        <Badge variant="outline">{category.dishCount} dishes</Badge>
+        <Badge variant="outline">
+          {t("menuManagement.categoryForm.dishCount", { count: category.dishCount })}
+        </Badge>
       </TableCell>
       <TableCell className="text-center">
         {category.isHidden ? (
-          <Badge variant="secondary">Hidden</Badge>
+          <Badge variant="secondary">{t("menuManagement.hidden")}</Badge>
         ) : (
-          <Badge variant="default">Visible</Badge>
+          <Badge variant="default">{t("menuManagement.visible")}</Badge>
         )}
       </TableCell>
       <TableCell className="text-right">
@@ -123,7 +128,7 @@ function SortableRow({
             variant="ghost"
             size="icon"
             onClick={() => onToggleVisibility(category.id, category.isHidden)}
-            title={category.isHidden ? "Show to customers" : "Hide from customers"}
+            title={category.isHidden ? t("menuManagement.showToCustomers") : t("menuManagement.hideFromCustomers")}
           >
             {category.isHidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </Button>
@@ -137,6 +142,7 @@ function SortableRow({
 }
 
 export function CategoryManager() {
+  const { t } = useTranslation()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<{
     id: number
@@ -164,13 +170,15 @@ export function CategoryManager() {
   const createCategory = useMutation({
     mutationFn: (data: CategoryFormData) => trpcClient.categories.create.mutate(data),
     onSuccess: () => {
-      toast.success("Category created successfully")
+      toast.success(t("menuManagement.categoryForm.createdSuccess"))
       setIsDialogOpen(false)
       resetForm()
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to create category: ${error.message}`)
+      toast.error(t("menuManagement.categoryForm.createdFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -179,13 +187,15 @@ export function CategoryManager() {
     mutationFn: (data: { id: number } & Partial<CategoryFormData>) =>
       trpcClient.categories.update.mutate(data),
     onSuccess: () => {
-      toast.success("Category updated successfully")
+      toast.success(t("menuManagement.categoryForm.updatedSuccess"))
       setIsDialogOpen(false)
       resetForm()
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update category: ${error.message}`)
+      toast.error(t("menuManagement.categoryForm.updatedFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -194,11 +204,13 @@ export function CategoryManager() {
     mutationFn: (data: { id: number; isHidden: boolean }) =>
       trpcClient.categories.toggleVisibility.mutate(data),
     onSuccess: () => {
-      toast.success("Category visibility updated")
+      toast.success(t("menuManagement.categoryForm.updatedSuccess"))
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update visibility: ${error.message}`)
+      toast.error(t("menuManagement.categoryForm.updatedFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -207,11 +219,13 @@ export function CategoryManager() {
     mutationFn: (categoryOrders: Array<{ id: number; displayOrder: number }>) =>
       trpcClient.categories.reorder.mutate({ categoryOrders }),
     onSuccess: () => {
-      toast.success("Categories reordered successfully")
+      toast.success(t("menuManagement.categoryForm.reorderSuccess"))
       refetch()
     },
     onError: (error: Error) => {
-      toast.error(`Failed to reorder categories: ${error.message}`)
+      toast.error(t("menuManagement.categoryForm.updatedFailed"), {
+        description: error.message,
+      })
     },
   })
 
@@ -255,7 +269,7 @@ export function CategoryManager() {
 
     // Validation
     if (!name.trim()) {
-      toast.error("Name is required")
+      toast.error(t("menuManagement.categoryForm.validationError"))
       return
     }
 
@@ -293,15 +307,15 @@ export function CategoryManager() {
     }
 
     // Find the indices
-    const oldIndex = categories.findIndex((cat: any) => cat.id === active.id)
-    const newIndex = categories.findIndex((cat: any) => cat.id === over.id)
+    const oldIndex = (categories as any[]).findIndex((cat: any) => cat.id === active.id)
+    const newIndex = (categories as any[]).findIndex((cat: any) => cat.id === over.id)
 
     if (oldIndex === -1 || newIndex === -1) {
       return
     }
 
     // Create new order array
-    const reorderedCategories = [...categories]
+    const reorderedCategories = [...(categories as any[])]
     const [movedCategory] = reorderedCategories.splice(oldIndex, 1)
     reorderedCategories.splice(newIndex, 0, movedCategory)
 
@@ -319,7 +333,7 @@ export function CategoryManager() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Categories</CardTitle>
+          <CardTitle>{t("menuManagement.categoryForm.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -351,19 +365,19 @@ export function CategoryManager() {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle>Categories</CardTitle>
+            <CardTitle>{t("menuManagement.categoryForm.title")}</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Organize menu items into categories
+              {t("menuManagement.categoryForm.description")}
             </p>
           </div>
           <Button onClick={handleOpenCreateDialog}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Category
+            {t("menuManagement.categoryForm.create")}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        {categories && categories.length > 0 ? (
+        {categories && (categories as any[]).length > 0 ? (
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -373,24 +387,25 @@ export function CategoryManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]"></TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="text-center">Display Order</TableHead>
-                  <TableHead className="text-center">Dishes</TableHead>
-                  <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("menuManagement.categoryForm.name")}</TableHead>
+                  <TableHead className="text-center">{t("menuManagement.categoryForm.displayOrder")}</TableHead>
+                  <TableHead className="text-center">{t("menuManagement.categoryForm.dishCount")}</TableHead>
+                  <TableHead className="text-center">{t("menuManagement.categoryForm.status")}</TableHead>
+                  <TableHead className="text-right">{t("menuManagement.categoryForm.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <SortableContext
-                items={categories.map((cat: any) => cat.id)}
+                items={(categories as any[]).map((cat: any) => cat.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <TableBody>
-                  {categories.map((category: any) => (
+                  {(categories as any[]).map((category: any) => (
                     <SortableRow
                       key={category.id}
                       category={category}
                       onEdit={handleOpenEditDialog}
                       onToggleVisibility={handleToggleVisibility}
+                      t={t}
                     />
                   ))}
                 </TableBody>
@@ -399,10 +414,10 @@ export function CategoryManager() {
           </DndContext>
         ) : (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No categories found</p>
+            <p className="text-muted-foreground mb-4">{t("menuManagement.categoryForm.noCategories")}</p>
             <Button onClick={handleOpenCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Your First Category
+              {t("menuManagement.categoryForm.addFirst")}
             </Button>
           </div>
         )}
@@ -412,49 +427,51 @@ export function CategoryManager() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingCategory ? "Edit Category" : "Create New Category"}</DialogTitle>
+            <DialogTitle>
+              {editingCategory ? t("menuManagement.categoryForm.update") : t("menuManagement.categoryForm.create")}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">{t("menuManagement.categoryForm.categoryNameRequired")}</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g., Appetizers, Main Course"
+                  placeholder={t("menuManagement.categoryForm.categoryNamePlaceholder")}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="displayOrder">Display Order</Label>
+                <Label htmlFor="displayOrder">{t("menuManagement.categoryForm.displayOrderLabel")}</Label>
                 <Input
                   id="displayOrder"
                   type="number"
                   value={displayOrder}
                   onChange={(e) => setDisplayOrder(e.target.value)}
-                  placeholder="0"
+                  placeholder={t("menuManagement.categoryForm.displayOrderPlaceholder")}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Categories are sorted by this number (lower numbers appear first)
+                  {t("menuManagement.categoryForm.displayOrderHint")}
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="iconUrl">Icon (emoji or URL)</Label>
+                <Label htmlFor="iconUrl">{t("menuManagement.categoryForm.iconLabel")}</Label>
                 <Input
                   id="iconUrl"
                   value={iconUrl}
                   onChange={(e) => setIconUrl(e.target.value)}
-                  placeholder="🍕 or https://..."
+                  placeholder={t("menuManagement.categoryForm.iconPlaceholder")}
                 />
               </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
+                {t("menuManagement.categoryForm.cancel")}
               </Button>
               <Button type="submit" disabled={createCategory.isPending || updateCategory.isPending}>
-                {editingCategory ? "Update" : "Create"}
+                {editingCategory ? t("menuManagement.categoryForm.update") : t("menuManagement.categoryForm.create")}
               </Button>
             </DialogFooter>
           </form>

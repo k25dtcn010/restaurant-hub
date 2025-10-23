@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
+import { useTranslation } from "react-i18next"
 
 import Loader from "@/components/loader"
 import { ServingQueue } from "@/components/serving-queue"
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/serving")({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const routeContext = Route.useRouteContext()
   const session = routeContext.session
 
@@ -70,13 +72,13 @@ function RouteComponent() {
       <div className="container mx-auto p-8">
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-2">Error Loading Orders</h2>
+            <h2 className="text-2xl font-bold text-red-600 mb-2">{t("serving.errorLoading")}</h2>
             <p className="text-muted-foreground mb-4">{error.message}</p>
             <button
               onClick={() => refetch()}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
             >
-              Retry
+              {t("serving.retry")}
             </button>
           </div>
         </div>
@@ -87,8 +89,8 @@ function RouteComponent() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Serving Dashboard</h1>
-        <p className="text-muted-foreground">Welcome, {session.data?.user.name}</p>
+        <h1 className="text-3xl font-bold mb-2">{t("serving.dashboard")}</h1>
+        <p className="text-muted-foreground">{t("serving.welcome", { name: session.data?.user.name })}</p>
       </div>
 
       {/* T090-T094: ServingQueue with status columns and real-time updates */}
