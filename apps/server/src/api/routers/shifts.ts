@@ -73,7 +73,7 @@ export const shiftsRouter = router({
         await ctx.db.insert(shiftStaff).values(
           staffIds.map((userId) => ({
             shiftId: newShift.id,
-            userId,
+            userId: String(userId), // Ensure userId is a string
             role: "Staff", // Default role, could be customized later
           }))
         )
