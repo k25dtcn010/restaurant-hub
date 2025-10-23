@@ -2,10 +2,12 @@ import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { Clock, Menu, X } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { ActiveShift } from "@/types/shifts"
 import { trpc } from "@/utils/trpc"
 
+import { LanguageToggle } from "./language-toggle"
 import { ModeToggle } from "./mode-toggle"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
@@ -26,17 +28,18 @@ import UserMenu from "./user-menu"
  */
 
 export default function Header() {
+  const { t } = useTranslation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const links = [
-    { to: "/", label: "Home" },
-    { to: "/dashboard", label: "Dashboard" },
-    { to: "/staff-order", label: "Staff Order" },
-    { to: "/kitchen", label: "Kitchen" },
-    { to: "/serving", label: "Serving" },
-    { to: "/inventory", label: "Inventory" },
-    { to: "/menu-management", label: "Menu" },
-    { to: "/shifts", label: "Shifts" },
+    { to: "/", label: t("navigation.home") },
+    { to: "/dashboard", label: t("navigation.dashboard") },
+    { to: "/staff-order", label: t("navigation.staffOrder") },
+    { to: "/kitchen", label: t("navigation.kitchen") },
+    { to: "/serving", label: t("navigation.serving") },
+    { to: "/inventory", label: t("navigation.inventory") },
+    { to: "/menu-management", label: t("navigation.menu") },
+    { to: "/shifts", label: t("navigation.shifts") },
   ] as const
 
   // Query active shifts for indicator (T129)
@@ -84,12 +87,13 @@ export default function Header() {
               <Badge variant="default" className="cursor-pointer hover:opacity-80">
                 <Clock className="h-3 w-3 mr-1" />
                 <span className="hidden sm:inline">
-                  Shift: {activeShift.shiftType} ({formatDuration(activeShift.duration)})
+                  {t("header.shift")}: {activeShift.shiftType} ({formatDuration(activeShift.duration)})
                 </span>
                 <span className="sm:hidden">{activeShift.shiftType}</span>
               </Badge>
             </Link>
           )}
+          <LanguageToggle />
           <ModeToggle />
           <UserMenu />
         </div>

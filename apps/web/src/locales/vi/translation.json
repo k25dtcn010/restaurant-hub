@@ -1,0 +1,198 @@
+{
+  "navigation": {
+    "home": "Trang chủ",
+    "dashboard": "Bảng điều khiển",
+    "staffOrder": "Đặt món nhân viên",
+    "kitchen": "Nhà bếp",
+    "serving": "Phục vụ",
+    "inventory": "Kho",
+    "menu": "Thực đơn",
+    "menuManagement": "Quản lý thực đơn",
+    "shifts": "Ca làm việc",
+    "reservations": "Đặt chỗ",
+    "paymentHistory": "Lịch sử thanh toán",
+    "login": "Đăng nhập"
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "add": "Thêm",
+    "close": "Đóng",
+    "confirm": "Xác nhận",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "submit": "Gửi",
+    "refresh": "Làm mới",
+    "yes": "Có",
+    "no": "Không"
+  },
+  "header": {
+    "shift": "Ca",
+    "activeShift": "Ca: {{shiftType}} ({{duration}})"
+  },
+  "errorBoundary": {
+    "title": "Đã xảy ra lỗi",
+    "networkError": "Không thể kết nối với máy chủ. Vui lòng kiểm tra kết nối Internet.",
+    "authError": "Phiên của bạn có thể đã hết hạn. Vui lòng đăng nhập lại.",
+    "genericError": "Chúng tôi gặp lỗi không mong muốn. Vui lòng thử lại.",
+    "refreshPage": "Làm mới trang",
+    "goToLogin": "Đến trang đăng nhập",
+    "goBack": "Quay lại",
+    "errorDetails": "Chi tiết lỗi (Chỉ dành cho phát triển)"
+  },
+  "pageError": {
+    "notFound": "Không tìm thấy trang",
+    "notFoundMessage": "Trang bạn đang tìm không tồn tại hoặc đã được di chuyển.",
+    "accessDenied": "Truy cập bị từ chối",
+    "accessDeniedMessage": "Bạn không có quyền truy cập trang này. Vui lòng đăng nhập hoặc liên hệ quản trị viên.",
+    "pageError": "Lỗi trang",
+    "goToHome": "Về trang chủ",
+    "signIn": "Đăng nhập"
+  },
+  "dashboard": {
+    "title": "Bảng điều khiển nhân viên",
+    "welcome": "Xin chào, {{name}}!",
+    "activeShiftMessage": "Bạn đang trong ca {{shiftType}} ({{duration}}).",
+    "apiStatus": "Trạng thái API: {{status}} ({{timestamp}})",
+    "createOrder": {
+      "title": "Tạo đơn hàng",
+      "description": "Tạo đơn hàng thay mặt khách hàng",
+      "button": "Đến trang tạo đơn"
+    },
+    "kitchen": {
+      "title": "Nhà bếp",
+      "description": "Xem và quản lý đơn hàng đến",
+      "button": "Đến nhà bếp"
+    },
+    "serving": {
+      "title": "Phục vụ",
+      "description": "Phục vụ món ăn đã hoàn thành cho khách",
+      "button": "Đến trang phục vụ"
+    },
+    "inventory": {
+      "title": "Kho",
+      "description": "Giám sát và quản lý tồn kho nguyên liệu",
+      "button": "Đến kho"
+    },
+    "menuManagement": {
+      "title": "Quản lý thực đơn",
+      "description": "Tạo và chỉnh sửa món ăn",
+      "button": "Đến thực đơn"
+    },
+    "shifts": {
+      "title": "Ca làm việc",
+      "description": "Quản lý ca làm việc và phiên",
+      "button": "Đến ca làm việc"
+    },
+    "payments": {
+      "title": "Xử lý thanh toán",
+      "description": "Ghi nhận thanh toán của khách hàng",
+      "button": "Đến thanh toán"
+    },
+    "paymentHistory": {
+      "title": "Lịch sử thanh toán",
+      "description": "Xem các bản ghi thanh toán",
+      "button": "Xem lịch sử"
+    }
+  },
+  "staffOrder": {
+    "title": "Đặt món nhân viên",
+    "selectTable": "Chọn bàn",
+    "browseMenu": "Xem thực đơn",
+    "orderCart": "Giỏ đặt món",
+    "noTableSelected": "Vui lòng chọn bàn",
+    "cartEmpty": "Giỏ hàng trống",
+    "placeOrder": "Đặt món",
+    "orderPlaced": "Đặt món thành công"
+  },
+  "kitchen": {
+    "title": "Bảng điều khiển nhà bếp",
+    "welcome": "Xin chào, {{name}}",
+    "pending": "Đang chờ",
+    "inProgress": "Đang thực hiện",
+    "ready": "Sẵn sàng",
+    "completed": "Hoàn thành",
+    "errorLoading": "Lỗi tải đơn hàng",
+    "retry": "Thử lại"
+  },
+  "serving": {
+    "title": "Hàng đợi phục vụ",
+    "readyToServe": "Sẵn sàng phục vụ",
+    "served": "Đã phục vụ"
+  },
+  "inventory": {
+    "title": "Quản lý kho",
+    "subtitle": "Giám sát và quản lý mức tồn kho nguyên liệu",
+    "lowStock": "Tồn kho thấp",
+    "outOfStock": "Hết hàng",
+    "lowStockAlert": "Cảnh báo tồn kho thấp",
+    "lowStockMessage": "{{count}} nguyên liệu sắp hết",
+    "lowStockMessage_other": "{{count}} nguyên liệu sắp hết"
+  },
+  "menuManagement": {
+    "title": "Quản lý thực đơn",
+    "categories": "Danh mục",
+    "dishes": "Món ăn",
+    "modifiers": "Tùy chọn",
+    "addCategory": "Thêm danh mục",
+    "addDish": "Thêm món",
+    "addModifier": "Thêm tùy chọn",
+    "dishesTab": "Món ăn",
+    "categoriesTab": "Danh mục",
+    "modifiersTab": "Tùy chọn",
+    "addNewDish": "Thêm món mới",
+    "showHidden": "Hiện món ẩn",
+    "hideHidden": "Ẩn món đã ẩn",
+    "available": "Có sẵn",
+    "unavailable": "Không có",
+    "hidden": "Đã ẩn",
+    "visible": "Hiển thị",
+    "kitchenPriority": "Ưu tiên bếp",
+    "recommended": "Đề xuất",
+    "chefSpecial": "Món đặc biệt"
+  },
+  "shifts": {
+    "title": "Quản lý ca làm việc",
+    "startShift": "Bắt đầu ca",
+    "endShift": "Kết thúc ca",
+    "currentShift": "Ca hiện tại",
+    "shiftHistory": "Lịch sử ca",
+    "breakfast": "Sáng",
+    "lunch": "Trưa",
+    "dinner": "Tối",
+    "custom": "Tùy chỉnh",
+    "activeTab": "Đang hoạt động",
+    "historyTab": "Lịch sử",
+    "noActiveShifts": "Không có ca đang hoạt động",
+    "noActiveShiftsMessage": "Bắt đầu ca mới để theo dõi đơn hàng và nhân viên",
+    "duration": "Thời gian",
+    "orders": "Đơn hàng",
+    "revenue": "Doanh thu",
+    "staff": "Nhân viên",
+    "startedAt": "Bắt đầu",
+    "endedAt": "Kết thúc",
+    "editStaff": "Sửa nhân viên",
+    "addStaff": "Thêm nhân viên",
+    "removeStaff": "Xóa nhân viên",
+    "shiftType": "Loại ca",
+    "filterByDate": "Lọc theo ngày",
+    "filterByType": "Lọc theo loại",
+    "filterByStaff": "Lọc theo nhân viên",
+    "allTypes": "Tất cả loại",
+    "allStaff": "Tất cả nhân viên"
+  },
+  "login": {
+    "title": "Đăng nhập",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "submit": "Đăng nhập",
+    "error": "Thông tin đăng nhập không hợp lệ"
+  }
+}

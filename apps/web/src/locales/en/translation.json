@@ -1,0 +1,198 @@
+{
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "staffOrder": "Staff Order",
+    "kitchen": "Kitchen",
+    "serving": "Serving",
+    "inventory": "Inventory",
+    "menu": "Menu",
+    "menuManagement": "Menu Management",
+    "shifts": "Shifts",
+    "reservations": "Reservations",
+    "paymentHistory": "Payment History",
+    "login": "Login"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "refresh": "Refresh",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "header": {
+    "shift": "Shift",
+    "activeShift": "Shift: {{shiftType}} ({{duration}})"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "networkError": "Unable to connect to the server. Please check your internet connection.",
+    "authError": "Your session may have expired. Please sign in again.",
+    "genericError": "We encountered an unexpected error. Please try again.",
+    "refreshPage": "Refresh Page",
+    "goToLogin": "Go to Login",
+    "goBack": "Go Back",
+    "errorDetails": "Error Details (Development Only)"
+  },
+  "pageError": {
+    "notFound": "Page Not Found",
+    "notFoundMessage": "The page you're looking for doesn't exist or has been moved.",
+    "accessDenied": "Access Denied",
+    "accessDeniedMessage": "You don't have permission to access this page. Please sign in or contact an administrator.",
+    "pageError": "Page Error",
+    "goToHome": "Go to Home",
+    "signIn": "Sign In"
+  },
+  "dashboard": {
+    "title": "Staff Dashboard",
+    "welcome": "Welcome, {{name}}!",
+    "activeShiftMessage": "You are currently in {{shiftType}} shift ({{duration}}).",
+    "apiStatus": "API Status: {{status}} ({{timestamp}})",
+    "createOrder": {
+      "title": "Create Order",
+      "description": "Create orders on behalf of customers",
+      "button": "Go to Order Creation"
+    },
+    "kitchen": {
+      "title": "Kitchen",
+      "description": "View and manage incoming orders",
+      "button": "Go to Kitchen"
+    },
+    "serving": {
+      "title": "Serving",
+      "description": "Serve completed orders to customers",
+      "button": "Go to Serving"
+    },
+    "inventory": {
+      "title": "Inventory",
+      "description": "Monitor and manage ingredient stock",
+      "button": "Go to Inventory"
+    },
+    "menuManagement": {
+      "title": "Menu Management",
+      "description": "Create and edit menu items",
+      "button": "Go to Menu"
+    },
+    "shifts": {
+      "title": "Shifts",
+      "description": "Manage staff shifts and sessions",
+      "button": "Go to Shifts"
+    },
+    "payments": {
+      "title": "Payment Processing",
+      "description": "Record customer payments",
+      "button": "Go to Payments"
+    },
+    "paymentHistory": {
+      "title": "Payment History",
+      "description": "View payment records",
+      "button": "View History"
+    }
+  },
+  "staffOrder": {
+    "title": "Staff Order",
+    "selectTable": "Select Table",
+    "browseMenu": "Browse Menu",
+    "orderCart": "Order Cart",
+    "noTableSelected": "Please select a table",
+    "cartEmpty": "Cart is empty",
+    "placeOrder": "Place Order",
+    "orderPlaced": "Order placed successfully"
+  },
+  "kitchen": {
+    "title": "Kitchen Dashboard",
+    "welcome": "Welcome, {{name}}",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "ready": "Ready",
+    "completed": "Completed",
+    "errorLoading": "Error Loading Orders",
+    "retry": "Retry"
+  },
+  "serving": {
+    "title": "Serving Queue",
+    "readyToServe": "Ready to Serve",
+    "served": "Served"
+  },
+  "inventory": {
+    "title": "Inventory Management",
+    "subtitle": "Monitor and manage ingredient stock levels",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "lowStockAlert": "Low Stock Alert",
+    "lowStockMessage": "{{count}} ingredient running low on stock",
+    "lowStockMessage_other": "{{count}} ingredients running low on stock"
+  },
+  "menuManagement": {
+    "title": "Menu Management",
+    "categories": "Categories",
+    "dishes": "Dishes",
+    "modifiers": "Modifiers",
+    "addCategory": "Add Category",
+    "addDish": "Add Dish",
+    "addModifier": "Add Modifier",
+    "dishesTab": "Dishes",
+    "categoriesTab": "Categories",
+    "modifiersTab": "Modifiers",
+    "addNewDish": "Add New Dish",
+    "showHidden": "Show Hidden",
+    "hideHidden": "Hide Hidden",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "hidden": "Hidden",
+    "visible": "Visible",
+    "kitchenPriority": "Kitchen Priority",
+    "recommended": "Recommended",
+    "chefSpecial": "Chef's Special"
+  },
+  "shifts": {
+    "title": "Shift Management",
+    "startShift": "Start Shift",
+    "endShift": "End Shift",
+    "currentShift": "Current Shift",
+    "shiftHistory": "Shift History",
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "custom": "Custom",
+    "activeTab": "Active",
+    "historyTab": "History",
+    "noActiveShifts": "No active shifts",
+    "noActiveShiftsMessage": "Start a new shift to begin tracking orders and staff",
+    "duration": "Duration",
+    "orders": "Orders",
+    "revenue": "Revenue",
+    "staff": "Staff",
+    "startedAt": "Started",
+    "endedAt": "Ended",
+    "editStaff": "Edit Staff",
+    "addStaff": "Add Staff",
+    "removeStaff": "Remove Staff",
+    "shiftType": "Shift Type",
+    "filterByDate": "Filter by Date",
+    "filterByType": "Filter by Type",
+    "filterByStaff": "Filter by Staff",
+    "allTypes": "All Types",
+    "allStaff": "All Staff"
+  },
+  "login": {
+    "title": "Sign In",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign In",
+    "error": "Invalid credentials"
+  }
+}

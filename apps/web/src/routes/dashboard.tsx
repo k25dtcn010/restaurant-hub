@@ -10,6 +10,7 @@ import {
   TruckIcon,
   UtensilsCrossed,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/dashboard")({
  */
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const { session } = Route.useRouteContext()
 
   const healthCheck = useQuery(trpc.healthCheck.queryOptions())
@@ -51,11 +53,16 @@ function RouteComponent() {
   return (
     <div className="container mx-auto p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Staff Dashboard</h1>
-        <p className="text-lg text-muted-foreground">Welcome, {session.data?.user.name}!</p>
+        <h1 className="text-3xl font-bold mb-2">{t("dashboard.title")}</h1>
+        <p className="text-lg text-muted-foreground">
+          {t("dashboard.welcome", { name: session.data?.user.name })}
+        </p>
         {healthCheck.data && (
           <p className="text-sm text-green-600 mt-2">
-            API Status: {healthCheck.data.status} ({healthCheck.data.timestamp})
+            {t("dashboard.apiStatus", {
+              status: healthCheck.data.status,
+              timestamp: healthCheck.data.timestamp,
+            })}
           </p>
         )}
       </div>
@@ -66,13 +73,13 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ClipboardList className="h-5 w-5" />
-              Create Order
+              {t("dashboard.createOrder.title")}
             </CardTitle>
-            <CardDescription>Create orders on behalf of customers</CardDescription>
+            <CardDescription>{t("dashboard.createOrder.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link to="/staff-order">Go to Order Creation</Link>
+              <Link to="/staff-order">{t("dashboard.createOrder.button")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -82,13 +89,13 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ChefHat className="h-5 w-5" />
-              Kitchen
+              {t("dashboard.kitchen.title")}
             </CardTitle>
-            <CardDescription>View and manage incoming orders</CardDescription>
+            <CardDescription>{t("dashboard.kitchen.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link to="/kitchen">Go to Kitchen</Link>
+              <Link to="/kitchen">{t("dashboard.kitchen.button")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -98,13 +105,13 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TruckIcon className="h-5 w-5" />
-              Serving
+              {t("dashboard.serving.title")}
             </CardTitle>
-            <CardDescription>Manage orders ready to serve</CardDescription>
+            <CardDescription>{t("dashboard.serving.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link to="/serving">Go to Serving</Link>
+              <Link to="/serving">{t("dashboard.serving.button")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -114,13 +121,13 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Shifts
+              {t("dashboard.shifts.title")}
             </CardTitle>
-            <CardDescription>Manage operational shifts and staff</CardDescription>
+            <CardDescription>{t("dashboard.shifts.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link to="/shifts">Go to Shifts</Link>
+              <Link to="/shifts">{t("dashboard.shifts.button")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -130,13 +137,13 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5" />
-              Inventory
+              {t("dashboard.inventory.title")}
             </CardTitle>
-            <CardDescription>Manage ingredient stock levels</CardDescription>
+            <CardDescription>{t("dashboard.inventory.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link to="/inventory">Go to Inventory</Link>
+              <Link to="/inventory">{t("dashboard.inventory.button")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -146,13 +153,13 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <History className="h-5 w-5" />
-              Payment History
+              {t("dashboard.paymentHistory.title")}
             </CardTitle>
-            <CardDescription>View transaction history and revenue</CardDescription>
+            <CardDescription>{t("dashboard.paymentHistory.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full" variant="outline">
-              <Link to="/payment-history">View History</Link>
+              <Link to="/payment-history">{t("dashboard.paymentHistory.button")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -162,7 +169,7 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Reservations
+              {t("navigation.reservations")}
             </CardTitle>
             <CardDescription>Manage table reservations</CardDescription>
           </CardHeader>
@@ -178,7 +185,7 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UtensilsCrossed className="h-5 w-5" />
-              Menu
+              {t("navigation.menu")}
             </CardTitle>
             <CardDescription>View restaurant menu</CardDescription>
           </CardHeader>
