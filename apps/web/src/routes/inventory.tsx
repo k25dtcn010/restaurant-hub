@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { AlertTriangle, RefreshCw } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { InventoryTable } from "@/components/inventory-table"
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/inventory")({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const [includeRecipes, setIncludeRecipes] = useState(true)
 
   // Query inventory data
@@ -76,12 +78,12 @@ function RouteComponent() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Inventory Management</h1>
-          <p className="text-muted-foreground mt-1">Monitor and manage ingredient stock levels</p>
+          <h1 className="text-3xl font-bold">{t("inventory.title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("inventory.subtitle")}</p>
         </div>
         <Button onClick={handleRefresh} variant="outline" size="sm">
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {t("common.refresh")}
         </Button>
       </div>
 
@@ -91,10 +93,9 @@ function RouteComponent() {
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
             <div>
-              <h3 className="font-semibold text-destructive">Low Stock Alert</h3>
+              <h3 className="font-semibold text-destructive">{t("inventory.lowStockAlert")}</h3>
               <p className="text-sm text-muted-foreground">
-                {lowStockCount} {lowStockCount === 1 ? "ingredient" : "ingredients"} running low on
-                stock
+                {t("inventory.lowStockMessage", { count: lowStockCount })}
               </p>
             </div>
           </div>

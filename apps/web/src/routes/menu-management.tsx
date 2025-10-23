@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Eye, EyeOff, Plus, RefreshCw } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { CategoryManager } from "@/components/category-manager"
@@ -63,6 +64,7 @@ interface Dish {
 }
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [editingDish, setEditingDish] = useState<any | null>(null)
 
@@ -238,7 +240,7 @@ function RouteComponent() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Menu Management</h1>
+          <h1 className="text-3xl font-bold">{t("menuManagement.title")}</h1>
           <p className="text-muted-foreground mt-2">
             Manage dishes, recipes, modifiers, and categories
           </p>
@@ -250,9 +252,9 @@ function RouteComponent() {
 
       <Tabs defaultValue="dishes" className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="dishes">Dishes</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="modifiers">Modifiers</TabsTrigger>
+          <TabsTrigger value="dishes">{t("menuManagement.dishesTab")}</TabsTrigger>
+          <TabsTrigger value="categories">{t("menuManagement.categoriesTab")}</TabsTrigger>
+          <TabsTrigger value="modifiers">{t("menuManagement.modifiersTab")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dishes">
@@ -262,7 +264,7 @@ function RouteComponent() {
             </Button>
             <Button onClick={handleCreateNew}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Dish
+              {t("menuManagement.addDish")}
             </Button>
           </div>
 

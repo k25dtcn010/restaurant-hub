@@ -59,7 +59,48 @@
   "dashboard": {
     "title": "Bảng điều khiển nhân viên",
     "welcome": "Xin chào, {{name}}!",
-    "activeShiftMessage": "Bạn đang trong ca {{shiftType}} ({{duration}})."
+    "activeShiftMessage": "Bạn đang trong ca {{shiftType}} ({{duration}}).",
+    "apiStatus": "Trạng thái API: {{status}} ({{timestamp}})",
+    "createOrder": {
+      "title": "Tạo đơn hàng",
+      "description": "Tạo đơn hàng thay mặt khách hàng",
+      "button": "Đến trang tạo đơn"
+    },
+    "kitchen": {
+      "title": "Nhà bếp",
+      "description": "Xem và quản lý đơn hàng đến",
+      "button": "Đến nhà bếp"
+    },
+    "serving": {
+      "title": "Phục vụ",
+      "description": "Phục vụ món ăn đã hoàn thành cho khách",
+      "button": "Đến trang phục vụ"
+    },
+    "inventory": {
+      "title": "Kho",
+      "description": "Giám sát và quản lý tồn kho nguyên liệu",
+      "button": "Đến kho"
+    },
+    "menuManagement": {
+      "title": "Quản lý thực đơn",
+      "description": "Tạo và chỉnh sửa món ăn",
+      "button": "Đến thực đơn"
+    },
+    "shifts": {
+      "title": "Ca làm việc",
+      "description": "Quản lý ca làm việc và phiên",
+      "button": "Đến ca làm việc"
+    },
+    "payments": {
+      "title": "Xử lý thanh toán",
+      "description": "Ghi nhận thanh toán của khách hàng",
+      "button": "Đến thanh toán"
+    },
+    "paymentHistory": {
+      "title": "Lịch sử thanh toán",
+      "description": "Xem các bản ghi thanh toán",
+      "button": "Xem lịch sử"
+    }
   },
   "staffOrder": {
     "title": "Đặt món nhân viên",
@@ -73,10 +114,13 @@
   },
   "kitchen": {
     "title": "Bảng điều khiển nhà bếp",
+    "welcome": "Xin chào, {{name}}",
     "pending": "Đang chờ",
     "inProgress": "Đang thực hiện",
     "ready": "Sẵn sàng",
-    "completed": "Hoàn thành"
+    "completed": "Hoàn thành",
+    "errorLoading": "Lỗi tải đơn hàng",
+    "retry": "Thử lại"
   },
   "serving": {
     "title": "Hàng đợi phục vụ",
@@ -85,8 +129,12 @@
   },
   "inventory": {
     "title": "Quản lý kho",
+    "subtitle": "Giám sát và quản lý mức tồn kho nguyên liệu",
     "lowStock": "Tồn kho thấp",
-    "outOfStock": "Hết hàng"
+    "outOfStock": "Hết hàng",
+    "lowStockAlert": "Cảnh báo tồn kho thấp",
+    "lowStockMessage": "{{count}} nguyên liệu sắp hết",
+    "lowStockMessage_other": "{{count}} nguyên liệu sắp hết"
   },
   "menuManagement": {
     "title": "Quản lý thực đơn",
@@ -95,7 +143,20 @@
     "modifiers": "Tùy chọn",
     "addCategory": "Thêm danh mục",
     "addDish": "Thêm món",
-    "addModifier": "Thêm tùy chọn"
+    "addModifier": "Thêm tùy chọn",
+    "dishesTab": "Món ăn",
+    "categoriesTab": "Danh mục",
+    "modifiersTab": "Tùy chọn",
+    "addNewDish": "Thêm món mới",
+    "showHidden": "Hiện món ẩn",
+    "hideHidden": "Ẩn món đã ẩn",
+    "available": "Có sẵn",
+    "unavailable": "Không có",
+    "hidden": "Đã ẩn",
+    "visible": "Hiển thị",
+    "kitchenPriority": "Ưu tiên bếp",
+    "recommended": "Đề xuất",
+    "chefSpecial": "Món đặc biệt"
   },
   "shifts": {
     "title": "Quản lý ca làm việc",
@@ -105,7 +166,27 @@
     "shiftHistory": "Lịch sử ca",
     "breakfast": "Sáng",
     "lunch": "Trưa",
-    "dinner": "Tối"
+    "dinner": "Tối",
+    "custom": "Tùy chỉnh",
+    "activeTab": "Đang hoạt động",
+    "historyTab": "Lịch sử",
+    "noActiveShifts": "Không có ca đang hoạt động",
+    "noActiveShiftsMessage": "Bắt đầu ca mới để theo dõi đơn hàng và nhân viên",
+    "duration": "Thời gian",
+    "orders": "Đơn hàng",
+    "revenue": "Doanh thu",
+    "staff": "Nhân viên",
+    "startedAt": "Bắt đầu",
+    "endedAt": "Kết thúc",
+    "editStaff": "Sửa nhân viên",
+    "addStaff": "Thêm nhân viên",
+    "removeStaff": "Xóa nhân viên",
+    "shiftType": "Loại ca",
+    "filterByDate": "Lọc theo ngày",
+    "filterByType": "Lọc theo loại",
+    "filterByStaff": "Lọc theo nhân viên",
+    "allTypes": "Tất cả loại",
+    "allStaff": "Tất cả nhân viên"
   },
   "login": {
     "title": "Đăng nhập",

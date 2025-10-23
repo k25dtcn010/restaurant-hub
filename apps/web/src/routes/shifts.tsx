@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Calendar, Clock, DollarSign, Plus, ShoppingBag, Trash2, Users } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { ShiftControl } from "@/components/shift-control"
@@ -77,6 +78,7 @@ export const Route = createFileRoute("/shifts")({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<"active" | "history">("active")
   const [editStaffShiftId, setEditStaffShiftId] = useState<number | null>(null)
   const [selectedStaffIds, setSelectedStaffIds] = useState<string[]>([])
