@@ -5,6 +5,7 @@ import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
+import { useNotificationSound } from "@/hooks/use-notification-sound"
 import { useWebSocket } from "@/hooks/use-websocket"
 import { queryClient, trpc, trpcClient } from "@/utils/trpc"
 
@@ -62,6 +63,7 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
   const { t } = useTranslation()
   const [isConnected, setIsConnected] = useState(false)
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null)
+  const { playSound } = useNotificationSound()
 
   // Mutation for updating order status
   const updateStatusMutation = useMutation({
@@ -123,6 +125,10 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
             },
           })
 
+          // Play notification sound when order is ready to serve
+          console.log("[ServingQueue] Order ready for serving, playing notification sound")
+          playSound()
+
           // Show notification
           const order = message.order as { id?: number; tableNumber?: number }
           if (order?.tableNumber) {
@@ -154,7 +160,7 @@ export function ServingQueue({ orders, onRefresh }: ServingQueueProps) {
           break
       }
     },
-    []
+    [playSound]
   )
 
   // Connect to WebSocket with 'serving' role

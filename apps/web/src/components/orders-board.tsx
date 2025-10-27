@@ -3,6 +3,7 @@ import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
+import { useNotificationSound } from "@/hooks/use-notification-sound"
 import { useWebSocket } from "@/hooks/use-websocket"
 import { queryClient } from "@/utils/trpc"
 
@@ -54,6 +55,7 @@ interface OrdersBoardProps {
 export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
   const { t } = useTranslation()
   const [isConnected, setIsConnected] = useState(false)
+  const { playSound } = useNotificationSound()
 
   /**
    * T071 & T074: WebSocket integration for real-time updates
@@ -83,6 +85,9 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
             },
           })
 
+          // Play notification sound for new orders
+          playSound()
+
           // Show notification
           const order = message.order as { id?: number; tableNumber?: number }
           if (order?.tableNumber) {
@@ -95,6 +100,17 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
         case "ORDER_STATUS_CHANGED":
           // Invalidate queries to refetch kitchen orders
           console.log("[OrdersBoard] Invalidating kitchen orders query for ORDER_STATUS_CHANGED")
+          
+          // Play notification sound when order is put to chef (status changes to InKitchen)
+          const statusChangeData = message as { 
+            status?: string
+            orderId?: number
+          }
+          if (statusChangeData.status === "InKitchen") {
+            console.log("[OrdersBoard] Order assigned to chef, playing notification sound")
+            playSound()
+          }
+          
           queryClient.invalidateQueries({
             predicate: (query) => {
               // tRPC query keys are arrays like [["orders", "getKitchenOrders"], {...input}]
@@ -114,7 +130,7 @@ export function OrdersBoard({ orders, onRefresh }: OrdersBoardProps) {
           break
       }
     },
-    []
+    [playSound]
   )
 
   // Connect to WebSocket with 'kitchen' role
